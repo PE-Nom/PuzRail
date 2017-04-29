@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/companyName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace"
+            android:singleLine="false"
+            android:text="事業者名"
+            android:textAllCaps="true"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/companyKana"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/companyName"
+            android:layout_alignParentBottom="false"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@+id/companyName"
+            android:fontFamily="monospace"
+            android:singleLine="true"
+            android:text="(じぎょうしゃかな)"
+            android:textSize="12sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/namelayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/lineNameProgress"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/nameProgTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="路線名当て"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/nameProgValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="1"
+                android:gravity="bottom|right"
+                android:text="進捗値"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <com.pentech.puzrail.ui.GaugeView
+            android:id="@+id/lineNameProgress"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="1dp"
+            android:layout_toLeftOf="@+id/trackLayout" />
+
+        <LinearLayout
+            android:id="@+id/trackLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/trackLayingProgress"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/trackLayingProgTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="地図合わせ"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/trackLayingProgValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="1"
+                android:gravity="bottom|right"
+                android:text="進捗値"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <com.pentech.puzrail.ui.GaugeView
+            android:id="@+id/trackLayingProgress"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="1dp"
+            android:layout_toLeftOf="@+id/stationLayout" />
+
+        <LinearLayout
+            android:id="@+id/stationLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/stationProgress"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/stationProgTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="　駅並べ"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/stationProgValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="1"
+                android:gravity="bottom|right"
+                android:text="進捗値"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <com.pentech.puzrail.ui.GaugeView
+            android:id="@+id/stationProgress"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="1dp" />
+    </RelativeLayout>
+
+</LinearLayout>
