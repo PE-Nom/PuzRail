@@ -88,13 +88,12 @@ public class StationPuzzleActivity extends AppCompatActivity implements
     private FrameLayout mapFrame;
     private LinearLayout transparentView;
 
-    private final static long DISPLAY_ANSWERE_TIME = 5000;
+    private int previewLineAnswerCount = 0;
+    private final static long DISPLAY_ANSWER_TIME = 1000;
+    private static final int showAnswerMax = 3;
+    private int showAnswerCount = 0;
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
-
-    private int showAnswerCount = 0;
-    private static final int showAnswerMax = 3;
-    private int previewLineAnswerCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -380,7 +379,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
             longClickSelectedStation.setMarker(marker);
             // 消去タイマー起動
             mAnswerDisplayingTimer = new Timer(true);
-            mAnswerDisplayingTimer.schedule(new displayTimerElapse(longClickSelectedStation),DISPLAY_ANSWERE_TIME);
+            mAnswerDisplayingTimer.schedule(new displayTimerElapse(longClickSelectedStation),DISPLAY_ANSWER_TIME);
         }
         // 駅名のSnackbar表示
         final Snackbar sb = Snackbar.make(StationPuzzleActivity.this.stationListView,

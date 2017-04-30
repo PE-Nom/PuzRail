@@ -70,7 +70,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         this.companyId = intent.getIntExtra("SelectedCompanyId", 3); // デフォルトを西日本旅客鉄道のIdにしておく
         this.previewAnswerCount = intent.getIntExtra("previewAnswerCount",0);
 
-        this.lines = db.getLineList(this.companyId, false);
+        this.lines = db.getLineList(this.companyId, true);
 
         this.lineNameProgValue = (TextView) findViewById(R.id.lineNameProgValue);
         this.lineNameProgress = (GaugeView) findViewById(R.id.lineNameProgress) ;

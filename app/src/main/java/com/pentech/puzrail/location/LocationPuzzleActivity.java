@@ -71,13 +71,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private Drawable mDrawable;
     private AlertDialog mDialog;
 
-    private final static long DISPLAY_ANSWERE_TIME = 5000;
+    private int previewLineAnswerCount = 0;
+    private final static long DISPLAY_ANSWER_TIME[] = {1000,1500,2500,4000};
+    private static final int showAnswerMax = 4;
+    private int showAnswerCount = 0;
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
-
-    private int showAnswerCount = 0;
-    private static final int showAnswerMax = 3;
-    private int previewLineAnswerCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,7 +273,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         if (mAnswerDisplayingTimer == null) {
             setGeoJsonVisible();
             mAnswerDisplayingTimer = new Timer(true);
-            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWERE_TIME);
+            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME[showAnswerCount]);
         }
     }
 
