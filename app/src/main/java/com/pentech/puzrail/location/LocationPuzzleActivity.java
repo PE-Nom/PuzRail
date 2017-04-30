@@ -531,7 +531,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         else if(id == R.id.action_Ask) {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("plain/text");
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "ib65629@gmail.com" });
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
             intent.putExtra(Intent.EXTRA_SUBJECT, "パズレールについてのお問い合わせ");
             startActivity(Intent.createChooser(intent, ""));
             return true;
