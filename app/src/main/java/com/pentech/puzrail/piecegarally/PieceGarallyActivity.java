@@ -95,7 +95,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("パズレール：路線名当て");
+        actionBar.setTitle("パズレール：路線当て");
         actionBar.setSubtitle(db.getCompany(this.companyId).getName());
     }
 
@@ -257,11 +257,11 @@ public class PieceGarallyActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-            PopUp.makePopup(this,this.listView,"file:///android_asset/puzzrail_help.html");
+            PopUp.makePopup(this,this.listView,"file:///android_asset/about_puzrail.html");
             return true;
         }
         else if (id == R.id.action_Help) {
-            Toast.makeText(PieceGarallyActivity.this, "使い方", Toast.LENGTH_SHORT).show();
+            PopUp.makePopup(this,this.listView,"file:///android_asset/help_puzrail.html");
             return true;
         }
         else if(id == R.id.action_Ask) {

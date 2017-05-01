@@ -558,11 +558,11 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-            PopUp.makePopup(this,this.transparentView,"file:///android_asset/puzzrail_help.html");
+            PopUp.makePopup(this,this.transparentView,"file:///android_asset/about_puzrail.html");
             return true;
         }
         else if (id == R.id.action_Help) {
-            Toast.makeText(StationPuzzleActivity.this, "使い方", Toast.LENGTH_SHORT).show();
+            PopUp.makePopup(this,this.transparentView,"file:///android_asset/help_puzrail.html");
             return true;
         }
         else if(id == R.id.action_Ask) {
