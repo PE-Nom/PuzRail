@@ -62,6 +62,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     private OnLineScrollEndListener listener;
     private Context context;
     private float density;
+    private boolean initState = false;
 
     public LineMapOverlayView(Context context) {
         super(context);
@@ -114,6 +115,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         super.setImageDrawable(ResourcesCompat.getDrawable(getResources(), this.line.getDrawableResourceId(), null));
     }
     public void resetImageDrawable(){
+        this.initState = false;
         super.setImageDrawable(null);
     }
     // pinch in/out操作のイベントハンドラ
@@ -228,8 +230,10 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         // if view size(width|height) is zero(the view size not decided yet)
         // or no image assigned, skip initialization
         if (getWidth() == 0 || getHeight() == 0 || getDrawable() == null) return;
-        if(DEBUG) Log.d(TAG,String.format("onLayout : left %d, top=%d, right=%d, bottom=%d",left,top,right,bottom));
-        init();
+        if(DEBUG) Log.d(TAG,String.format("onLayout : changed = %b,left %d, top=%d, right=%d, bottom=%d",changed,left,top,right,bottom));
+        if(!this.initState){
+            init();
+        }
     }
 
     private void init(){
@@ -272,6 +276,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                 values[0],values[1],values[2],
                 values[3],values[4],values[5],
                 values[6],values[7],values[8]));
+        this.initState=true;
     }
 
     @Override
@@ -578,23 +583,23 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         screenPoint1 = map.getProjection().toScreenLocation(point1);
         screenPoint2 = map.getProjection().toScreenLocation(point2);
 
-        Log.d(TAG,String.format("screenPoint1 = (%f,%f) , screenPoint2 = (%f,%f)",
-                (double)screenPoint1.x,(double)screenPoint1.y,(double)screenPoint2.x,(double)screenPoint2.y));
-        Log.d(TAG,String.format("ImageRect top = %f, left = %f, bottom = %f, right = %f",
-                railwayImageRect.left,railwayImageRect.top,railwayImageRect.right,railwayImageRect.bottom));
+//        Log.d(TAG,String.format("screenPoint1 = (%f,%f) , screenPoint2 = (%f,%f)",
+//                (double)screenPoint1.x,(double)screenPoint1.y,(double)screenPoint2.x,(double)screenPoint2.y));
+//        Log.d(TAG,String.format("ImageRect top = %f, left = %f, bottom = %f, right = %f",
+//                railwayImageRect.left,railwayImageRect.top,railwayImageRect.right,railwayImageRect.bottom));
 
         double distance[]  = new double[2];
         distance[0] = Math.sqrt( Math.pow((railwayImageRect.top    - (double)screenPoint1.y), 2.0) +
                                  Math.pow((railwayImageRect.left   - (double)screenPoint1.x),2.0));
         distance[1] = Math.sqrt( Math.pow((railwayImageRect.bottom - (double)screenPoint2.y), 2.0) +
                                  Math.pow((railwayImageRect.right  - (double)screenPoint2.x),2.0));
-        Log.d(TAG,String.format("distance = %f,%f density = %f",distance[0],distance[1],this.density));
+//        Log.d(TAG,String.format("distance = %f,%f density = %f",distance[0],distance[1],this.density));
 
         int err[] = new int[2];
         err[0] = (int)(distance[0] / this.density);
         err[1] = (int)(distance[1] / this.density);
         int error = err[0]+err[1];
-        Log.d(TAG,String.format("err(dp) = %d, %d, error = %d",err[0],err[1],error));
+//        Log.d(TAG,String.format("err(dp) = %d, %d, error = %d",err[0],err[1],error));
 
         return (error);
     }

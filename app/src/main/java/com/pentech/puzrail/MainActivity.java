@@ -88,22 +88,22 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onReceiveAd");
     }
 
     @Override
     public void onFailedToReceiveAd(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onFailedToReceiveAd");
     }
 
     @Override
     public void onClick(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onClick");
     }
 
     @Override
     public void onDismissScreen(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onDismissScreen");
     }
 
     /**

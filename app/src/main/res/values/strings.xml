@@ -7,6 +7,7 @@
     <string name="action_settings">設定</string>
     <string name="action_garally">ギャラリー表示</string>
     <string name="action_list">リスト表示</string>
+    <!-- for Test -->
     <string name="nend_api_key">c5cb8bc474345961c6e7a9778c947957ed8e1e4f</string>
     <!-- for release
     <string name="nend_api_key">7eefb7225114edec9a206dc0812840405c9dd27b</string>

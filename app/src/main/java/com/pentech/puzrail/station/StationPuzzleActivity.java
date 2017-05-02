@@ -150,22 +150,23 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onReceiveAd");
     }
 
     @Override
     public void onFailedToReceiveAd(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onFailedToReceiveAd");
     }
 
     @Override
     public void onClick(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onClick");
+        this.showAnswerCount = 0;
     }
 
     @Override
     public void onDismissScreen(NendAdView nendAdView) {
-        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"onDismissScreen");
     }
 
     private void updateProgressBar(){
@@ -659,7 +660,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                                     }
                                     else{
                                         final Snackbar sb = Snackbar.make(StationPuzzleActivity.this.stationListView,
-                                                "回数制限一杯!!　広告クリックを促す",
+                                                "広告クリックお願いしま～っす",
                                                 Snackbar.LENGTH_SHORT);
                                         sb.getView().setBackgroundColor(ContextCompat.getColor(StationPuzzleActivity.this, R.color.color_10));
                                         TextView textView = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
