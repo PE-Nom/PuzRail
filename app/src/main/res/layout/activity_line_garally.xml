@@ -12,6 +12,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_weight="1"
+        android:gravity="bottom|center"
         android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
@@ -178,7 +179,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             NendApiKey="@string/nend_api_key"
-            NendSpotId="@integer/nend_spot_id" />
+            NendSpotId="@integer/nend_spot_id"
+            NendAdjustSize="true" />
 
     </LinearLayout>
 

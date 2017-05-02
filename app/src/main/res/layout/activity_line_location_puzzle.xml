@@ -8,6 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="bottom|center"
         android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
@@ -57,7 +58,8 @@
             NendApiKey="@string/nend_api_key"
             NendSpotId="@integer/nend_spot_id"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            NendAdjustSize="true"/>
 
     </LinearLayout>
 

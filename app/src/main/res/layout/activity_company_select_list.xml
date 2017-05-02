@@ -67,7 +67,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             NendApiKey="@string/nend_api_key"
-            NendSpotId="@integer/nend_spot_id" />
+            NendSpotId="@integer/nend_spot_id"
+            NendAdjustSize="true" />
 
     </LinearLayout>
 
