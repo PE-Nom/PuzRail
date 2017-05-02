@@ -11,11 +11,13 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,6 +25,9 @@ import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.ui.PopUp;
+
+import net.nend.android.NendAdListener;
+import net.nend.android.NendAdView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,7 +37,7 @@ import java.util.Iterator;
  */
 
 public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
+        implements AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener,NendAdListener{
 
     private static final int RESULTCODE = 1;
 
@@ -44,6 +49,8 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<String> names = new ArrayList<String>();
     private CompanyListAdapter adapter;
     private AlertDialog mDialog;
+
+    private LinearLayout rootLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,6 +80,41 @@ public class MainActivity extends AppCompatActivity
         this.listView.setAdapter(this.adapter);
         this.listView.setOnItemClickListener(this);
         this.listView.setOnItemLongClickListener(this);
+
+        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+//        this.rootLayout = (LinearLayout) findViewById(R.id.root_layout);
+        // 1 NendAdView をインスタンス化
+//        NendAdView nendAdView = new NendAdView(this, 746408, "7eefb7225114edec9a206dc0812840405c9dd27b");
+//        NendAdView nendAdView = new NendAdView(this, 3174, "c5cb8bc474345961c6e7a9778c947957ed8e1e4f");
+        // 中央下部表示の場合
+//        this.rootLayout.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+        // 2 NendAdView をレイアウトに追加
+//        this.rootLayout.addView(nendAdView, new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.WRAP_CONTENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT));
+        // 3 広告の取得を開始
+        nendAdView.setListener(this);
+        nendAdView.loadAd();
+    }
+
+    @Override
+    public void onReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFailedToReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
     }
 
     /**

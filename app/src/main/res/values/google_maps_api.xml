@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- リリース用
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
         AIzaSyCuL4PDywuo1NqrVOJUQN8r0AqvI-ys65k
+    </string>
+    -->
+    <!-- デバッグ用 -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyC4mEZfEMxIrQQ_GC9wK7czlO7aaMg1pFE
     </string>
 </resources>
