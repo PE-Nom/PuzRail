@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- for Test -->
+    <!-- for Test
     <integer name="nend_spot_id">3174</integer>
-    <!-- for release
-    <integer name="nend_spot_id">746408</integer>
     -->
+    <!-- for release
+    -->
+    <integer name="nend_spot_id">746408</integer>
 </resources>

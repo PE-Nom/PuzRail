@@ -369,7 +369,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                         final Snackbar sb = Snackbar.make(LocationPuzzleActivity.this.transparent,
                                                 "広告クリックお願いしま～っす",
                                                 Snackbar.LENGTH_SHORT);
-                                        sb.getView().setBackgroundColor(ContextCompat.getColor(LocationPuzzleActivity.this, R.color.transparent));
+                                        sb.getView().setBackgroundColor(ContextCompat.getColor(LocationPuzzleActivity.this, R.color.color_10));
                                         TextView textView = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         textView.setTextColor(ContextCompat.getColor(LocationPuzzleActivity.this.getApplicationContext(), R.color.color_RED));
                                         sb.show();
