@@ -42,6 +42,9 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonLineStringStyle;
 
+import net.nend.android.NendAdListener;
+import net.nend.android.NendAdView;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -53,7 +56,8 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMapClickListener,GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraIdleListener,
-        OnLineScrollEndListener {
+        OnLineScrollEndListener,
+        NendAdListener {
 
     private final static String TAG = "LocationPuzzleActivity";
     private String lineName;
@@ -107,6 +111,30 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         actionBar.setTitle("パズレール：地図合わせ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
+        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+        nendAdView.setListener(this);
+        nendAdView.loadAd();
+
+    }
+
+    @Override
+    public void onReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFailedToReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
     }
 
     /**

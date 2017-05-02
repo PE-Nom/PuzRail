@@ -82,17 +82,6 @@ public class MainActivity extends AppCompatActivity
         this.listView.setOnItemLongClickListener(this);
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
-//        this.rootLayout = (LinearLayout) findViewById(R.id.root_layout);
-        // 1 NendAdView をインスタンス化
-//        NendAdView nendAdView = new NendAdView(this, 746408, "7eefb7225114edec9a206dc0812840405c9dd27b");
-//        NendAdView nendAdView = new NendAdView(this, 3174, "c5cb8bc474345961c6e7a9778c947957ed8e1e4f");
-        // 中央下部表示の場合
-//        this.rootLayout.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-        // 2 NendAdView をレイアウトに追加
-//        this.rootLayout.addView(nendAdView, new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.WRAP_CONTENT,
-//                LinearLayout.LayoutParams.WRAP_CONTENT));
-        // 3 広告の取得を開始
         nendAdView.setListener(this);
         nendAdView.loadAd();
     }

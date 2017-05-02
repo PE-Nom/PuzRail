@@ -31,12 +31,15 @@ import com.pentech.puzrail.ui.MultiButtonListView;
 import com.pentech.puzrail.ui.PopUp;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import net.nend.android.NendAdListener;
+import net.nend.android.NendAdView;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
 public class PieceGarallyActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+        implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,NendAdListener {
 
     private static String TAG = "PieceGarallyActivity";
     private static final int RESULTCODE = 1;
@@ -97,6 +100,31 @@ public class PieceGarallyActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("パズレール：路線当て");
         actionBar.setSubtitle(db.getCompany(this.companyId).getName());
+
+        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+        nendAdView.setListener(this);
+        nendAdView.loadAd();
+
+    }
+
+    @Override
+    public void onReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFailedToReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
     }
 
     private void updateLineNameProgress(){

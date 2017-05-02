@@ -50,6 +50,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonLineStringStyle;
 
+import net.nend.android.NendAdListener;
+import net.nend.android.NendAdView;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -62,7 +65,8 @@ import java.util.TimerTask;
 public class StationPuzzleActivity extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener,
-        OnMapReadyCallback {
+        OnMapReadyCallback,
+        NendAdListener {
 
     private String TAG = "StationPuzzleActivity";
     private String lineNameNone = "------------";
@@ -138,6 +142,30 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         this.separatorMove.setLongClickable(true);
         this.separatorMove.setOnTouchListener(new OnTouchListener(this));
 
+        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+        nendAdView.setListener(this);
+        nendAdView.loadAd();
+
+    }
+
+    @Override
+    public void onReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFailedToReceiveAd(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onFailedToReceiveAd", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) {
+        Toast.makeText(getApplicationContext(), "onDismissScreen", Toast.LENGTH_LONG).show();
     }
 
     private void updateProgressBar(){

@@ -52,6 +52,13 @@
 
         </FrameLayout>
 
+        <net.nend.android.NendAdView
+            android:id="@+id/nend"
+            NendApiKey="@string/nend_api_key"
+            NendSpotId="@integer/nend_spot_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <ImageView
