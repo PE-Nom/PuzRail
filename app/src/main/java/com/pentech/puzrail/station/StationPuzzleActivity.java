@@ -124,7 +124,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         this.lineName = lineName+"("+linekana+")";
         this.companyId = line.getCompanyId();
 
-        actionBar.setTitle("パズレール：駅並べ");
+        actionBar.setTitle("線路と駅パズル：駅並べ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
         this.progressTitle = (TextView)findViewById(R.id.ProgressTitle);

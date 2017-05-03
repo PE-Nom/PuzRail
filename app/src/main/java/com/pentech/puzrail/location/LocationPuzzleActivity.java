@@ -108,7 +108,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         this.lineName = lineName+"("+linekana+")";
         this.companyId = line.getCompanyId();
 
-        actionBar.setTitle("パズレール：地図合わせ");
+        actionBar.setTitle("線路と駅パズル：地図合わせ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);

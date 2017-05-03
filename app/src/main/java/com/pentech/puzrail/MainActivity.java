@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("パズレール：");
+        actionBar.setTitle("線路と駅パズル：");
         actionBar.setSubtitle("鉄道事業者選択");
 
         this.listView = (ListView) findViewById(R.id.company_list_view);

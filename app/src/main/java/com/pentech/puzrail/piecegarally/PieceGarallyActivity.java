@@ -98,7 +98,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("パズレール：路線当て");
+        actionBar.setTitle("線路と駅パズル：路線当て");
         actionBar.setSubtitle(db.getCompany(this.companyId).getName());
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
