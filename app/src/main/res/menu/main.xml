@@ -10,7 +10,7 @@
         app:showAsAction="always" >
         <menu>
             <item android:id="@+id/action_AboutPuzzRail"
-                android:title="パズレールについて"
+                android:title="「線路と駅」について"
                 android:orderInCategory="100"
                 app:showAsAction="never" />
             <item android:id="@+id/action_Help"

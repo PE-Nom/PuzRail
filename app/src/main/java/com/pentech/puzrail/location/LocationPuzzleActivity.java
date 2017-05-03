@@ -561,7 +561,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("plain/text");
             intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
-            intent.putExtra(Intent.EXTRA_SUBJECT, "パズレールについてのお問い合わせ");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "「線路と駅」のお問い合わせ");
             startActivity(Intent.createChooser(intent, ""));
             return true;
         }
