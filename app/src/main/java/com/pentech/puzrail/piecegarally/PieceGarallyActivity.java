@@ -394,7 +394,6 @@ public class PieceGarallyActivity extends AppCompatActivity
                                     previewAnswerCount++;
                                 }
                                 else{
-                                    Toast.makeText(getApplicationContext(), "onClick", Toast.LENGTH_LONG).show();
                                     final Snackbar sb = Snackbar.make(PieceGarallyActivity.this.listView,
                                             "広告クリックお願いしま～っす",
                                             Snackbar.LENGTH_SHORT);
