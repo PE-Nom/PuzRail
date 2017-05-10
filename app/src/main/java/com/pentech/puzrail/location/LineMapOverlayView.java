@@ -132,7 +132,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             if(DEBUG) Log.d(TAG, String.format("onScale factor:%f",detector.getScaleFactor()));
             // 表示倍率の計算
             if(mScalingMode){
-                if(processZoom(detector)){
+                if(processZoom(detector.getScaleFactor())){
                     invalidate();
                 }
             }
@@ -182,9 +182,35 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 //            if(DEBUG) Log.d(TAG, "onScroll");
             if(!mScalingMode){
                 mScrolling = true;
-                if(processDrag(distanceX,distanceY)){
-                    invalidate();
+
+//                Log.d(TAG,String.format("positionLock = %b, positionLocked = %b",
+//                        LineMapOverlayView.this.positionLock,LineMapOverlayView.this.positionLocked));
+                float dy,dx;
+                if(LineMapOverlayView.this.positionLock){
+                    if(!LineMapOverlayView.this.positionLocked ) {
+                        LatLng point1, point2;
+                        Point screenPoint1, screenPoint2;
+                        point1 = new LatLng(LineMapOverlayView.this.line.getCorrectTopLat(), LineMapOverlayView.this.line.getCorrectLeftLng());
+                        point2 = new LatLng(LineMapOverlayView.this.line.getCorrectBottomLat(), LineMapOverlayView.this.line.getCorrectRightLng());
+                        screenPoint1 = map.getProjection().toScreenLocation(point1);
+                        screenPoint2 = map.getProjection().toScreenLocation(point2);
+                        RectF railwayImageRect = getCurrentImageRect();
+                        dx = Math.min((screenPoint1.x - railwayImageRect.left), (screenPoint2.x - railwayImageRect.right));
+                        dy = Math.min((screenPoint1.y - railwayImageRect.top), (screenPoint2.y - railwayImageRect.bottom));
+                        if (processDrag(dx, dy) && processZoom(computeScaleError())) {
+                            invalidate();
+                        }
+                        LineMapOverlayView.this.positionLocked = true;
+                    }
                 }
+                else{
+                    dx = -1.0f*distanceX;
+                    dy = -1.0f*distanceY;
+                    if(processDrag(dx,dy)){
+                        invalidate();
+                    }
+                }
+
             }
             return true;
         }
@@ -311,12 +337,11 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         }
     }
 
-    private final boolean processDrag(final float distanceX,final float distanceY) {
+    private final boolean processDrag(final float dist_x,final float dist_y) {
 
         float[] mTrans = new float[8];
-
-        float dx = -1.0f*distanceX;
-        float dy = -1.0f*distanceY;
+        float dx = dist_x;
+        float dy = dist_y;
 
         // calculate the corner coordinates of image applied matrix
         // [(left,top),(right,top),(right,bottom),(left.bottom)]
@@ -372,21 +397,21 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             // otherwise the image can not move when one side is on the border of limit rectangle.
             // only calculate without rotation now because its calculation is to heavy when rotation applied.
 //            if (!mIsRotating) {
-                final float left = Math.min(Math.min(mTrans[0], mTrans[2]), Math.min(mTrans[4], mTrans[6]));
-                final float right = Math.max(Math.max(mTrans[0], mTrans[2]), Math.max(mTrans[4], mTrans[6]));
-                final float top = Math.min(Math.min(mTrans[1], mTrans[3]), Math.min(mTrans[5], mTrans[7]));
-                final float bottom = Math.max(Math.max(mTrans[1], mTrans[3]), Math.max(mTrans[5], mTrans[7]));
+            final float left = Math.min(Math.min(mTrans[0], mTrans[2]), Math.min(mTrans[4], mTrans[6]));
+            final float right = Math.max(Math.max(mTrans[0], mTrans[2]), Math.max(mTrans[4], mTrans[6]));
+            final float top = Math.min(Math.min(mTrans[1], mTrans[3]), Math.min(mTrans[5], mTrans[7]));
+            final float bottom = Math.max(Math.max(mTrans[1], mTrans[3]), Math.max(mTrans[5], mTrans[7]));
 
-                if (right < mLimitRect.left) {
-                    dx = mLimitRect.left - right;
-                } else if (left + EPS > mLimitRect.right) {
-                    dx = mLimitRect.right - left - EPS;
-                }
-                if (bottom < mLimitRect.top) {
-                    dy = mLimitRect.top - bottom;
-                } else if (top + EPS > mLimitRect.bottom) {
-                    dy = mLimitRect.bottom - top - EPS;
-                }
+            if (right < mLimitRect.left) {
+                dx = mLimitRect.left - right;
+            } else if (left + EPS > mLimitRect.right) {
+                dx = mLimitRect.right - left - EPS;
+            }
+            if (bottom < mLimitRect.top) {
+                dy = mLimitRect.top - bottom;
+            } else if (top + EPS > mLimitRect.bottom) {
+                dy = mLimitRect.bottom - top - EPS;
+            }
 //            }
             if ((dx != 0) || (dy != 0)) {
 //                if(DEBUG) Log.v(TAG, String.format("Applied processDrag:dx=%f,dy=%f", dx, dy));
@@ -437,7 +462,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     /**
      * zooming
      */
-    private final boolean processZoom(final ScaleGestureDetector detector) {
+    private final boolean processZoom(float scale) {
 
         // スケーリングの中心座標を求める。
         // 最初に現在の表示領域の矩形頂点座標を求める
@@ -465,7 +490,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         // get current zooming scale
         final float currentScale = Math.min(values[Matrix.MSCALE_X],values[Matrix.MSCALE_Y]);
         // calculate the zooming scale from the distance between touched positions
-        final float scale = detector.getScaleFactor();
+//        final float scale = detector.getScaleFactor();
         // calculate the applied zooming scale
         final float tmpScale = scale * currentScale*1.1f;
         if (tmpScale < mMinScale) {
@@ -551,7 +576,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         return error;
     }
 
-    private double computeScaleError(){
+    private float computeScaleError(){
         LatLng point1,point2;
         Point screenPoint1,screenPoint2;
 
@@ -569,7 +594,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         float pieceScaleWidth = Math.abs(railwayImageRect.right - railwayImageRect.left);
         float pieceScale = pieceScaleHeight > pieceScaleWidth ? pieceScaleHeight : pieceScaleWidth;
         // 表示スケールの比率
-        double error = pieceScale/(double)lineScale;
+        float error = pieceScale/(float)lineScale;
         return(error);
     }
 
@@ -605,10 +630,10 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     }
 
     // 正誤判定誤差(表示dpでの位置誤差）
-    public final static int ERR_RANGE_LEVEL0 = 3;
-    public final static int ERR_RANGE_LEVEL1 = 10;
-    public final static int ERR_RANGE_LEVEL2 = 20;
-    public final static int ERR_RANGE_LEVEL3 = 35;
+    public final static int ERR_RANGE_LEVEL0 = 10;
+    public final static int ERR_RANGE_LEVEL1 = 15;
+    public final static int ERR_RANGE_LEVEL2 = 25;
+    public final static int ERR_RANGE_LEVEL3 = 40;
 
     //　位置誤差のレベル番号（滅灯のデューティ設定用)
     private final static int ERR_LEVEL0 = 0;
@@ -617,8 +642,8 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     private final static int ERR_LEVEL3 = 3;
 
     // 滅灯デューティ比
-    private final int onTime[] = new int[] {0,30,80,1000};
-    private final int offTime[] = new int[] {0,10,20,0};
+    private final int onTime[] = new int[] {10,30,80,1000};
+    private final int offTime[] = new int[] {10,10,20,0};
     boolean lightingSw = true;
     int colorCount = 0;
 
@@ -646,6 +671,11 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         return clm;
     }
 
+    private boolean positionLock = false;
+    private boolean positionLocked = false;
+    private int positionLockTimeCnt = 0;
+    private final static int PositionLockTime = 100;
+
     @Override
     protected void onDraw(Canvas canvas) {
         Paint paint = new Paint();
@@ -657,22 +687,45 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         paint.setTextSize(12*this.density); // 12sp*density
 
 //       final double positionError[] = computePositionError();
-        double scaleError = computeScaleError();
+        float scaleError = computeScaleError();
         int err = computeLocationError();
-        if( err < ERR_RANGE_LEVEL1 ){
-            super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL1)));
-        }
-        else if( err < ERR_RANGE_LEVEL2 ) {
-            super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL2)));
-        }
-        else if(err < ERR_RANGE_LEVEL3 ){
-            super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
+
+        if( err < ERR_RANGE_LEVEL0 ){
+            if(!this.positionLock && !this.positionLocked){ // 未固定の場合
+                // 正解の位置に一定時間固定
+                this.positionLock = true;
+                this.positionLockTimeCnt = 0;
+            }
+            else{
+                //  固定時間のカウントアップ
+                if(this.positionLockTimeCnt < this.PositionLockTime){ // 固定時間経過
+                    this.positionLockTimeCnt++;
+                    super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL0)));
+                }
+                else{
+                    this.positionLock = false;
+                }
+            }
         }
         else{
-            super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
-            colorCount =0;
-            lightingSw = true;
+            this.positionLock = false;
+            this.positionLocked = false;
+            if( err < ERR_RANGE_LEVEL1 ){
+                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL1)));
+            }
+            else if( err < ERR_RANGE_LEVEL2 ) {
+                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL2)));
+            }
+            else if(err < ERR_RANGE_LEVEL3 ){
+                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
+            }
+            else{
+                super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
+                colorCount =0;
+                lightingSw = true;
+            }
         }
+
         if(!this.line.isLocationCompleted()){
             String positionErr = String.format("（位置ズレ,縮尺ズレ）= (%d,%.2f)",err,scaleError);
             canvas.drawText(positionErr, 2*this.density, 15*this.density, paint);

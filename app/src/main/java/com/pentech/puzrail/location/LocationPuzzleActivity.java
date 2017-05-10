@@ -67,6 +67,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private Line line;
     private GoogleMap mMap;
     private MapView mMapView;
+    private LatLng initLatLng;
     private GeoJsonLayer layer;
     private LineMapOverlayView mImageView;
     private ImageView transparent;
@@ -223,9 +224,10 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         // 乱数による位置移動
         double camposLat = lineCenterLat + (displayLatRange-lineRangeLat)*(Math.random()-0.5);
         double camposLng = lineCenterLng + (displayLngRange-lineRangeLng)*(Math.random()-0.5);
+        this.initLatLng = new LatLng(camposLat,camposLng);
         Log.d(TAG,String.format("##### camera position   : lng = %f, lat = %f",camposLng,camposLat));
         this.mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(camposLat,camposLng),
+                this.initLatLng,
                 this.line.getInitZoomLevel())
         );
 //
@@ -321,8 +323,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.mImageView.resetImageDrawable();
                         LocationPuzzleActivity.this.mMap.moveCamera(
                                 CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(LocationPuzzleActivity.this.line.getInitCamposLat(),
-                                        LocationPuzzleActivity.this.line.getInitCamposLng()),
+                                    LocationPuzzleActivity.this.initLatLng,
                                         LocationPuzzleActivity.this.line.getInitZoomLevel())
                                 );
                         LocationPuzzleActivity.this.mImageView.setImageDrawable();
@@ -379,8 +380,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                             case 2: // 最初の位置に戻す
                                 LocationPuzzleActivity.this.mMap.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
-                                                new LatLng(LocationPuzzleActivity.this.line.getInitCamposLat(),
-                                                        LocationPuzzleActivity.this.line.getInitCamposLng()),
+                                                LocationPuzzleActivity.this.initLatLng,
                                                 LocationPuzzleActivity.this.line.getInitZoomLevel())
                                 );
                                 LocationPuzzleActivity.this.mImageView.resetImageDrawable();
