@@ -14,16 +14,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
@@ -64,6 +69,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private DBAdapter db;
     private int companyId;
     private int selectedLineId;
+    private SettingParameter settingParameter;
     private Line line;
     private GoogleMap mMap;
     private MapView mMapView;
@@ -100,6 +106,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         this.db = new DBAdapter(this);
         this.db.open();
         this.line = db.getLine(this.selectedLineId);
+        this.settingParameter = db.getSettingParameter();
         Log.d(TAG,String.format("selected line is %s",line.getName()));
         setUpMap(savedInstanceState);
 
@@ -233,6 +240,8 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 //
         mImageView.setMap(this.mMap);
         mImageView.setImageDrawable();
+        mImageView.setDifficulty_mode(this.settingParameter.getDifficultyMode());
+        mImageView.setVibrationMode(this.settingParameter.isVibrate());
         if(hasAlreadyLocated()) setGeoJsonVisible();
 
     }
@@ -333,11 +342,80 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                 .show();
     }
 
+    private void settingDifficulty(){
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View dialogLayout = inflater.inflate(R.layout.activity_line_location_setting_dialog, (ViewGroup) findViewById(R.id.layout_root));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("難易度設定");
+        //builder.setMessage("");
+        builder.setView(dialogLayout);
+
+        // radioボタンの初期化
+        RadioGroup radioGroup = (RadioGroup) dialogLayout.findViewById(R.id.settingDifficulty);
+        int dif = this.settingParameter.getDifficultyMode();
+        if(dif == LineMapOverlayView.DIFFICULTY_BEGINNER){
+            radioGroup.check(R.id.difficulty_beginner);
+        }
+        else if(dif == LineMapOverlayView.DIFFICULTY_AMATEUR){
+            radioGroup.check(R.id.difficulty_amateur);
+        }
+        else{
+            radioGroup.check(R.id.difficulty_professional);
+        }
+
+        // switchの初期化
+        Switch vibrationSwitch = (Switch) dialogLayout.findViewById(R.id.vibration_mode);
+        vibrationSwitch.setChecked(this.settingParameter.isVibrate());
+
+        // ok 選択操作
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                int difficulty_mode = 0;
+                RadioGroup radioGroup = (RadioGroup) dialogLayout.findViewById(R.id.settingDifficulty);
+                Switch vibrationSwitch = (Switch) dialogLayout.findViewById(R.id.vibration_mode);
+                if (radioGroup.getCheckedRadioButtonId() == R.id.difficulty_beginner) {
+                    difficulty_mode = LineMapOverlayView.DIFFICULTY_BEGINNER;
+                    Log.d(TAG,"beginner selected");
+                }
+                else if(radioGroup.getCheckedRadioButtonId() == R.id.difficulty_amateur){
+                    difficulty_mode = LineMapOverlayView.DIFFICULTY_AMATEUR;
+                    Log.d(TAG,"amateur selected");
+                }
+                else{
+                    difficulty_mode = LineMapOverlayView.DIFFICULTY_PROFESSIONAL;
+                    Log.d(TAG,"professional selected");
+                }
+                if(vibrationSwitch.isChecked()){
+                    Log.d(TAG,"vibration checked");
+                }
+                else{
+                    Log.d(TAG,"vibration no checked");
+                }
+                boolean vibration = vibrationSwitch.isChecked();
+                LocationPuzzleActivity.this.settingParameter.setDifficultyMode(difficulty_mode);
+                LocationPuzzleActivity.this.settingParameter.setVibrationMode(vibration);
+                LocationPuzzleActivity.this.mImageView.setDifficulty_mode(difficulty_mode);
+                LocationPuzzleActivity.this.mImageView.setVibrationMode(vibration);
+                LocationPuzzleActivity.this.db.updateDifficultySetting(difficulty_mode);
+                LocationPuzzleActivity.this.db.updateVibrationSetting(vibration);
+           }
+        });
+
+        // cancel操作
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }
+        );
+        builder.create().show();
+    }
+
     @Override
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG,"onMapLongClick");
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
+        contextMenuList.add("難易度 設定");
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
         contextMenuList.add("最初の位置に戻す");
@@ -355,12 +433,15 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.mDialog.dismiss();
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>)adapterView.getAdapter();
                         switch(position){
-                            case 0: // 回答をクリア（回答済みの場合）
+                            case 0: // 難易度設定
+                                settingDifficulty();
+                                break;
+                            case 1: // 回答をクリア（回答済みの場合）
                                 if(LocationPuzzleActivity.this.hasAlreadyLocated()){
                                     answerClear();
                                 }
                                 break;
-                            case 1: // 回答を見る（未回答の場合）
+                            case 2: // 回答を見る（未回答の場合）
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
@@ -377,7 +458,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                     }
                                 }
                                 break;
-                            case 2: // 最初の位置に戻す
+                            case 3: // 最初の位置に戻す
                                 LocationPuzzleActivity.this.mMap.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
                                                 LocationPuzzleActivity.this.initLatLng,
@@ -386,7 +467,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 LocationPuzzleActivity.this.mImageView.resetImageDrawable();
                                 LocationPuzzleActivity.this.mImageView.setImageDrawable();;
                                 break;
-                            case 3: // Webを検索する
+                            case 4: // Webを検索する
                                 if(LocationPuzzleActivity.this.line.isNameCompleted()){
                                     Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     intent.putExtra(SearchManager.QUERY, LocationPuzzleActivity.this.line.getName()); // query contains search string
@@ -446,7 +527,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         mImageView.displayCorrectCoordinate(TAG);
         int err = mImageView.computeLocationError();
         Log.d(TAG,String.format("error = %d",err));
-        if( err < LineMapOverlayView.ERR_RANGE_LEVEL0 ){
+        if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
             // 正解
             mImageView.resetImageDrawable();
             setGeoJsonVisible();

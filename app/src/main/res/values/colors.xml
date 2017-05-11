@@ -20,6 +20,8 @@
     <color name="color_100">#F2590C</color>
     <color name="color_200">#F58B55</color>
     <color name="color_RED">#ff0000</color>
+    <color name="color_WHITE">#ffffffff</color>
+    <color name="color_bkGroundREct">#af6868</color>
 
     <color name="transparent">#40637e99</color>
 

@@ -1,11 +1,17 @@
 #
 # DBのテーブル定義
 #
+CREATE TABLE [settingParameter] ([id] INTEGER NOT NULL DEFAULT '0', [difficultyMode] INTEGER NOT NULL DEFAULT '2', [vibrationMode] INTEGER NOT NULL DEFAULT '1', PRIMARY KEY(id));
 CREATE TABLE [area] ([areaCode] INTEGER NOT NULL UNIQUE, [areaName] VARCHAR(32), PRIMARY KEY(areaCode));
 CREATE TABLE [companyType] ( [companyCode] INTEGER, [typeName] VARCHAR(32) NOT NULL, PRIMARY KEY(companyCode));
 CREATE TABLE [companies] ( [companyId] INTEGER, [companyCode] INTEGER NOT NULL, [companyName] VARCHAR(256), [companyKana] VARCHAR(256), PRIMARY KEY(companyId));
 CREATE TABLE [lines] ( [lineId] INTEGER, [areaCode] INTEGER NOT NULL, [companyId] INTEGER NOT NULL, [lineName] VARCHAR(256) NOT NULL, [lineKana] VARCHAR(256) NOT NULL, [type] INTEGER NOT NULL, [drawable_resource_name] VARCHAR(128) NOT NULL UNIQUE, [raw_resource_name] VARCHAR(128) NOT NULL UNIQUE, [correct_topLat] REAL DEFAULT '0.0', [correct_leftLng] REAL DEFAULT '0.0', [correct_bottomLat] REAL DEFAULT '0.0', [correct_rightLng] REAL DEFAULT '0.0', [scroll_max_lat] REAL DEFAULT '0.0', [scroll_max_lng] REAL DEFAULT '0.0', [scroll_min_lat] REAL DEFAULT '0.0', [scroll_min_lng] REAL DEFAULT '0.0', [init_campos_lat] REAL DEFAULT '0.0', [init_campos_lng] REAL DEFAULT '0.0', [max_zoom_level] REAL DEFAULT '10.0', [min_zoom_level] REAL DEFAULT '6.0', [init_zoom_level] REAL DEFAULT '8.0', [nameAnswerStatus] INTEGER NOT NULL DEFAULT '0', [locationAnswerStatus] INTEGER NOT NULL DEFAULT '0', [stationAnswerStatus] INTEGER NOT NULL DEFAULT '0', PRIMARY KEY(lineId));
 CREATE TABLE [stations] ( [companyId] INTEGER, [lineId] INTEGER, [stationOrder] INTEGER, [stationName] VARCHAR(256) NOT NULL, [stationKana] VARCHAR(256) NOT NULL, [stationLat] REAL NOT NULL DEFAULT '0', [stationLng] REAL NOT NULL DEFAULT '0', [overlaySw] INTEGER NOT NULL DEFAULT '0', [answerStatus] INTEGER NOT NULL DEFAULT '0', PRIMARY KEY(companyId,lineId,stationOrder) );
+#
+# SettingParameter テーブル初期化
+# 2:Beginner,1:Amateur,0:Professional, 1:Vibration ON
+#
+INSERT INTO [settingParameter] VALUES( 0, 2, 1 );
 #
 # area テーブル初期化
 #

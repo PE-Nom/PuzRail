@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
 
 public class DBAdapter {
     static final String DATABASE_NAME = "Railway.db";
-    static final int DATABASE_VERSION = 1;
+    static final int DATABASE_VERSION = 2;
 
     private String TAG = "DBAdapter";
 
@@ -78,6 +78,7 @@ public class DBAdapter {
         @Override
         public void onUpgrade( SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.d(TAG,"onUpgrade");
+            db.execSQL("DROP TABLE IF EXISTS settingParameter");
             db.execSQL("DROP TABLE IF EXISTS currentMode");
             db.execSQL("DROP TABLE IF EXISTS area");
             db.execSQL("DROP TABLE IF EXISTS companyType");
@@ -104,6 +105,51 @@ public class DBAdapter {
     //
     // App Methods
     //
+
+    // Setting Parameter
+    private SettingParameter extractSettingParameter(Cursor c){
+        int dif = c.getInt(c.getColumnIndex("difficultyMode"));
+        boolean mode = (c.getInt(c.getColumnIndex("vibrationMode"))==1);
+        SettingParameter setting = new SettingParameter(dif,mode);
+        Log.d(TAG,String.format("setting : %d,%b",
+                setting.getDifficultyMode(),setting.isVibrate()));
+        return setting;
+    }
+
+    public SettingParameter getSettingParameter(){
+        SettingParameter setting = null;
+        Cursor cursor = db.rawQuery("SELECT * from settingParameter WHERE id = 0",null);
+        try{
+            if(cursor.moveToFirst()){
+                setting = extractSettingParameter(cursor);
+            }
+            else{
+                Log.d(TAG,"No record selected");
+            }
+        }finally {
+            cursor.close();
+        }
+        return setting;
+    }
+
+    public boolean updateDifficultySetting(int difficultyMode){
+        ContentValues cv = new ContentValues();
+        cv.put("difficultyMode", difficultyMode);
+        db.update("settingParameter", cv, "id = 0", null);
+        return true;
+    }
+
+    public boolean updateVibrationSetting(boolean vibrationMode){
+        ContentValues cv = new ContentValues();
+        if(vibrationMode){
+            cv.put("vibrationMode", 1);
+        }
+        else{
+            cv.put("vibrationMode", 0);
+        }
+        db.update("settingParameter", cv, "id = 0", null);
+        return true;
+    }
 
     // companies table
     private Company extractCompany( Cursor c){
@@ -132,8 +178,6 @@ public class DBAdapter {
             cursor.close();
         }
         return company;
-
-
     }
 
     public ArrayList<Company> getCompanies(){
