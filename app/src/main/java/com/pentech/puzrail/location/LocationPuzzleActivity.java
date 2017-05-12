@@ -85,7 +85,11 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private int previewLineAnswerCount = 0;
     private final static long DISPLAY_ANSWER_TIME[] = {1000,1500,2500,4000};
     private static final int showAnswerMax = 4;
+    private int onReceiveAdCnt = 0;
     private int showAnswerCount = 0;
+    private static boolean adChanged = false;
+
+
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
 
@@ -127,7 +131,9 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
-        Log.d(TAG,"onReceiveAd");
+        Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
+        this.onReceiveAdCnt++;
+        if(1<this.onReceiveAdCnt) this.adChanged = true;
     }
 
     @Override
@@ -139,6 +145,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
         this.showAnswerCount = 0;
+        this.adChanged = false;
     }
 
     @Override
@@ -445,7 +452,9 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
-                                        showAnswerCount++;
+                                        if(LocationPuzzleActivity.this.adChanged) {
+                                            showAnswerCount++;
+                                        }
                                     }
                                     else{
                                         final Snackbar sb = Snackbar.make(LocationPuzzleActivity.this.transparent,

@@ -94,8 +94,11 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     private int previewLineAnswerCount = 0;
     private final static long DISPLAY_ANSWER_TIME = 1000;
-    private static final int showAnswerMax = 3;
+    private static final int showAnswerMax = 5;
+    private int onReceiveAdCnt = 0;
     private int showAnswerCount = 0;
+    private static boolean adChanged = false;
+
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
 
@@ -150,7 +153,9 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
-        Log.d(TAG,"onReceiveAd");
+        Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
+        this.onReceiveAdCnt++;
+        if(1<this.onReceiveAdCnt) this.adChanged = true;
     }
 
     @Override
@@ -162,6 +167,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
         this.showAnswerCount = 0;
+        this.adChanged = false;
     }
 
     @Override
@@ -656,7 +662,9 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                                 if( mAnswerDisplayingTimer == null){
                                     if( showAnswerCount < showAnswerMax ) {
                                         answerDisplay();
-                                        showAnswerCount++;
+                                        if(StationPuzzleActivity.this.adChanged) {
+                                            showAnswerCount++;
+                                        }
                                     }
                                     else{
                                         final Snackbar sb = Snackbar.make(StationPuzzleActivity.this.stationListView,

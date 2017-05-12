@@ -52,7 +52,9 @@ public class PieceGarallyActivity extends AppCompatActivity
     private int selectedLineIndex = -1;
     private int companyId;
     private int previewAnswerCount = 0;
-    private static final int showAnswerMax = 3;
+    private static final int showAnswerMax = 5;
+    private int onReceiveAdCnt = 0;
+    private static boolean adChanged = false;
 
     private AlertDialog mDialog;
     /**
@@ -109,7 +111,9 @@ public class PieceGarallyActivity extends AppCompatActivity
 
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
-        Log.d(TAG,"onReceiveAd");
+        Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
+        this.onReceiveAdCnt++;
+        if(1<this.onReceiveAdCnt) this.adChanged = true;
     }
 
     @Override
@@ -121,6 +125,7 @@ public class PieceGarallyActivity extends AppCompatActivity
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
         this.previewAnswerCount = 0;
+        this.adChanged = false;
     }
 
     @Override
@@ -391,7 +396,9 @@ public class PieceGarallyActivity extends AppCompatActivity
                                     sb.setActionTextColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.background1));
                                     sb.getView().setBackgroundColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.color_10));
                                     sb.show();
-                                    previewAnswerCount++;
+                                    if(PieceGarallyActivity.this.adChanged){
+                                        previewAnswerCount++;
+                                    }
                                 }
                                 else{
                                     final Snackbar sb = Snackbar.make(PieceGarallyActivity.this.listView,
