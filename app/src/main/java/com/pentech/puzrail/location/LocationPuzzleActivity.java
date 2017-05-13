@@ -83,12 +83,10 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private AlertDialog mDialog;
 
     private int previewLineAnswerCount = 0;
-    private final static long DISPLAY_ANSWER_TIME[] = {1000,1500,2500,4000};
+    private final static long DISPLAY_ANSWER_TIME = 1000;
     private static final int showAnswerMax = 4;
     private int onReceiveAdCnt = 0;
     private int showAnswerCount = 0;
-    private static boolean adChanged = false;
-
 
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
@@ -133,7 +131,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     public void onReceiveAd(NendAdView nendAdView) {
         Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
         this.onReceiveAdCnt++;
-        if(1<this.onReceiveAdCnt) this.adChanged = true;
     }
 
     @Override
@@ -145,7 +142,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
         this.showAnswerCount = 0;
-        this.adChanged = false;
+        this.onReceiveAdCnt = 0;
     }
 
     @Override
@@ -320,7 +317,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         if (mAnswerDisplayingTimer == null) {
             setGeoJsonVisible();
             mAnswerDisplayingTimer = new Timer(true);
-            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME[showAnswerCount]);
+            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
         }
     }
 
@@ -452,7 +449,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
-                                        if(LocationPuzzleActivity.this.adChanged) {
+                                        if(LocationPuzzleActivity.this.onReceiveAdCnt > 1) {
                                             showAnswerCount++;
                                         }
                                     }

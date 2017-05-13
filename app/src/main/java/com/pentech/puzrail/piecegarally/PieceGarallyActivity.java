@@ -54,7 +54,6 @@ public class PieceGarallyActivity extends AppCompatActivity
     private int previewAnswerCount = 0;
     private static final int showAnswerMax = 5;
     private int onReceiveAdCnt = 0;
-    private static boolean adChanged = false;
 
     private AlertDialog mDialog;
     /**
@@ -113,7 +112,6 @@ public class PieceGarallyActivity extends AppCompatActivity
     public void onReceiveAd(NendAdView nendAdView) {
         Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
         this.onReceiveAdCnt++;
-        if(1<this.onReceiveAdCnt) this.adChanged = true;
     }
 
     @Override
@@ -125,7 +123,7 @@ public class PieceGarallyActivity extends AppCompatActivity
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
         this.previewAnswerCount = 0;
-        this.adChanged = false;
+        this.onReceiveAdCnt = 0;
     }
 
     @Override
@@ -396,7 +394,7 @@ public class PieceGarallyActivity extends AppCompatActivity
                                     sb.setActionTextColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.background1));
                                     sb.getView().setBackgroundColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.color_10));
                                     sb.show();
-                                    if(PieceGarallyActivity.this.adChanged){
+                                    if(PieceGarallyActivity.this.onReceiveAdCnt > 1){
                                         previewAnswerCount++;
                                     }
                                 }
