@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
@@ -19,8 +20,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +45,8 @@ import net.nend.android.NendAdView;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PieceGarallyActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,NendAdListener {
@@ -60,7 +66,6 @@ public class PieceGarallyActivity extends AppCompatActivity
     private static final int showAnswerMax = 5;
     private int onReceiveAdCnt = 0;
 
-    private AlertDialog mDialog;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -169,6 +174,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         finish();
     }
 
+    private AlertDialog mDialog;
     private void selectLineSilhouette(int position){
         // アイコンタップでTextViewにその名前を表示する
         Log.d(TAG, String.format("onItemLongClick position = %d", position));
@@ -371,7 +377,7 @@ public class PieceGarallyActivity extends AppCompatActivity
                         PieceGarallyActivity.this.updateStationsProgress();
                         break;
                     case 1:
-//                      Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        // Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
                         PieceGarallyActivity.this.longClickSelectedLine.resetLocationAnswerStatus();
                         PieceGarallyActivity.this.db.updateLineLocationAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
                         PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
@@ -393,6 +399,113 @@ public class PieceGarallyActivity extends AppCompatActivity
         alertDialog.show();
     }
 
+//    private PopupWindow railwaySlhouetteShowPopup = null;
+    private AlertDialog railwaySlhouetteShowPopup = null;
+    private Timer mAnswerDisplayingTimer = null;
+    private Handler mHandler = new Handler();
+    private final static long DISPLAY_ANSWER_TIME = 1000*3;
+    // 回答表示の消去
+    private class displayTimerElapse extends TimerTask {
+        /**
+         * The action to be performed by this timer task.
+         */
+        @Override
+        public void run() {
+            mHandler.post(new Runnable(){
+                /**
+                 * When an object implementing interface <code>Runnable</code> is used
+                 * to create a thread, starting the thread causes the object's
+                 * <code>run</code> method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method <code>run</code> is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    if(railwaySlhouetteShowPopup!=null){
+                        railwaySlhouetteShowPopup.dismiss();
+                        railwaySlhouetteShowPopup = null;
+                    }
+                    mAnswerDisplayingTimer = null;
+                }
+            });
+        }
+    }
+
+    private void showRailwaySilhouetteAnswer(Line line){
+        final ArrayList<Line> lines = new ArrayList<Line>();
+        lines.add(line);
+
+        if(railwaySlhouetteShowPopup==null) {
+            GridView answerShowLinesGridView = new GridView(this);
+            answerShowLinesGridView.setVerticalSpacing(40);
+            answerShowLinesGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+            answerShowLinesGridView.setGravity(Gravity.CENTER);
+            answerShowLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
+
+            RailwayGridAdapter answerShowLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), lines );
+            answerShowLinesGridView.setAdapter(answerShowLinesAdapter);
+            // ダイアログ表示
+            railwaySlhouetteShowPopup = new AlertDialog.Builder(this)
+                    .setTitle(line.getRawName()+"("+line.getRawKana()+")のシルエット")
+                    .setPositiveButton("OK",null)
+                    .setView(answerShowLinesGridView)
+                    .create();
+            railwaySlhouetteShowPopup.show();
+        }
+        mAnswerDisplayingTimer = new Timer(true);
+        mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
+    }
+
+/*    private void showRailwaySilhouetteAnswer(Line line){
+        if(railwaySlhouetteShowPopup==null){
+
+            railwaySlhouetteShowPopup = new PopupWindow(this);
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.railway_silhouette_answer_show_popup, null);
+
+            // タイトル設定
+            TextView popupTitle = (TextView)popupView.findViewById(R.id.railway_silhouette_answer_popup_title);
+            popupTitle.setText(line.getRawName()+"("+line.getRawKana()+")のシルエット");
+
+            //　railwayシルエット設定
+            ImageView silhouetteView = (ImageView)popupView.findViewById(R.id.railway_silhouette_answer_popup_view);
+            Drawable lineDrawable = ResourcesCompat.getDrawable(this.getResources(), line.getDrawableResourceId(), null);
+            silhouetteView.setImageDrawable(lineDrawable);
+
+            // closeボタン設定
+            Button closeBtn = (Button)popupView.findViewById(R.id.railway_silhouette_answer_popup_button);
+            closeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (railwaySlhouetteShowPopup.isShowing()) {
+                        railwaySlhouetteShowPopup.dismiss();
+                        railwaySlhouetteShowPopup = null;
+                    }
+                }
+            });
+
+            railwaySlhouetteShowPopup.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            railwaySlhouetteShowPopup.setBackgroundDrawable(background);
+
+            // タップ時に他のViewでキャッチされないための設定
+            railwaySlhouetteShowPopup.setOutsideTouchable(true);
+            railwaySlhouetteShowPopup.setFocusable(true);
+
+            // 画面中央に表示
+            railwaySlhouetteShowPopup.showAtLocation(findViewById(R.id.lineNameProgValue), Gravity.BOTTOM, 0, 0);
+
+            mAnswerDisplayingTimer = new Timer(true);
+            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
+        }
+    }
+*/
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         longClickSelectedLine = lines.get(position);
@@ -418,12 +531,14 @@ public class PieceGarallyActivity extends AppCompatActivity
                                 break;
                             case 1: // 回答を見る
                                 if(previewAnswerCount < showAnswerMax ){
-                                    final Snackbar sb = Snackbar.make(PieceGarallyActivity.this.listView,
+/*                                    final Snackbar sb = Snackbar.make(PieceGarallyActivity.this.listView,
                                             longClickSelectedLine.getRawName()+"("+longClickSelectedLine.getRawKana()+")",
                                             Snackbar.LENGTH_SHORT);
                                     sb.setActionTextColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.background1));
                                     sb.getView().setBackgroundColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.color_10));
                                     sb.show();
+*/
+                                    showRailwaySilhouetteAnswer(longClickSelectedLine);
                                     if(PieceGarallyActivity.this.onReceiveAdCnt > 1){
                                         previewAnswerCount++;
                                     }
