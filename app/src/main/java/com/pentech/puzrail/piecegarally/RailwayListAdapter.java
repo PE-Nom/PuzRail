@@ -108,48 +108,57 @@ public class RailwayListAdapter extends BaseAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
 
-        Drawable drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
-        holder.railwayLineImage.setImageDrawable(drawable);
-
         // 路線名のテキスト表示
-        if(line.isNameCompleted()){
-            holder.railwayLineName.setText(line.getName()+" ");
-            holder.railwaylineKana.setText("("+line.getLineKana()+")");
-        }
-        else{
-            holder.railwayLineName.setText("------------ ");
-            holder.railwaylineKana.setText("(------------)");
-        }
+        Log.d(TAG,String.format("linename = %s, linekana = %s",line.getRawName(),line.getRawKana()));
+        holder.railwayLineName.setText(line.getRawName()+" ");
+        holder.railwaylineKana.setText("("+line.getRawKana()+")");
         holder.railwayLineName.setTextColor(Color.parseColor("#142d81"));
         holder.railwaylineKana.setTextColor(Color.parseColor("#142d81"));
 
-        // 敷設工事のImageButtonの表示Image切り替え
+        // 路線シルエットのイメージ表示
+        Drawable drawable;
+        if(line.isNameCompleted()){
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
+        }
+        else{
+//            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.piece_border_image,null);
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_line_question,null);
+        }
+        holder.railwayLineImage.setImageDrawable(drawable);
+
+        // 「地図合わせ」のImageButtonの表示Image切り替え
         if(line.isLocationCompleted()){
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_completed,null);
         }
-        else{
+        else if(line.isNameCompleted()){
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying,null);
+        }
+        else{
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_inhibit,null);
         }
         holder.mapImageBtn.setImageDrawable(drawable);
         holder.mapImageBtn.setTag(position);
 
-        // 駅開設のImageButtonの表示Image切り替え
+        // 「駅並べ」のImageButtonの表示Image切り替え
         int totalStationsInLine = dbAdapter.countTotalStationsInLine(companyId,lineId);
         int answeredStationsInLine = dbAdapter.countAnsweredStationsInLine(companyId,lineId);
-//        if(line.isStationCompleted())
         if(totalStationsInLine==answeredStationsInLine)
         {
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_completed,null);
         }
-        else{
+        else if(line.isNameCompleted()){
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open,null);
+        }
+        else{
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_inhibit,null);
         }
         holder.staImageBtn.setImageDrawable(drawable);
         holder.staImageBtn.setTag(position);
 
+        // 「駅並べ」の進捗ゲージ表示
         int progress = 100*dbAdapter.countAnsweredStationsInLine(companyId,lineId)/
                 dbAdapter.countTotalStationsInLine(companyId,lineId);
-        Log.d(TAG,String.format("AnsweredStation %d, %d, %d",progress,totalStationsInLine,answeredStationsInLine));
+//        Log.d(TAG,String.format("AnsweredStation %d, %d, %d",progress,totalStationsInLine,answeredStationsInLine));
         holder.progGauge.setData(progress,"%", ContextCompat.getColor(this.context, R.color.color_30));
 
         return convertView;

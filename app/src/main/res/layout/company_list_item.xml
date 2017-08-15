@@ -61,7 +61,7 @@
                 android:layout_marginRight="1dp"
                 android:layout_weight="1"
                 android:gravity="right"
-                android:text="路線名当て"
+                android:text="路線ｼﾙｴｯﾄ"
                 android:textSize="12sp" />
 
             <TextView
