@@ -3,12 +3,15 @@ package com.pentech.puzrail.piecegarally;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -75,7 +79,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         this.companyId = intent.getIntExtra("SelectedCompanyId", 3); // デフォルトを西日本旅客鉄道のIdにしておく
         this.previewAnswerCount = intent.getIntExtra("previewAnswerCount",0);
 
-        this.lines = db.getLineList(this.companyId, true);
+        this.lines = db.getLineList(this.companyId, false);
 
         this.lineNameProgValue = (TextView) findViewById(R.id.lineNameProgValue);
         this.lineNameProgress = (GaugeView) findViewById(R.id.lineNameProgress) ;
@@ -165,14 +169,14 @@ public class PieceGarallyActivity extends AppCompatActivity
         finish();
     }
 
-    private void selectLineName(int position){
+    private void selectLineSilhouette(int position){
         // アイコンタップでTextViewにその名前を表示する
         Log.d(TAG, String.format("onItemLongClick position = %d", position));
         Line line = this.lines.get(position);
         if(!line.isNameCompleted()){
             this.selectedLineIndex = position;
             final ArrayList<Line> sortedRemainLines = new ArrayList<Line>();
-            final ArrayList<String> randomizedRemainLines = new ArrayList<String>();
+            final ArrayList<Line> randomizedRemainLines = new ArrayList<Line>();
 
             //路線名　未正解の路線を抽出（lines→sortedRemainLines)
             Iterator<Line> lineIte = this.lines.iterator();
@@ -188,38 +192,47 @@ public class PieceGarallyActivity extends AppCompatActivity
                 // 0～未正解件数までの整数をランダムに生成
                 int idx = rnd.nextInt(sortedRemainLines.size());
                 Line fromLine = sortedRemainLines.get(idx);
-                Iterator<String> li = randomizedRemainLines.iterator();
+                Iterator<Line> li = randomizedRemainLines.iterator();
                 boolean already = false;
                 while(li.hasNext()){
-                    String toLineName = li.next();
-                    if(toLineName.equals(fromLine.getRawName()+"("+fromLine.getRawKana()+")")){
+                    Line toLine = li.next();
+                    if(toLine.getLineId() == fromLine.getLineId()){
                         already = true;
                         break;
                     }
                 }
                 if(!already){
-                    randomizedRemainLines.add(fromLine.getRawName()+"("+fromLine.getRawKana()+")");
+                    randomizedRemainLines.add(fromLine);
                 }
             }
 
-            ArrayAdapter<String> remainLinesAdapter
-                    = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,randomizedRemainLines);
+            // 未正解路線のシルエットのグリッドビュー生成
+            GridView remainLinesGridView = new GridView(this);
+            remainLinesGridView.setNumColumns(4);
+//            remainLinesGridView.setHorizontalSpacing(2);
+            remainLinesGridView.setVerticalSpacing(4);
+//            remainLinesGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+            remainLinesGridView.setGravity(Gravity.CENTER);
+            remainLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
 
-            // 未正解アイテムのリストビュー生成
-            ListView remainLinesListView = new ListView(this);
-            remainLinesListView.setAdapter(remainLinesAdapter);
-            remainLinesListView.setOnItemClickListener(
+            RailwayGridAdapter remainLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), randomizedRemainLines );
+            remainLinesGridView.setAdapter(remainLinesAdapter);
+            remainLinesGridView.setOnItemClickListener(
                     // ダイアログ上の未正解アイテムがクリックされたら答え合わせする
                     new AdapterView.OnItemClickListener(){
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                             mDialog.dismiss();
+
                             int correctAnswerIdx = PieceGarallyActivity.this.selectedLineIndex;
                             Line correctLine = (Line)(PieceGarallyActivity.this.lineListAdapter.getItem(correctAnswerIdx));
                             String correctLineName = correctLine.getRawName()+"("+correctLine.getRawKana()+")";
-                            String selectedLineName = randomizedRemainLines.get(position);
+
+                            Line selectedLine = randomizedRemainLines.get(position);
+                            String selectedLineName = selectedLine.getRawName()+"("+selectedLine.getRawKana()+")";
+
                             Log.d(TAG,String.format("correct %s, selected %s",correctLineName,selectedLineName));
                             //正解判定
-                            if(correctLineName.equals(selectedLineName)){
+                            if(correctLine.getLineId() == selectedLine.getLineId()){
                                 Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
                                 correctLine.setNameAnswerStatus();
                                 PieceGarallyActivity.this.db.updateLineNameAnswerStatus(correctLine);
@@ -235,9 +248,9 @@ public class PieceGarallyActivity extends AppCompatActivity
 
             // ダイアログ表示
             mDialog = new AlertDialog.Builder(this)
-                    .setTitle("路線リスト")
+                    .setTitle(String.format("｢%s｣は？",line.getRawName()))
                     .setPositiveButton("Cancel",null)
-                    .setView(remainLinesListView)
+                    .setView(remainLinesGridView)
                     .create();
             mDialog.show();
 
@@ -274,7 +287,7 @@ public class PieceGarallyActivity extends AppCompatActivity
                 }
                 break;
             default:
-                selectLineName(position);
+                selectLineSilhouette(position);
                 break;
         }
     }
@@ -316,72 +329,68 @@ public class PieceGarallyActivity extends AppCompatActivity
 
     // 回答クリアの対象選択
     private Line longClickSelectedLine = null;
+
+    int answerClearSelectedItem = 0;
     private void answerClear(){
-        final String[] items = {"全部（シルエット＋地図合わせ＋駅並べ）", "「地図合わせ」だけ", "「駅並べ（全駅）」だけ"};
-        final Boolean[] checkedItems = {false,false,false};
-        new AlertDialog.Builder(this)
-                .setTitle(longClickSelectedLine.getName() +" : 回答クリア")
-                .setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        checkedItems[which] = isChecked;
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        for( int i=0; i<checkedItems.length; i++){
-                            switch (i){
-                                case 0:
-                                    if(checkedItems[i]){
-                                        // 路線シルエット
-                                        // Log.d(TAG,String.format("%s:路線シルエットのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                                        PieceGarallyActivity.this.longClickSelectedLine.resetNameAnswerStatus();
-                                        PieceGarallyActivity.this.db.updateLineNameAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
-                                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                        PieceGarallyActivity.this.updateLineNameProgress();
+        final String[] items = {"｢路線シルエット｣と\n｢地図合わせ｣と\n｢駅並べ｣", "｢地図合わせ｣だけ", "｢駅並べ｣だけ"};
 
-                                        // 地図合わせ
-                                        // Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                                        PieceGarallyActivity.this.longClickSelectedLine.resetLocationAnswerStatus();
-                                        PieceGarallyActivity.this.db.updateLineLocationAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
-                                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                        PieceGarallyActivity.this.updateLocationProgress();
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(longClickSelectedLine.getName() +" : 回答クリア");
+        alertDialog.setSingleChoiceItems(items, answerClearSelectedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d(TAG,String.format("which = %d",which));
+                    answerClearSelectedItem = which;
+                }
+            });
+        alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d(TAG,String.format("which = %d",which));
+                switch (answerClearSelectedItem){
+                    case 0:
+                        // 路線シルエット
+                        // Log.d(TAG,String.format("%s:路線シルエットのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        PieceGarallyActivity.this.longClickSelectedLine.resetNameAnswerStatus();
+                        PieceGarallyActivity.this.db.updateLineNameAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
+                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                        PieceGarallyActivity.this.updateLineNameProgress();
 
-                                        // 駅並べ
-                                        // Log.d(TAG,String.format("%s:駅並べのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                                        // longClickSelectedLine.getLineId()で指定される路線の初ターミナルを除くすべて駅の回答ステータスを変更する
-                                        PieceGarallyActivity.this.db.updateStationsAnswerStatusInLine(PieceGarallyActivity.this.longClickSelectedLine.getLineId(),false);
-                                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                        PieceGarallyActivity.this.updateStationsProgress();
-                                    }
-                                    break;
-                                case 1:
-                                    if(checkedItems[i]){
-                                        Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                                        PieceGarallyActivity.this.longClickSelectedLine.resetLocationAnswerStatus();
-                                        PieceGarallyActivity.this.db.updateLineLocationAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
-                                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                        PieceGarallyActivity.this.updateLocationProgress();
-                                    }
-                                    break;
-                                case 2:
-                                    if(checkedItems[i]){
-                                        Log.d(TAG,String.format("%s:駅並べのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                                        // longClickSelectedLine.getLineId()で指定される路線の初ターミナルを除くすべて駅の回答ステータスを変更する
-                                        PieceGarallyActivity.this.db.updateStationsAnswerStatusInLine(PieceGarallyActivity.this.longClickSelectedLine.getLineId(),false);
-                                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                        PieceGarallyActivity.this.updateStationsProgress();
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+                        // 地図合わせ
+                        // Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        PieceGarallyActivity.this.longClickSelectedLine.resetLocationAnswerStatus();
+                        PieceGarallyActivity.this.db.updateLineLocationAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
+                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                        PieceGarallyActivity.this.updateLocationProgress();
+
+                        // 駅並べ
+                        // Log.d(TAG,String.format("%s:駅並べのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        // longClickSelectedLine.getLineId()で指定される路線の初ターミナルを除くすべて駅の回答ステータスを変更する
+                        PieceGarallyActivity.this.db.updateStationsAnswerStatusInLine(PieceGarallyActivity.this.longClickSelectedLine.getLineId(),false);
+                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                        PieceGarallyActivity.this.updateStationsProgress();
+                        break;
+                    case 1:
+//                      Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        PieceGarallyActivity.this.longClickSelectedLine.resetLocationAnswerStatus();
+                        PieceGarallyActivity.this.db.updateLineLocationAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
+                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                        PieceGarallyActivity.this.updateLocationProgress();
+                        break;
+                    case 2:
+                        // Log.d(TAG,String.format("%s:駅並べのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
+                        // longClickSelectedLine.getLineId()で指定される路線の初ターミナルを除くすべて駅の回答ステータスを変更する
+                        PieceGarallyActivity.this.db.updateStationsAnswerStatusInLine(PieceGarallyActivity.this.longClickSelectedLine.getLineId(),false);
+                        PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                        PieceGarallyActivity.this.updateStationsProgress();
+                        break;
+                    default:
+                        break;
                     }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+                }
+            });
+        alertDialog.setNegativeButton("Cancel", null);
+        alertDialog.show();
     }
 
     @Override
