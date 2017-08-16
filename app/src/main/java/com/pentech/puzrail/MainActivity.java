@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity
     // クリア対象の回答データ選択
     private Company longClickSelectedCompany = null;
     private void answerClear(){
-        final String[] items = {"路線名（全路線）", "地図合わせ（全路線）", "駅並べ（全駅）"};
+        final String[] items = {"路線シルエット（全路線）", "地図合わせ（全路線）", "駅並べ（全駅）"};
         final Boolean[] checkedItems = {false,false,false};
         new AlertDialog.Builder(this)
                 .setTitle(longClickSelectedCompany.getName()+" : 回答クリア")

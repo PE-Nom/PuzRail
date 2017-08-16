@@ -554,14 +554,9 @@ public class PieceGarallyActivity extends AppCompatActivity
                                 }
                                 break;
                             case 2: // Webを検索する
-                                if(longClickSelectedLine.isNameCompleted()){
-                                    Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                                    intent.putExtra(SearchManager.QUERY, longClickSelectedLine.getName()); // query contains search string
-                                    startActivity(intent);
-                                }
-                                else{
-                                    Toast.makeText(PieceGarallyActivity.this,"路線名が未回答です。\n路線名を先に回答してください", Toast.LENGTH_SHORT).show();
-                                }
+                                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                                intent.putExtra(SearchManager.QUERY, longClickSelectedLine.getRawName()); // query contains search string
+                                startActivity(intent);
                                 break;
                         }
                     }
