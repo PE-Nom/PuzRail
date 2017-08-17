@@ -61,6 +61,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 
     private boolean mScalingMode = false;
     private boolean mScrolling = false;
+    private boolean mDragging = false;
 
     private OnLineScrollEndListener listener;
     private Context context;
@@ -327,21 +328,23 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 //                + ", left = " + imageRectF.left + ", top  = " + imageRectF.top + ", bottom = " + imageRectF.bottom  + ", right = " + imageRectF.right);
 
         if( imageRectF.left < x && x < imageRectF.right && imageRectF.top < y && y < imageRectF.bottom && getDrawable()!=null){
-//            if(DEBUG) Log.d(TAG," in the Image");
             super.onTouchEvent(event);
+            mDragging = true;
             boolean a = mGestureDetector.onTouchEvent(event);
             boolean b = mScaleDetector.onTouchEvent(event);
-//        if(DEBUG) Log.d(TAG,"getWith() = " + getWidth() + ", getHeight() = " + getHeight() + ", getX() = " + getX() + ", getY() = " + getY());
-            if(event.getAction()==MotionEvent.ACTION_UP && mScrolling){
-                Log.d(TAG,"ピース移動完了");
-                if(this.listener!=null) this.listener.onScrollEnd();
-                mScrolling = false;
+            if(event.getAction()==MotionEvent.ACTION_UP){
+                mDragging = false;
+                if(mScrolling){
+                    Log.d(TAG,"ピース移動完了");
+                    if(this.listener!=null) this.listener.onScrollEnd();
+                    mScrolling = false;
+                }
             }
             return a|b;
         }
         else{
-//            if(DEBUG) Log.d(TAG," out of the Image");
             mScrolling = false;
+            mDragging = false;
             return false;
         }
     }
@@ -525,6 +528,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     /**
      * ColorMatrix data for reversing image
      */
+
     private static final float[] TRANSPEARENT = {
             1.0f,   0.0f,   0.0f,  0.0f,  0.0f,
             0.0f,   1.0f,   0.0f,  0.0f,  0.0f,
@@ -541,6 +545,25 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             1.0f,   0.0f,   0.0f,  0.0f,  0.0f,
             0.0f,   1.0f,   0.0f,  0.0f,  0.0f,
             0.0f,   0.0f,   1.0f,  0.0f,  0.0f,
+            0.0f,   0.0f,   0.0f,  1.0f,  0.0f,
+    };
+
+    private static final float[] TRANSPEARENT_DRAGGING = {
+            0.0f,   0.0f,   0.0f,  0.0f,  0.0f,
+            1.0f,   0.0f,   0.0f,  0.0f,  0.0f, //　赤を緑に変換するだけ
+            0.0f,   0.0f,   0.0f,  0.0f,  0.0f,
+            1.0f,   0.0f,   0.0f,  0.0f,  0.0f,
+    };
+    private static final float[] REVERSE_DRAGGING = {
+            0.0f,   0.0f,   0.0f,  0.0f,    0.0f, // 赤を消す
+            1.0f,   0.0f,   0.0f,  0.0f,    0.0f, // 赤→緑に変換
+           -1.0f,   0.0f,   0.0f,  0.0f,  255.0f, // 黒→赤を消して青をセット
+            0.0f,   0.0f,   0.0f,  1.0f,    0.0f,
+    };
+    private static final float[] NORMAL_DRAGGING = {
+            0.0f,   0.0f,   0.0f,  0.0f,  0.0f,
+            1.0f,   0.0f,   0.0f,  0.0f,  0.0f,
+            0.0f,   0.0f,   0.0f,  0.0f,  0.0f,
             0.0f,   0.0f,   0.0f,  1.0f,  0.0f,
     };
 
@@ -674,6 +697,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 
     private ColorMatrix getColorMatrix(int errLevel){
         ColorMatrix clm = new ColorMatrix(REVERSE);
+        if(mDragging){
+            clm = new ColorMatrix(REVERSE_DRAGGING);
+        }
         int onCnt = onTime[errLevel];
         int offCnt = offTime[errLevel];
         if(lightingSw){
@@ -690,7 +716,11 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                 colorCount = 0;
             }
             else{
-                clm = new ColorMatrix(TRANSPEARENT);
+                if(mDragging){
+                    clm = new ColorMatrix(TRANSPEARENT_DRAGGING);
+                }else{
+                    clm = new ColorMatrix(TRANSPEARENT);
+                }
             }
         }
         return clm;
@@ -721,7 +751,12 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                 }
                 else{
                     this.positionLock = false;
-                    super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE)));
+                    if(mDragging) {
+                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE_DRAGGING)));
+                    }
+                    else{
+                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE)));
+                    }
                 }
             }
         }
@@ -738,7 +773,12 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                 super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
             }
             else{
-                super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
+                if(mDragging) {
+                    super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL_DRAGGING)));
+                }
+                else{
+                    super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
+                }
                 colorCount =0;
                 lightingSw = true;
             }

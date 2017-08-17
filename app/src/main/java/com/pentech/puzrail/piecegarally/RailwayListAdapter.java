@@ -10,10 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.pentech.puzrail.R;
@@ -23,7 +21,6 @@ import com.pentech.puzrail.ui.MultiButtonListView;
 import com.pentech.puzrail.ui.SimpleGaugeView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by takashi on 2016/12/19.
@@ -121,17 +118,16 @@ public class RailwayListAdapter extends BaseAdapter {
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
         }
         else{
-//            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.piece_border_image,null);
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_line_question,null);
         }
         holder.railwayLineImage.setImageDrawable(drawable);
 
         // 「地図合わせ」のImageButtonの表示Image切り替え
         if(line.isLocationCompleted()){
-            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_completed,null);
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_completed_button,null);
         }
         else if(line.isNameCompleted()){
-            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying,null);
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_button,null);
         }
         else{
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_inhibit,null);
@@ -144,10 +140,10 @@ public class RailwayListAdapter extends BaseAdapter {
         int answeredStationsInLine = dbAdapter.countAnsweredStationsInLine(companyId,lineId);
         if(totalStationsInLine==answeredStationsInLine)
         {
-            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_completed,null);
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_completed_button,null);
         }
         else if(line.isNameCompleted()){
-            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open,null);
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_button,null);
         }
         else{
             drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_inhibit,null);
