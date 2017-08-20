@@ -24,5 +24,6 @@
     <color name="color_bkGroundREct">#af6868</color>
 
     <color name="transparent">#40637e99</color>
+    <color name="color_fab">#c0ff4444</color>
 
 </resources>

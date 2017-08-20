@@ -49,6 +49,10 @@
             android:name="com.pentech.puzrail.station.StationPuzzleActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.pentech.puzrail.tutorial.TutorialActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="com.google.android.gms.version"

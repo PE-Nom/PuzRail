@@ -4,8 +4,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,13 +21,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
+import com.pentech.puzrail.tutorial.TutorialActivity;
 import com.pentech.puzrail.ui.PopUp;
 
 import net.nend.android.NendAdListener;
@@ -31,6 +39,8 @@ import net.nend.android.NendAdView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by takashi on 2017/01/11.
@@ -80,6 +90,14 @@ public class MainActivity extends AppCompatActivity
         this.listView.setAdapter(this.adapter);
         this.listView.setOnItemClickListener(this);
         this.listView.setOnItemLongClickListener(this);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showInformation();
+            }
+        });
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -136,6 +154,104 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // --------------------
+    // ワンポイント　チュートリアルの表示
+    private PopupWindow onePointTutorial = null;
+    private Timer mOnePointTutorialDisplayingTimer = null;
+    private Handler tutorialTimerHandler = new Handler();
+    private final static long TUTORIAL_DISPLAY_TIME = 1000*5;
+    // ワンポイント チュートリアルの表示の消去
+    private class tutorialDisplayTimerElapse extends TimerTask {
+        /**
+         * The action to be performed by this timer task.
+         */
+        @Override
+        public void run() {
+            tutorialTimerHandler.post(new Runnable(){
+                /**
+                 * When an object implementing interface <code>Runnable</code> is used
+                 * to create a thread, starting the thread causes the object's
+                 * <code>run</code> method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method <code>run</code> is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    if(onePointTutorial !=null){
+                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                    }
+                    mOnePointTutorialDisplayingTimer = null;
+                }
+            });
+        }
+    }
+
+    private void showInformation(){
+        if(onePointTutorial == null){
+
+            onePointTutorial = new PopupWindow(this);
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.one_point_tutorial_popup, null);
+
+            // ワンポイント　アドバイスのテキスト
+            TextView information = (TextView)popupView.findViewById(R.id.information);
+            information.setText("運営会社をタップしてね");
+
+            // 「詳しく...」ボタン設定
+            Button moreBtn = (Button)popupView.findViewById(R.id.more);
+            moreBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onePointTutorial.isShowing()) {
+                        onePointTutorial.dismiss();
+                        // この呼び出しでOnDismissListenerが呼び出されるので
+                        // ここでは以下の呼び出しは不要（OnDismissListenerに委譲）
+                        // onePointTutorial = null;
+                        // mOnePointTutorialDisplayingTimer.cancel();
+                        // mOnePointTutorialDisplayingTimer = null;
+                    }
+                    Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
+                    intent.putExtra("page", 1);
+                    startActivity(intent);
+                }
+            });
+            onePointTutorial.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            onePointTutorial.setBackgroundDrawable(background);
+
+            // タップ時に他のViewでキャッチされないための設定
+            onePointTutorial.setOutsideTouchable(true);
+            onePointTutorial.setFocusable(true);
+
+            // Popup以外のタップでPopup消去
+            // 「詳しく...」ボタンのOnClickListener.onClick()で呼び出すdismiss()でも呼び出される
+            onePointTutorial.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    if (onePointTutorial != null) {
+//                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                        mOnePointTutorialDisplayingTimer.cancel();
+                        mOnePointTutorialDisplayingTimer = null;
+                    }
+                }
+            });
+
+            // 画面中央に表示
+            onePointTutorial.showAtLocation(findViewById(R.id.company_list_view), Gravity.BOTTOM, 0, 0);
+
+            mOnePointTutorialDisplayingTimer = new Timer(true);
+            mOnePointTutorialDisplayingTimer.schedule(new MainActivity.tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
+        }
+    }
+
     /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
@@ -158,11 +274,17 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-            PopUp.makePopup(this,this.listView,"file:///android_asset/about_puzrail.html");
+//            PopUp.makePopup(this,this.listView,"file:///android_asset/about_puzrail.html");
+            Intent intent = new Intent(mContext, TutorialActivity.class);
+            intent.putExtra("page", 0);
+            startActivity(intent);
             return true;
         }
         else if (id == R.id.action_Help) {
-            PopUp.makePopup(this,this.listView,"file:///android_asset/help_puzrail.html");
+//            PopUp.makePopup(this,this.listView,"file:///android_asset/help_puzrail.html");
+            Intent intent = new Intent(mContext, TutorialActivity.class);
+            intent.putExtra("page", 1);
+            startActivity(intent);
             return true;
         }
         else if(id == R.id.action_Ask) {

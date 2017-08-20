@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
@@ -13,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -34,9 +36,9 @@ import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.location.LocationPuzzleActivity;
 import com.pentech.puzrail.station.StationPuzzleActivity;
+import com.pentech.puzrail.tutorial.TutorialActivity;
 import com.pentech.puzrail.ui.GaugeView;
 import com.pentech.puzrail.ui.MultiButtonListView;
-import com.pentech.puzrail.ui.PopUp;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import net.nend.android.NendAdListener;
@@ -112,6 +114,14 @@ public class PieceGarallyActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("線路と駅パズル：路線シルエット");
         actionBar.setSubtitle(db.getCompany(this.companyId).getName());
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showInformation();
+            }
+        });
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -305,6 +315,104 @@ public class PieceGarallyActivity extends AppCompatActivity
         return true;
     }
 
+    // --------------------
+    // ワンポイント　チュートリアルの表示
+    private PopupWindow onePointTutorial = null;
+    private Timer mOnePointTutorialDisplayingTimer = null;
+    private Handler tutorialTimerHandler = new Handler();
+    private final static long TUTORIAL_DISPLAY_TIME = 1000*5;
+    // ワンポイント チュートリアルの表示の消去
+    private class tutorialDisplayTimerElapse extends TimerTask {
+        /**
+         * The action to be performed by this timer task.
+         */
+        @Override
+        public void run() {
+            tutorialTimerHandler.post(new Runnable(){
+                /**
+                 * When an object implementing interface <code>Runnable</code> is used
+                 * to create a thread, starting the thread causes the object's
+                 * <code>run</code> method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method <code>run</code> is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    if(onePointTutorial !=null){
+                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                    }
+                    mOnePointTutorialDisplayingTimer = null;
+                }
+            });
+        }
+    }
+
+    private void showInformation(){
+        if(onePointTutorial == null){
+
+            onePointTutorial = new PopupWindow(this);
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.one_point_tutorial_popup, null);
+
+            // ワンポイント　アドバイスのテキスト
+            TextView information = (TextView)popupView.findViewById(R.id.information);
+            information.setText("■シルエット■をタップして正解すると\n■地図合わせ■、■駅並べ■が遊べるよ");
+
+            // 「詳しく...」ボタン設定
+            Button moreBtn = (Button)popupView.findViewById(R.id.more);
+            moreBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onePointTutorial.isShowing()) {
+                        onePointTutorial.dismiss();
+                        // この呼び出しでOnDismissListenerが呼び出されるので
+                        // ここでは以下の呼び出しは不要（OnDismissListenerに委譲）
+                        // onePointTutorial = null;
+                        // mOnePointTutorialDisplayingTimer.cancel();
+                        // mOnePointTutorialDisplayingTimer = null;
+                    }
+                    Intent intent = new Intent(PieceGarallyActivity.this, TutorialActivity.class);
+                    intent.putExtra("page", 2);
+                    startActivity(intent);
+                }
+            });
+            onePointTutorial.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            onePointTutorial.setBackgroundDrawable(background);
+
+            // タップ時に他のViewでキャッチされないための設定
+            onePointTutorial.setOutsideTouchable(true);
+            onePointTutorial.setFocusable(true);
+
+            // Popup以外のタップでPopup消去
+            // 「詳しく...」ボタンのOnClickListener.onClick()で呼び出すdismiss()でも呼び出される
+            onePointTutorial.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    if (onePointTutorial != null) {
+//                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                        mOnePointTutorialDisplayingTimer.cancel();
+                        mOnePointTutorialDisplayingTimer = null;
+                    }
+                }
+            });
+
+            // 画面中央に表示
+            onePointTutorial.showAtLocation(findViewById(R.id.lineNameProgValue), Gravity.BOTTOM, 0, 0);
+
+            mOnePointTutorialDisplayingTimer = new Timer(true);
+            mOnePointTutorialDisplayingTimer.schedule(new tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -314,11 +422,15 @@ public class PieceGarallyActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-            PopUp.makePopup(this,this.listView,"file:///android_asset/about_puzrail.html");
+            Intent intent = new Intent(PieceGarallyActivity.this, TutorialActivity.class);
+            intent.putExtra("page", 0);
+            startActivity(intent);
             return true;
         }
         else if (id == R.id.action_Help) {
-            PopUp.makePopup(this,this.listView,"file:///android_asset/help_puzrail.html");
+            Intent intent = new Intent(PieceGarallyActivity.this, TutorialActivity.class);
+            intent.putExtra("page", 2);
+            startActivity(intent);
             return true;
         }
         else if(id == R.id.action_Ask) {
@@ -399,13 +511,14 @@ public class PieceGarallyActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-//    private PopupWindow railwaySlhouetteShowPopup = null;
-    private AlertDialog railwaySlhouetteShowPopup = null;
+    // --------------------
+    // 路線シルエットの回答表示
+    private AlertDialog railwaySlhouetteShowDialog = null;
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
     private final static long DISPLAY_ANSWER_TIME = 1000*3;
     // 回答表示の消去
-    private class displayTimerElapse extends TimerTask {
+    private class answerDisplayTimerElapse extends TimerTask {
         /**
          * The action to be performed by this timer task.
          */
@@ -425,9 +538,9 @@ public class PieceGarallyActivity extends AppCompatActivity
                  */
                 @Override
                 public void run() {
-                    if(railwaySlhouetteShowPopup!=null){
-                        railwaySlhouetteShowPopup.dismiss();
-                        railwaySlhouetteShowPopup = null;
+                    if(railwaySlhouetteShowDialog !=null){
+                        railwaySlhouetteShowDialog.dismiss();
+                        railwaySlhouetteShowDialog = null;
                     }
                     mAnswerDisplayingTimer = null;
                 }
@@ -439,7 +552,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         final ArrayList<Line> lines = new ArrayList<Line>();
         lines.add(line);
 
-        if(railwaySlhouetteShowPopup==null) {
+        if(railwaySlhouetteShowDialog ==null) {
             GridView answerShowLinesGridView = new GridView(this);
             answerShowLinesGridView.setVerticalSpacing(40);
             answerShowLinesGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
@@ -449,63 +562,17 @@ public class PieceGarallyActivity extends AppCompatActivity
             RailwayGridAdapter answerShowLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), lines );
             answerShowLinesGridView.setAdapter(answerShowLinesAdapter);
             // ダイアログ表示
-            railwaySlhouetteShowPopup = new AlertDialog.Builder(this)
+            railwaySlhouetteShowDialog = new AlertDialog.Builder(this)
                     .setTitle(line.getRawName()+"("+line.getRawKana()+")のシルエット")
                     .setPositiveButton("OK",null)
                     .setView(answerShowLinesGridView)
                     .create();
-            railwaySlhouetteShowPopup.show();
+            railwaySlhouetteShowDialog.show();
         }
         mAnswerDisplayingTimer = new Timer(true);
-        mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
+        mAnswerDisplayingTimer.schedule(new answerDisplayTimerElapse(),DISPLAY_ANSWER_TIME);
     }
 
-/*    private void showRailwaySilhouetteAnswer(Line line){
-        if(railwaySlhouetteShowPopup==null){
-
-            railwaySlhouetteShowPopup = new PopupWindow(this);
-            // レイアウト設定
-            View popupView = getLayoutInflater().inflate(R.layout.railway_silhouette_answer_show_popup, null);
-
-            // タイトル設定
-            TextView popupTitle = (TextView)popupView.findViewById(R.id.railway_silhouette_answer_popup_title);
-            popupTitle.setText(line.getRawName()+"("+line.getRawKana()+")のシルエット");
-
-            //　railwayシルエット設定
-            ImageView silhouetteView = (ImageView)popupView.findViewById(R.id.railway_silhouette_answer_popup_view);
-            Drawable lineDrawable = ResourcesCompat.getDrawable(this.getResources(), line.getDrawableResourceId(), null);
-            silhouetteView.setImageDrawable(lineDrawable);
-
-            // closeボタン設定
-            Button closeBtn = (Button)popupView.findViewById(R.id.railway_silhouette_answer_popup_button);
-            closeBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (railwaySlhouetteShowPopup.isShowing()) {
-                        railwaySlhouetteShowPopup.dismiss();
-                        railwaySlhouetteShowPopup = null;
-                    }
-                }
-            });
-
-            railwaySlhouetteShowPopup.setContentView(popupView);
-
-            // 背景設定
-            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
-            railwaySlhouetteShowPopup.setBackgroundDrawable(background);
-
-            // タップ時に他のViewでキャッチされないための設定
-            railwaySlhouetteShowPopup.setOutsideTouchable(true);
-            railwaySlhouetteShowPopup.setFocusable(true);
-
-            // 画面中央に表示
-            railwaySlhouetteShowPopup.showAtLocation(findViewById(R.id.lineNameProgValue), Gravity.BOTTOM, 0, 0);
-
-            mAnswerDisplayingTimer = new Timer(true);
-            mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
-        }
-    }
-*/
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         longClickSelectedLine = lines.get(position);

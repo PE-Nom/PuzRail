@@ -7,13 +7,16 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,8 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -33,6 +38,8 @@ import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
+import com.pentech.puzrail.station.StationPuzzleActivity;
+import com.pentech.puzrail.tutorial.TutorialActivity;
 import com.pentech.puzrail.ui.PopUp;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -120,6 +127,14 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 
         actionBar.setTitle("線路と駅パズル：地図合わせ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showInformation();
+            }
+        });
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -579,6 +594,150 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         return true;
     }
 
+    // --------------------
+    // ワンポイント　チュートリアルの表示
+    private PopupWindow onePointTutorial = null;
+    private Timer mOnePointTutorialDisplayingTimer = null;
+    private Handler tutorialTimerHandler = new Handler();
+    private final static long TUTORIAL_DISPLAY_TIME = 1000*5;
+    // ワンポイント チュートリアルの表示の消去
+    private class tutorialDisplayTimerElapse extends TimerTask {
+        /**
+         * The action to be performed by this timer task.
+         */
+        @Override
+        public void run() {
+            tutorialTimerHandler.post(new Runnable(){
+                /**
+                 * When an object implementing interface <code>Runnable</code> is used
+                 * to create a thread, starting the thread causes the object's
+                 * <code>run</code> method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method <code>run</code> is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    if(onePointTutorial !=null){
+                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                    }
+                    mOnePointTutorialDisplayingTimer = null;
+                }
+            });
+        }
+    }
+
+    private void showInformation(){
+        if(onePointTutorial == null){
+
+            onePointTutorial = new PopupWindow(this);
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.one_point_tutorial_popup, null);
+
+            // ワンポイント　アドバイスのテキスト
+            TextView information = (TextView)popupView.findViewById(R.id.information);
+            information.setText("■シルエットピース■と■地図■の大きさ、位置を合わせてね");
+
+            // 「詳しく...」ボタン設定
+            Button moreBtn = (Button)popupView.findViewById(R.id.more);
+            moreBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onePointTutorial.isShowing()) {
+                        onePointTutorial.dismiss();
+                        // この呼び出しでOnDismissListenerが呼び出されるので
+                        // ここでは以下の呼び出しは不要（OnDismissListenerに委譲）
+                        // onePointTutorial = null;
+                        // mOnePointTutorialDisplayingTimer.cancel();
+                        // mOnePointTutorialDisplayingTimer = null;
+                    }
+                    Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
+                    intent.putExtra("page", 3);
+                    startActivity(intent);
+                }
+            });
+            onePointTutorial.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            onePointTutorial.setBackgroundDrawable(background);
+
+            // タップ時に他のViewでキャッチされないための設定
+            onePointTutorial.setOutsideTouchable(true);
+            onePointTutorial.setFocusable(true);
+
+            // Popup以外のタップでPopup消去
+            // 「詳しく...」ボタンのOnClickListener.onClick()で呼び出すdismiss()でも呼び出される
+            onePointTutorial.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    if (onePointTutorial != null) {
+//                        onePointTutorial.dismiss();
+                        onePointTutorial = null;
+                        mOnePointTutorialDisplayingTimer.cancel();
+                        mOnePointTutorialDisplayingTimer = null;
+                    }
+                }
+            });
+
+            // 画面中央に表示
+            onePointTutorial.showAtLocation(findViewById(R.id.transparent), Gravity.BOTTOM, 0, 0);
+
+            mOnePointTutorialDisplayingTimer = new Timer(true);
+            mOnePointTutorialDisplayingTimer.schedule(new LocationPuzzleActivity.tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
+        }
+    }
+
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     * <p>
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.</p>
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_AboutPuzzRail) {
+//            PopUp.makePopup(this,this.mImageView,"file:///android_asset/about_puzrail.html");
+            Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
+            intent.putExtra("page", 0);
+            startActivity(intent);
+            return true;
+        }
+        else if (id == R.id.action_Help) {
+//            PopUp.makePopup(this,this.mImageView,"file:///android_asset/help_puzrail.html");
+            Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
+            intent.putExtra("page", 3);
+            startActivity(intent);
+            return true;
+        }
+        else if(id == R.id.action_Ask) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("plain/text");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
+            intent.putExtra(Intent.EXTRA_SUBJECT, "「線路と駅」のお問い合わせ");
+            startActivity(Intent.createChooser(intent, ""));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -615,43 +774,4 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         super.onLowMemory();
     }
 
-    /**
-     * This hook is called whenever an item in your options menu is selected.
-     * The default implementation simply returns false to have the normal
-     * processing happen (calling the item's Runnable or sending a message to
-     * its Handler as appropriate).  You can use this method for any items
-     * for which you would like to do processing without those other
-     * facilities.
-     * <p>
-     * <p>Derived classes should call through to the base class for it to
-     * perform the default menu handling.</p>
-     *
-     * @param item The menu item that was selected.
-     * @return boolean Return false to allow normal menu processing to
-     * proceed, true to consume it here.
-     * @see #onCreateOptionsMenu
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_AboutPuzzRail) {
-            PopUp.makePopup(this,this.mImageView,"file:///android_asset/about_puzrail.html");
-            return true;
-        }
-        else if (id == R.id.action_Help) {
-            PopUp.makePopup(this,this.mImageView,"file:///android_asset/help_puzrail.html");
-            return true;
-        }
-        else if(id == R.id.action_Ask) {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("plain/text");
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
-            intent.putExtra(Intent.EXTRA_SUBJECT, "「線路と駅」のお問い合わせ");
-            startActivity(Intent.createChooser(intent, ""));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

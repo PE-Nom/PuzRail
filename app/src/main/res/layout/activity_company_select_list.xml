@@ -36,31 +36,50 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <LinearLayout
-            android:id="@+id/company_list_linear_layout"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignTop="@+id/nend"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:scrollbars="vertical"
-            android:weightSum="1">
+            android:layout_weight="1">
 
-            <ListView
-                android:id="@+id/company_list_view"
-                style="@style/Widget.AppCompat.ListView"
+            <LinearLayout
+                android:id="@+id/company_list_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignTop="@+id/nend"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:divider="#000"
-                android:dividerHeight="0.5dp"
-                android:elevation="20dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:scrollbars="vertical"
+                android:weightSum="1">
 
-        </LinearLayout>
+                <ListView
+                    android:id="@+id/company_list_view"
+                    style="@style/Widget.AppCompat.ListView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignTop="@+id/nend"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:divider="#000"
+                    android:dividerHeight="0.5dp"
+                    android:elevation="20dp" />
+
+            </LinearLayout>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="@dimen/fab_margin"
+                android:scaleType="center"
+                android:src="@android:drawable/ic_menu_info_details"
+                app:backgroundTint="@color/color_fab"
+                app:elevation="8dp"
+                app:fabSize="mini" />
+
+        </FrameLayout>
 
         <net.nend.android.NendAdView
             android:id="@+id/nend"

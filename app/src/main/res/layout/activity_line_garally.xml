@@ -162,15 +162,34 @@
 
             </LinearLayout>
 
-            <com.pentech.puzrail.ui.MultiButtonListView
-                android:id="@+id/railway_list_view"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="2dp"
-                android:background="@drawable/backgound_bg" />
+                android:layout_height="match_parent">
+
+                <com.pentech.puzrail.ui.MultiButtonListView
+                    android:id="@+id/railway_list_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/backgound_bg" />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    android:layout_margin="@dimen/fab_margin"
+                    android:scaleType="center"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    app:backgroundTint="@color/color_fab"
+                    app:elevation="8dp"
+                    app:fabSize="mini" />
+
+            </FrameLayout>
+
             <!--
                         <ListView
                             android:id="@+id/railway_list_view"
