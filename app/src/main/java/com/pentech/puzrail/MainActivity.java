@@ -32,7 +32,6 @@ import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
-import com.pentech.puzrail.ui.PopUp;
 
 import net.nend.android.NendAdListener;
 import net.nend.android.NendAdView;
@@ -274,14 +273,12 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-//            PopUp.makePopup(this,this.listView,"file:///android_asset/about_puzrail.html");
             Intent intent = new Intent(mContext, TutorialActivity.class);
             intent.putExtra("page", 0);
             startActivity(intent);
             return true;
         }
         else if (id == R.id.action_Help) {
-//            PopUp.makePopup(this,this.listView,"file:///android_asset/help_puzrail.html");
             Intent intent = new Intent(mContext, TutorialActivity.class);
             intent.putExtra("page", 1);
             startActivity(intent);

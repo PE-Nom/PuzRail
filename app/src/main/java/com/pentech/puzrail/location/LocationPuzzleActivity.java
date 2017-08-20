@@ -38,9 +38,7 @@ import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
-import com.pentech.puzrail.station.StationPuzzleActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
-import com.pentech.puzrail.ui.PopUp;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -714,14 +712,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_AboutPuzzRail) {
-//            PopUp.makePopup(this,this.mImageView,"file:///android_asset/about_puzrail.html");
             Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
             intent.putExtra("page", 0);
             startActivity(intent);
             return true;
         }
         else if (id == R.id.action_Help) {
-//            PopUp.makePopup(this,this.mImageView,"file:///android_asset/help_puzrail.html");
             Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
             intent.putExtra("page", 3);
             startActivity(intent);
