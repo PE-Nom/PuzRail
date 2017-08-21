@@ -24,6 +24,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,6 +38,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
@@ -69,6 +72,7 @@ import java.util.TimerTask;
 public class StationPuzzleActivity extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener,
+        AbsListView.OnScrollListener,
         OnMapReadyCallback,
         NendAdListener {
 
@@ -104,6 +108,10 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
+
+    private SettingParameter settingParameter;
+    private FloatingActionButton mFab;
+    private boolean fabVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,13 +156,21 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         this.separatorMove.setLongClickable(true);
         this.separatorMove.setOnTouchListener(new OnTouchListener(this));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showInformation();
             }
         });
+        this.settingParameter = db.getSettingParameter();
+        fabVisible = settingParameter.isFabVisibility();
+        if(fabVisible){
+            mFab.show();
+        }
+        else{
+            mFab.hide();
+        }
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -343,6 +359,28 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         this.stationListView.setAdapter(this.stationsAdapter);
         this.stationListView.setOnItemClickListener(this);
         this.stationListView.setOnItemLongClickListener(this);
+        this.stationListView.setOnScrollListener(this);
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        final int remainingItemCount = totalItemCount - (firstVisibleItem + visibleItemCount);
+        if (StationPuzzleActivity.this.fabVisible && totalItemCount > visibleItemCount) {
+            if (remainingItemCount > 0) {
+                // SHow FAB Here
+                StationPuzzleActivity.this.mFab.animate().translationY(0).setInterpolator(new LinearInterpolator()).start();
+            } else {
+                // Hide FAB Here
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) StationPuzzleActivity.this.mFab.getLayoutParams();
+                int fab_bottomMargin = layoutParams.bottomMargin;
+                StationPuzzleActivity.this.mFab.animate().translationY(StationPuzzleActivity.this.mFab.getHeight() + fab_bottomMargin).setInterpolator(new LinearInterpolator()).start();
+            }
+        }
     }
 
     // GeoJsonLayerの生成とColorの指定、Mapへの登録
@@ -644,7 +682,6 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                 @Override
                 public void onDismiss() {
                     if (onePointTutorial != null) {
-//                        onePointTutorial.dismiss();
                         onePointTutorial = null;
                         mOnePointTutorialDisplayingTimer.cancel();
                         mOnePointTutorialDisplayingTimer = null;
@@ -715,6 +752,12 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         longClickSelectedStation = this.stations.get(position);
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
+        if(fabVisible){
+            contextMenuList.add("ｉボタンを表示しない");
+        }
+        else{
+            contextMenuList.add("ｉボタンを表示する");
+        }
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
         contextMenuList.add("Webを検索する");
@@ -730,12 +773,24 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                         mDialog.dismiss();
                         switch(position) {
-                            case 0: // 回答をクリア
+                            case 0:
+                                if(fabVisible){
+                                    fabVisible = false;
+                                    mFab.hide();
+                                }
+                                else{
+                                    fabVisible = true;
+                                    mFab.show();
+                                }
+                                settingParameter.setFabVisibility(fabVisible);
+                                StationPuzzleActivity.this.db.updateFabVisibility(fabVisible);
+                                break;
+                            case 1: // 回答をクリア
                                 if(StationPuzzleActivity.this.longClickSelectedStation.getStationOrder()!=1 &&
                                         StationPuzzleActivity.this.longClickSelectedStation.isFinished())
                                 answerClear();
                                 break;
-                            case 1: // 回答を見る
+                            case 2: // 回答を見る
                                 if( mAnswerDisplayingTimer == null){
                                     if( showAnswerCount < showAnswerMax ) {
                                         answerDisplay();
@@ -754,7 +809,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                                     }
                                 }
                                 break;
-                            case 2: // Webを検索する
+                            case 3: // Webを検索する
                                 if(longClickSelectedStation.isFinished()){
                                     Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     intent.putExtra(SearchManager.QUERY, longClickSelectedStation.getName()+"駅"); // query contains search string

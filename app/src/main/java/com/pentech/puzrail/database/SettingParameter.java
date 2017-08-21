@@ -7,10 +7,12 @@ package com.pentech.puzrail.database;
 public class SettingParameter {
     private int difficulty_mode = 0;
     private boolean vibrationMode = true;
+    private boolean fabVisibility = true;
 
-    public SettingParameter( int dif, boolean vib){
+    public SettingParameter( int dif, boolean vib, boolean fabVisibility){
         this.difficulty_mode = dif;
         this.vibrationMode = vib;
+        this.fabVisibility = fabVisibility;
     }
 
     public int getDifficultyMode(){
@@ -21,6 +23,8 @@ public class SettingParameter {
         return this.vibrationMode;
     }
 
+    public boolean isFabVisibility() { return this.fabVisibility; }
+
     public void setDifficultyMode(int dif){
         this.difficulty_mode = dif;
     }
@@ -28,4 +32,6 @@ public class SettingParameter {
     public void setVibrationMode(boolean mode){
         this.vibrationMode = mode;
     }
+
+    public void setFabVisibility(boolean fabVisibility) { this.fabVisibility = fabVisibility; }
 }

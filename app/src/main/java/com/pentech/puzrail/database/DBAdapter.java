@@ -22,7 +22,8 @@ import java.util.StringTokenizer;
 
 public class DBAdapter {
     static final String DATABASE_NAME = "Railway.db";
-    static final int DATABASE_VERSION = 2;
+//    static final int DATABASE_VERSION = 2;
+    static final int DATABASE_VERSION = 3;
 
     private String TAG = "DBAdapter";
 
@@ -110,7 +111,8 @@ public class DBAdapter {
     private SettingParameter extractSettingParameter(Cursor c){
         int dif = c.getInt(c.getColumnIndex("difficultyMode"));
         boolean mode = (c.getInt(c.getColumnIndex("vibrationMode"))==1);
-        SettingParameter setting = new SettingParameter(dif,mode);
+        boolean fabVisibility = (c.getInt(c.getColumnIndex("fabVisibility"))==1);
+        SettingParameter setting = new SettingParameter(dif,mode,fabVisibility);
         Log.d(TAG,String.format("setting : %d,%b",
                 setting.getDifficultyMode(),setting.isVibrate()));
         return setting;
@@ -146,6 +148,18 @@ public class DBAdapter {
         }
         else{
             cv.put("vibrationMode", 0);
+        }
+        db.update("settingParameter", cv, "id = 0", null);
+        return true;
+    }
+
+    public boolean updateFabVisibility(boolean fabVisibility){
+        ContentValues cv = new ContentValues();
+        if(fabVisibility){
+            cv.put("fabVisibility", 1);
+        }
+        else{
+            cv.put("fabVisibility", 0);
         }
         db.update("settingParameter", cv, "id = 0", null);
         return true;

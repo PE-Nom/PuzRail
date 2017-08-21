@@ -14,17 +14,18 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.LinearInterpolator;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import com.pentech.puzrail.MainActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
+import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.location.LocationPuzzleActivity;
 import com.pentech.puzrail.station.StationPuzzleActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
@@ -50,8 +52,11 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class PieceGarallyActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,NendAdListener {
+public class PieceGarallyActivity extends AppCompatActivity implements
+        AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener,
+        AbsListView.OnScrollListener,
+        NendAdListener {
 
     private static String TAG = "PieceGarallyActivity";
     private static final int RESULTCODE = 1;
@@ -67,6 +72,10 @@ public class PieceGarallyActivity extends AppCompatActivity
     private int previewAnswerCount = 0;
     private static final int showAnswerMax = 5;
     private int onReceiveAdCnt = 0;
+
+    private SettingParameter settingParameter;
+    private FloatingActionButton mFab;
+    private boolean fabVisible = true;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -115,13 +124,22 @@ public class PieceGarallyActivity extends AppCompatActivity
         actionBar.setTitle("線路と駅パズル：路線シルエット");
         actionBar.setSubtitle(db.getCompany(this.companyId).getName());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showInformation();
             }
         });
+        this.settingParameter = db.getSettingParameter();
+        fabVisible = settingParameter.isFabVisibility();
+        if(fabVisible){
+            mFab.show();
+        }
+        else{
+            mFab.hide();
+        }
+        this.listView.setOnScrollListener(this);
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -184,6 +202,27 @@ public class PieceGarallyActivity extends AppCompatActivity
         finish();
     }
 
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        final int remainingItemCount = totalItemCount - (firstVisibleItem + visibleItemCount);
+        if (PieceGarallyActivity.this.fabVisible && totalItemCount > visibleItemCount) {
+            if (remainingItemCount > 0) {
+                // SHow FAB Here
+                PieceGarallyActivity.this.mFab.animate().translationY(0).setInterpolator(new LinearInterpolator()).start();
+            } else {
+                // Hide FAB Here
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) PieceGarallyActivity.this.mFab.getLayoutParams();
+                int fab_bottomMargin = layoutParams.bottomMargin;
+                PieceGarallyActivity.this.mFab.animate().translationY(PieceGarallyActivity.this.mFab.getHeight() + fab_bottomMargin).setInterpolator(new LinearInterpolator()).start();
+            }
+        }
+    }
+
     private AlertDialog mDialog;
     private void selectLineSilhouette(int position){
         // アイコンタップでTextViewにその名前を表示する
@@ -225,9 +264,7 @@ public class PieceGarallyActivity extends AppCompatActivity
             // 未正解路線のシルエットのグリッドビュー生成
             GridView remainLinesGridView = new GridView(this);
             remainLinesGridView.setNumColumns(4);
-//            remainLinesGridView.setHorizontalSpacing(2);
             remainLinesGridView.setVerticalSpacing(4);
-//            remainLinesGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
             remainLinesGridView.setGravity(Gravity.CENTER);
             remainLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
 
@@ -397,7 +434,6 @@ public class PieceGarallyActivity extends AppCompatActivity
                 @Override
                 public void onDismiss() {
                     if (onePointTutorial != null) {
-//                        onePointTutorial.dismiss();
                         onePointTutorial = null;
                         mOnePointTutorialDisplayingTimer.cancel();
                         mOnePointTutorialDisplayingTimer = null;
@@ -453,7 +489,7 @@ public class PieceGarallyActivity extends AppCompatActivity
         final String[] items = {"｢路線シルエット｣と\n｢地図合わせ｣と\n｢駅並べ｣", "｢地図合わせ｣だけ", "｢駅並べ｣だけ"};
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle(longClickSelectedLine.getName() +" : 回答クリア");
+        alertDialog.setTitle(longClickSelectedLine.getRawName() +" : 回答クリア");
         alertDialog.setSingleChoiceItems(items, answerClearSelectedItem, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -578,6 +614,12 @@ public class PieceGarallyActivity extends AppCompatActivity
         longClickSelectedLine = lines.get(position);
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
+        if(fabVisible){
+            contextMenuList.add("ｉボタンを表示しない");
+        }
+        else{
+            contextMenuList.add("ｉボタンを表示する");
+        }
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
         contextMenuList.add("Webを検索する");
@@ -593,18 +635,23 @@ public class PieceGarallyActivity extends AppCompatActivity
                     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                         mDialog.dismiss();
                         switch(position) {
-                            case 0: // 回答をクリア
+                            case 0:
+                                if(fabVisible){
+                                    fabVisible = false;
+                                    mFab.hide();
+                                }
+                                else{
+                                    fabVisible = true;
+                                    mFab.show();
+                                }
+                                settingParameter.setFabVisibility(fabVisible);
+                                PieceGarallyActivity.this.db.updateFabVisibility(fabVisible);
+                                break;
+                            case 1: // 回答をクリア
                                 answerClear();
                                 break;
-                            case 1: // 回答を見る
+                            case 2: // 回答を見る
                                 if(previewAnswerCount < showAnswerMax ){
-/*                                    final Snackbar sb = Snackbar.make(PieceGarallyActivity.this.listView,
-                                            longClickSelectedLine.getRawName()+"("+longClickSelectedLine.getRawKana()+")",
-                                            Snackbar.LENGTH_SHORT);
-                                    sb.setActionTextColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.background1));
-                                    sb.getView().setBackgroundColor(ContextCompat.getColor(PieceGarallyActivity.this, R.color.color_10));
-                                    sb.show();
-*/
                                     showRailwaySilhouetteAnswer(longClickSelectedLine);
                                     if(PieceGarallyActivity.this.onReceiveAdCnt > 1){
                                         previewAnswerCount++;
@@ -620,7 +667,7 @@ public class PieceGarallyActivity extends AppCompatActivity
                                     sb.show();
                                 }
                                 break;
-                            case 2: // Webを検索する
+                            case 3: // Webを検索する
                                 Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                 intent.putExtra(SearchManager.QUERY, longClickSelectedLine.getRawName()); // query contains search string
                                 startActivity(intent);
@@ -632,7 +679,7 @@ public class PieceGarallyActivity extends AppCompatActivity
 
         // ダイアログ表示
         mDialog = new AlertDialog.Builder(this)
-                .setTitle(String.format("%s", longClickSelectedLine.getName()))
+                .setTitle(String.format("%s", longClickSelectedLine.getRawName()))
                 .setPositiveButton("Cancel", null)
                 .setView(contextMenuListView)
                 .create();

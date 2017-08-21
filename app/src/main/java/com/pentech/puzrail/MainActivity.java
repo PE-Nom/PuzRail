@@ -19,17 +19,20 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
+import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
 
@@ -45,8 +48,11 @@ import java.util.TimerTask;
  * Created by takashi on 2017/01/11.
  */
 
-public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener,NendAdListener{
+public class MainActivity extends AppCompatActivity implements
+        AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener,
+        AbsListView.OnScrollListener,
+        NendAdListener{
 
     private static final int RESULTCODE = 1;
 
@@ -58,6 +64,9 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<String> names = new ArrayList<String>();
     private CompanyListAdapter adapter;
     private AlertDialog mDialog;
+    private SettingParameter settingParameter;
+    private FloatingActionButton mFab;
+    private boolean fabVisible = true;
 
     private LinearLayout rootLayout;
 
@@ -90,13 +99,22 @@ public class MainActivity extends AppCompatActivity
         this.listView.setOnItemClickListener(this);
         this.listView.setOnItemLongClickListener(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showInformation();
             }
         });
+        this.settingParameter = db.getSettingParameter();
+        fabVisible = settingParameter.isFabVisibility();
+        if(fabVisible){
+            mFab.show();
+        }
+        else{
+            mFab.hide();
+        }
+        this.listView.setOnScrollListener(this);
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -116,6 +134,28 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        final int remainingItemCount = totalItemCount - (firstVisibleItem + visibleItemCount);
+        Log.d(TAG,String.format("totalItemCount = %d,visibleItemCount = %d",totalItemCount,visibleItemCount));
+        if (MainActivity.this.fabVisible && totalItemCount > visibleItemCount) {
+            if (remainingItemCount > 0) {
+                // SHow FAB Here
+                MainActivity.this.mFab.animate().translationY(0).setInterpolator(new LinearInterpolator()).start();
+            } else {
+                // Hide FAB Here
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) MainActivity.this.mFab.getLayoutParams();
+                int fab_bottomMargin = layoutParams.bottomMargin;
+                MainActivity.this.mFab.animate().translationY(MainActivity.this.mFab.getHeight() + fab_bottomMargin).setInterpolator(new LinearInterpolator()).start();
+            }
+        }
     }
 
     @Override
@@ -235,7 +275,6 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDismiss() {
                     if (onePointTutorial != null) {
-//                        onePointTutorial.dismiss();
                         onePointTutorial = null;
                         mOnePointTutorialDisplayingTimer.cancel();
                         mOnePointTutorialDisplayingTimer = null;
@@ -363,6 +402,12 @@ public class MainActivity extends AppCompatActivity
         longClickSelectedCompany = this.companies.get(position);
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
+        if(fabVisible){
+            contextMenuList.add("ｉボタンを表示しない");
+        }
+        else{
+            contextMenuList.add("ｉボタンを表示する");
+        }
         contextMenuList.add("回答クリア");
         contextMenuList.add("Webを検索する");
 
@@ -377,10 +422,22 @@ public class MainActivity extends AppCompatActivity
                     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                         mDialog.dismiss();
                         switch(position) {
-                            case 0: // 回答をクリア
+                            case 0:
+                                if(fabVisible){
+                                    fabVisible = false;
+                                    mFab.hide();
+                                }
+                                else{
+                                    fabVisible = true;
+                                    mFab.show();
+                                }
+                                settingParameter.setFabVisibility(fabVisible);
+                                MainActivity.this.db.updateFabVisibility(fabVisible);
+                                break;
+                            case 1: // 回答をクリア
                                 answerClear();
                                 break;
-                            case 1: // Webを検索する
+                            case 2: // Webを検索する
                                 Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                 intent.putExtra(SearchManager.QUERY, longClickSelectedCompany.getName()); // query contains search string
                                 startActivity(intent);

@@ -96,6 +96,9 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private Timer mAnswerDisplayingTimer = null;
     private Handler mHandler = new Handler();
 
+    private FloatingActionButton mFab;
+    private boolean fabVisible = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,13 +129,20 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         actionBar.setTitle("線路と駅パズル：地図合わせ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showInformation();
             }
         });
+        fabVisible = settingParameter.isFabVisibility();
+        if(fabVisible){
+            mFab.show();
+        }
+        else{
+            mFab.hide();
+        }
 
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
@@ -432,6 +442,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         Log.d(TAG,"onMapLongClick");
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
+        if(fabVisible){
+            contextMenuList.add("ｉボタンを表示しない");
+        }
+        else{
+            contextMenuList.add("ｉボタンを表示する");
+        }
         contextMenuList.add("難易度 設定");
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
@@ -450,15 +466,27 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.mDialog.dismiss();
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>)adapterView.getAdapter();
                         switch(position){
-                            case 0: // 難易度設定
+                            case 0:
+                                if(fabVisible){
+                                    fabVisible = false;
+                                    mFab.hide();
+                                }
+                                else{
+                                    fabVisible = true;
+                                    mFab.show();
+                                }
+                                settingParameter.setFabVisibility(fabVisible);
+                                LocationPuzzleActivity.this.db.updateFabVisibility(fabVisible);
+                                break;
+                            case 1: // 難易度設定
                                 settingDifficulty();
                                 break;
-                            case 1: // 回答をクリア（回答済みの場合）
+                            case 2: // 回答をクリア（回答済みの場合）
                                 if(LocationPuzzleActivity.this.hasAlreadyLocated()){
                                     answerClear();
                                 }
                                 break;
-                            case 2: // 回答を見る（未回答の場合）
+                            case 3: // 回答を見る（未回答の場合）
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
@@ -477,7 +505,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                     }
                                 }
                                 break;
-                            case 3: // 最初の位置に戻す
+                            case 4: // 最初の位置に戻す
                                 LocationPuzzleActivity.this.mMap.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
                                                 LocationPuzzleActivity.this.initLatLng,
@@ -486,7 +514,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 LocationPuzzleActivity.this.mImageView.resetImageDrawable();
                                 LocationPuzzleActivity.this.mImageView.setImageDrawable();;
                                 break;
-                            case 4: // Webを検索する
+                            case 5: // Webを検索する
                                 if(LocationPuzzleActivity.this.line.isNameCompleted()){
                                     Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     intent.putExtra(SearchManager.QUERY, LocationPuzzleActivity.this.line.getName()); // query contains search string
@@ -674,7 +702,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                 @Override
                 public void onDismiss() {
                     if (onePointTutorial != null) {
-//                        onePointTutorial.dismiss();
                         onePointTutorial = null;
                         mOnePointTutorialDisplayingTimer.cancel();
                         mOnePointTutorialDisplayingTimer = null;

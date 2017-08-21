@@ -1,7 +1,7 @@
 #
 # DBのテーブル定義
 #
-CREATE TABLE [settingParameter] ([id] INTEGER NOT NULL DEFAULT '0', [difficultyMode] INTEGER NOT NULL DEFAULT '2', [vibrationMode] INTEGER NOT NULL DEFAULT '1', PRIMARY KEY(id));
+CREATE TABLE [settingParameter] ([id] INTEGER NOT NULL DEFAULT '0', [difficultyMode] INTEGER NOT NULL DEFAULT '2', [vibrationMode] INTEGER NOT NULL DEFAULT '1', [fabVisibility] INTEGER NOT NULL DEFAULT '1', PRIMARY KEY(id));
 CREATE TABLE [area] ([areaCode] INTEGER NOT NULL UNIQUE, [areaName] VARCHAR(32), PRIMARY KEY(areaCode));
 CREATE TABLE [companyType] ( [companyCode] INTEGER, [typeName] VARCHAR(32) NOT NULL, PRIMARY KEY(companyCode));
 CREATE TABLE [companies] ( [companyId] INTEGER, [companyCode] INTEGER NOT NULL, [companyName] VARCHAR(256), [companyKana] VARCHAR(256), PRIMARY KEY(companyId));
@@ -9,9 +9,9 @@ CREATE TABLE [lines] ( [lineId] INTEGER, [areaCode] INTEGER NOT NULL, [companyId
 CREATE TABLE [stations] ( [companyId] INTEGER, [lineId] INTEGER, [stationOrder] INTEGER, [stationName] VARCHAR(256) NOT NULL, [stationKana] VARCHAR(256) NOT NULL, [stationLat] REAL NOT NULL DEFAULT '0', [stationLng] REAL NOT NULL DEFAULT '0', [overlaySw] INTEGER NOT NULL DEFAULT '0', [answerStatus] INTEGER NOT NULL DEFAULT '0', PRIMARY KEY(companyId,lineId,stationOrder) );
 #
 # SettingParameter テーブル初期化
-# 2:Beginner,1:Amateur,0:Professional, 1:Vibration ON
+# 2:Beginner,1:Amateur,0:Professional, 1:Vibration ON, 1:fabVisibility true
 #
-INSERT INTO [settingParameter] VALUES( 0, 2, 1 );
+INSERT INTO [settingParameter] VALUES( 0, 2, 1, 1 );
 #
 # area テーブル初期化
 #
