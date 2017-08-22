@@ -442,12 +442,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         Log.d(TAG,"onMapLongClick");
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
-        if(fabVisible){
-            contextMenuList.add("ｉボタンを表示しない");
-        }
-        else{
-            contextMenuList.add("ｉボタンを表示する");
-        }
         contextMenuList.add("難易度 設定");
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
@@ -466,27 +460,15 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.mDialog.dismiss();
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>)adapterView.getAdapter();
                         switch(position){
-                            case 0:
-                                if(fabVisible){
-                                    fabVisible = false;
-                                    mFab.hide();
-                                }
-                                else{
-                                    fabVisible = true;
-                                    mFab.show();
-                                }
-                                settingParameter.setFabVisibility(fabVisible);
-                                LocationPuzzleActivity.this.db.updateFabVisibility(fabVisible);
-                                break;
-                            case 1: // 難易度設定
+                            case 0: // 難易度設定
                                 settingDifficulty();
                                 break;
-                            case 2: // 回答をクリア（回答済みの場合）
+                            case 1: // 回答をクリア（回答済みの場合）
                                 if(LocationPuzzleActivity.this.hasAlreadyLocated()){
                                     answerClear();
                                 }
                                 break;
-                            case 3: // 回答を見る（未回答の場合）
+                            case 2: // 回答を見る（未回答の場合）
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
@@ -505,7 +487,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                     }
                                 }
                                 break;
-                            case 4: // 最初の位置に戻す
+                            case 3: // 最初の位置に戻す
                                 LocationPuzzleActivity.this.mMap.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
                                                 LocationPuzzleActivity.this.initLatLng,
@@ -514,7 +496,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 LocationPuzzleActivity.this.mImageView.resetImageDrawable();
                                 LocationPuzzleActivity.this.mImageView.setImageDrawable();;
                                 break;
-                            case 5: // Webを検索する
+                            case 4: // Webを検索する
                                 if(LocationPuzzleActivity.this.line.isNameCompleted()){
                                     Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     intent.putExtra(SearchManager.QUERY, LocationPuzzleActivity.this.line.getName()); // query contains search string
@@ -618,6 +600,34 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    /**
+     * Prepare the Screen's standard options menu to be displayed.  This is
+     * called right before the menu is shown, every time it is shown.  You can
+     * use this method to efficiently enable/disable items or otherwise
+     * dynamically modify the contents.
+     * <p>
+     * <p>The default implementation updates the system menu items based on the
+     * activity's state.  Deriving classes should always call through to the
+     * base class implementation.
+     *
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     * @return You must return true for the menu to be displayed;
+     * if you return false it will not be shown.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.getItem(0);
+        if(fabVisible){
+            item.setTitle("iボタンを消す");
+        }
+        else{
+            item.setTitle("iボタンを表示");
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     // --------------------
@@ -738,7 +748,24 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_AboutPuzzRail) {
+        if(id == R.id.action_information) {
+            if(fabVisible){
+                fabVisible = false;
+                mFab.hide();
+                item.setTitle("iボタンを表示");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            else{
+                fabVisible = true;
+                mFab.show();
+                item.setTitle("iボタンを消す");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            settingParameter.setFabVisibility(fabVisible);
+            LocationPuzzleActivity.this.db.updateFabVisibility(fabVisible);
+            return true;
+        }
+        else if (id == R.id.action_AboutPuzzRail) {
             Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
             intent.putExtra("page", 0);
             startActivity(intent);

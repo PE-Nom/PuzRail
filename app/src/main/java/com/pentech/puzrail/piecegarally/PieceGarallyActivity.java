@@ -352,6 +352,34 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         return true;
     }
 
+    /**
+     * Prepare the Screen's standard options menu to be displayed.  This is
+     * called right before the menu is shown, every time it is shown.  You can
+     * use this method to efficiently enable/disable items or otherwise
+     * dynamically modify the contents.
+     * <p>
+     * <p>The default implementation updates the system menu items based on the
+     * activity's state.  Deriving classes should always call through to the
+     * base class implementation.
+     *
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     * @return You must return true for the menu to be displayed;
+     * if you return false it will not be shown.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.getItem(0);
+        if(fabVisible){
+            item.setTitle("iボタンを消す");
+        }
+        else{
+            item.setTitle("iボタンを表示");
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     // --------------------
     // ワンポイント　チュートリアルの表示
     private PopupWindow onePointTutorial = null;
@@ -457,7 +485,24 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_AboutPuzzRail) {
+        if(id == R.id.action_information) {
+            if(fabVisible){
+                fabVisible = false;
+                mFab.hide();
+                item.setTitle("iボタンを表示");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            else{
+                fabVisible = true;
+                mFab.show();
+                item.setTitle("iボタンを消す");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            settingParameter.setFabVisibility(fabVisible);
+            PieceGarallyActivity.this.db.updateFabVisibility(fabVisible);
+            return true;
+        }
+        else if (id == R.id.action_AboutPuzzRail) {
             Intent intent = new Intent(PieceGarallyActivity.this, TutorialActivity.class);
             intent.putExtra("page", 0);
             startActivity(intent);
@@ -614,12 +659,6 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         longClickSelectedLine = lines.get(position);
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
-        if(fabVisible){
-            contextMenuList.add("ｉボタンを表示しない");
-        }
-        else{
-            contextMenuList.add("ｉボタンを表示する");
-        }
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
         contextMenuList.add("Webを検索する");
@@ -635,22 +674,10 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                         mDialog.dismiss();
                         switch(position) {
-                            case 0:
-                                if(fabVisible){
-                                    fabVisible = false;
-                                    mFab.hide();
-                                }
-                                else{
-                                    fabVisible = true;
-                                    mFab.show();
-                                }
-                                settingParameter.setFabVisibility(fabVisible);
-                                PieceGarallyActivity.this.db.updateFabVisibility(fabVisible);
-                                break;
-                            case 1: // 回答をクリア
+                            case 0: // 回答をクリア
                                 answerClear();
                                 break;
-                            case 2: // 回答を見る
+                            case 1: // 回答を見る
                                 if(previewAnswerCount < showAnswerMax ){
                                     showRailwaySilhouetteAnswer(longClickSelectedLine);
                                     if(PieceGarallyActivity.this.onReceiveAdCnt > 1){
@@ -667,7 +694,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                                     sb.show();
                                 }
                                 break;
-                            case 3: // Webを検索する
+                            case 2: // Webを検索する
                                 Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                 intent.putExtra(SearchManager.QUERY, longClickSelectedLine.getRawName()); // query contains search string
                                 startActivity(intent);

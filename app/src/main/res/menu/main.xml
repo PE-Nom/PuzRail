@@ -2,25 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_settings"
+    <item android:id="@+id/action_information"
+        android:title="iボタンを表示"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
-        android:icon="@drawable/ic_setting_gear"
-        app:showAsAction="always" >
-        <menu>
-            <item android:id="@+id/action_AboutPuzzRail"
-                android:title="「線路と駅」について"
-                android:orderInCategory="100"
-                app:showAsAction="never" />
-            <item android:id="@+id/action_Help"
-                android:title="使い方"
-                android:orderInCategory="100"
-                app:showAsAction="never" />
-            <item android:id="@+id/action_Ask"
-                android:title="お問い合わせ"
-                android:orderInCategory="100"
-                app:showAsAction="never" />
-        </menu>
-    </item>
+        app:showAsAction="never" />
+    <item android:id="@+id/action_AboutPuzzRail"
+        android:title="「線路と駅」について"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_Help"
+        android:title="使い方"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_Ask"
+        android:title="お問い合わせ"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
+
 </menu>

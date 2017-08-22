@@ -2,9 +2,12 @@ package com.pentech.puzrail.tutorial;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -19,6 +22,7 @@ public class TutorialActivity extends AppCompatActivity {
     private static String TAG = "TutorialMain";
 
     private ViewPager pager;
+    private TabLayout tabLayout;
     private FragmentPagerAdapter adapter;
     private int currentPage;
     private PagerIndicator indicator;
@@ -29,10 +33,18 @@ public class TutorialActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tutorial_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id._toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("線路と駅パズル：");
+        actionBar.setSubtitle("遊び方チュートリアル");
+
         Intent intent = getIntent();
         this.currentPage = intent.getIntExtra("page", 0);
         Log.d(TAG,String.format("CurrentPage = %d",this.currentPage));
 
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         pager = (ViewPager) findViewById(R.id.pager);
         container = (LinearLayout) findViewById(R.id.pager_dots_container);
 
@@ -41,6 +53,7 @@ public class TutorialActivity extends AppCompatActivity {
         pager.setAdapter(adapter);
         pager.addOnPageChangeListener(indicator);
         pager.setCurrentItem(currentPage);
+        tabLayout.setupWithViewPager(pager);
     }
 
     /**
@@ -52,15 +65,4 @@ public class TutorialActivity extends AppCompatActivity {
         super.onBackPressed();
         finish();
     }
-
-    public void onClickNext(View view) {
-        currentPage ++;
-        pager.setCurrentItem(currentPage);
-    }
-
-    public void onClickGoToTop(View view) {
-        currentPage = 0;
-        pager.setCurrentItem(currentPage);
-    }
-
 }
