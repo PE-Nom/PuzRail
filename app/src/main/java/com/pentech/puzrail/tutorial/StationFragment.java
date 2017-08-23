@@ -23,6 +23,7 @@ public class StationFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = (View) inflater.inflate(R.layout.tutorial_page_station, container, false);
         WebView wv = (WebView) view.findViewById(R.id.webview);
+        wv.getSettings().setJavaScriptEnabled(true);
         wv.loadUrl(url);
         return view;
     }

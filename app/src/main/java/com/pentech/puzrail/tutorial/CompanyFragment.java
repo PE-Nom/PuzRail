@@ -1,10 +1,12 @@
 package com.pentech.puzrail.tutorial;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.pentech.puzrail.R;
@@ -23,6 +25,12 @@ public class CompanyFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = (View) inflater.inflate(R.layout.tutorial_page_company, container, false);
         WebView wv = (WebView) view.findViewById(R.id.webview);
+        WebSettings s = wv.getSettings();
+        s.setJavaScriptEnabled(true);
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+//            s.setAllowUniversalAccessFromFileURLs(true);
+//            s.setAllowFileAccessFromFileURLs(true);
+//        }
         wv.loadUrl(url);
         return view;
     }

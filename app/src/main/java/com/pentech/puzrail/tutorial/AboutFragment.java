@@ -24,6 +24,7 @@ public class AboutFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = (View) inflater.inflate(R.layout.page_about, container, false);
         WebView wv = (WebView) view.findViewById(R.id.webview);
+        wv.getSettings().setJavaScriptEnabled(true);
         wv.loadUrl(url);
         return view;
     }

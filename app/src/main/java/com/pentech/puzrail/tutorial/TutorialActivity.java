@@ -44,7 +44,8 @@ public class TutorialActivity extends AppCompatActivity {
         this.currentPage = intent.getIntExtra("page", 0);
         Log.d(TAG,String.format("CurrentPage = %d",this.currentPage));
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         pager = (ViewPager) findViewById(R.id.pager);
         container = (LinearLayout) findViewById(R.id.pager_dots_container);
 

@@ -12,7 +12,7 @@ public class UserInfoViewPagerAdapter extends FragmentPagerAdapter {
     private static final int PAGE_NUM = 5;
     private static String urlString[] = {
             "file:///android_asset/about_puzrail.html",
-            "file:///android_asset/help_puzrail.html",
+            "file:///android_asset/jquerytest.html",
             "file:///android_asset/help_puzrail.html",
             "file:///android_asset/help_puzrail.html",
             "file:///android_asset/help_puzrail.html",
@@ -70,19 +70,19 @@ public class UserInfoViewPagerAdapter extends FragmentPagerAdapter {
         String pageTitle = "None";
         switch(position){
             case 0:
-                pageTitle = "「線路と駅」について";
+                pageTitle = "線路と駅";
                 break;
             case 1:
-                pageTitle = "「事業者選択」の遊び方";
+                pageTitle = "事業者選択";
                 break;
             case 2:
-                pageTitle = "「路線シルエット」の遊び方";
+                pageTitle = "路線シルエット";
                 break;
             case 3:
-                pageTitle = "「地図合わせ」の遊び方";
+                pageTitle = "地図合わせ";
                 break;
             case 4:
-                pageTitle = "「駅並べ」の遊び方";
+                pageTitle = "駅並べ";
                 break;
             default:
                 break;
