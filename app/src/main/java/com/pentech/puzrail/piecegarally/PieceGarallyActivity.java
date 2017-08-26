@@ -36,6 +36,7 @@ import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.database.SettingParameter;
+import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.location.LocationPuzzleActivity;
 import com.pentech.puzrail.station.StationPuzzleActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
@@ -68,6 +69,10 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     private TextView silhouetteProgValue, locationProgValue, stationsProgValue;
     private TextView silhouetteProgDenom, locationProgDenom, stationsProgDenom;
     private GaugeView silhouetteProgress, locationProgress,stationsProgress;
+    private int companyTotalScore = 0;
+    private int silhouetteTotalScore = 0;
+    private int locationTotalScore = 0;
+    private int stationsTotalScore = 0;
     private int selectedLineIndex = -1;
     private int companyId;
     private int previewAnswerCount = 0;
@@ -98,6 +103,29 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         this.lines = db.getLineList(this.companyId, false);
 
+        Iterator<Line> lineIterator = lines.iterator();
+        while(lineIterator.hasNext()){
+            Line line = lineIterator.next();
+            this.silhouetteTotalScore+= line.getSilhouetteScore();
+            this.locationTotalScore += line.getLocationScore();
+            ArrayList<Station> stations = db.getStationList(line.getLineId());
+            Iterator<Station> stationIterator = stations.iterator();
+            while(stationIterator.hasNext()){
+                Station station = stationIterator.next();
+                this.stationsTotalScore += station.getStationScore();
+            }
+        }
+        this.companyTotalScore = this.silhouetteTotalScore + this.locationTotalScore + this.stationsTotalScore;
+
+        TextView companyScore = (TextView) findViewById(R.id.companyTotalScore);
+        companyScore.setText(String.format("%d",this.companyTotalScore));
+        TextView silhouetteScore = (TextView) findViewById(R.id.silhouetteScore);
+        silhouetteScore.setText(String.format("%d",this.silhouetteTotalScore));
+        TextView locationScore = (TextView) findViewById(R.id.locationScore);
+        locationScore.setText(String.format("%d",this.locationTotalScore));
+        TextView stationsScore = (TextView) findViewById(R.id.stationsSocre);
+        stationsScore.setText(String.format("%d",this.stationsTotalScore));
+
         this.silhouetteProgDenom = (TextView) findViewById(R.id.silhouetteProgDenominator);
         this.silhouetteProgValue = (TextView) findViewById(R.id.silhouetteProgValue);
         this.silhouetteProgress = (GaugeView) findViewById(R.id.silhouetteProgress) ;
@@ -115,7 +143,6 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         // GridViewのインスタンスを生成
         this.listView = (MultiButtonListView) findViewById(R.id.railway_list_view);
-//        this.listView = (ListView) findViewById(R.id.railway_list_view);
         this.lineListAdapter = new RailwayListAdapter(this.getApplicationContext(), this.lines, db);;
         this.listView.setAdapter(this.lineListAdapter);
         this.listView.setOnItemClickListener(this);
@@ -178,7 +205,6 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         int cnt = db.countSilhouetteAnsweredLines(this.companyId);
         int lineNameProgress = 100*cnt/this.lines.size();
         this.silhouetteProgress.setData(lineNameProgress,"%",  ContextCompat.getColor(this, R.color.color_90), 90, true);
-//        this.silhouetteProgValue.setText(String.format("%d/%d",cnt,this.lines.size()));
         this.silhouetteProgValue.setText(String.format("%d",cnt));
         this.silhouetteProgDenom.setText(String.format("/%d",this.lines.size()));
     }
@@ -187,7 +213,6 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         int answeredLines = db.countLocationAnsweredLines(this.companyId);
         int locationProgress = 100*answeredLines/lines.size();
         this.locationProgress.setData(locationProgress,"%",  ContextCompat.getColor(this, R.color.color_60), 90, true);
-//        this.locationProgValue.setText(String.format("%d/%d",answeredLines,lines.size()));
         this.locationProgValue.setText(String.format("%d",answeredLines));
         this.locationProgDenom.setText(String.format("/%d",this.lines.size()));
     }
@@ -197,7 +222,6 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         int totalStations = db.countTotalStationsInCompany(this.companyId);
         int stationAnsweredProgress = 100*answeredStations/totalStations;
         this.stationsProgress.setData(stationAnsweredProgress,"%",  ContextCompat.getColor(this, R.color.color_30), 90, true);
-//        this.stationsProgValue.setText(String.format("%d/%d",answeredStations,totalStations));
         this.stationsProgValue.setText(String.format("%d",answeredStations));
         this.stationsProgDenom.setText(String.format("/%d",totalStations));
     }

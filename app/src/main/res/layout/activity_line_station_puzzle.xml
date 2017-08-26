@@ -77,7 +77,7 @@
                             android:text="合計得点：" />
 
                         <TextView
-                            android:id="@+id/statiosnScore"
+                            android:id="@+id/stationsScore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="5dp"

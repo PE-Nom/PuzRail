@@ -11,9 +11,12 @@ import android.widget.TextView;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
+import com.pentech.puzrail.database.Line;
+import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.ui.GaugeView;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by takashi on 2017/03/26.
@@ -96,12 +99,20 @@ public class CompanyListAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.companyName = (TextView)convertView.findViewById(R.id.companyName);
             holder.companyKana = (TextView)convertView.findViewById(R.id.companyKana);
+            holder.companyTotalScore = (TextView)convertView.findViewById(R.id.companyTotalScore);
+
             holder.silhouetteProgressDenominator = (TextView)convertView.findViewById(R.id.silhouetteProgDenominator);
             holder.silhouetteProgressValue = (TextView)convertView.findViewById(R.id.silhouetteProgValue);
+            holder.silhouetteScore = (TextView) convertView.findViewById(R.id.silhouetteScore);
+
             holder.locationProgressDenominator = (TextView)convertView.findViewById(R.id.locationProgDenominator);
             holder.locationProgressValue = (TextView)convertView.findViewById(R.id.locationProgValue);
+            holder.locationScore = (TextView) convertView.findViewById(R.id.locationScore);
+
             holder.stationsProgressDenominator = (TextView)convertView.findViewById(R.id.stationsProgDenominator);
             holder.stationsProgressValue = (TextView)convertView.findViewById(R.id.stationsProgValue);
+            holder.stationsScore = (TextView) convertView.findViewById(R.id.stationsSocre);
+
             holder.silhouetteProgress = (GaugeView)convertView.findViewById(R.id.silhouetteProgress);
             holder.locationProgress = (GaugeView)convertView.findViewById(R.id.locationProgress);
             holder.stationsProgress = (GaugeView)convertView.findViewById(R.id.stationsProgress);
@@ -109,43 +120,45 @@ public class CompanyListAdapter extends BaseAdapter {
         }
         else{
             holder = (ViewHolder)convertView.getTag();
+
+            Company company = this.companies.get(position);
+            holder.companyName.setText(company.getName()+" ");
+            holder.companyName.setTextColor(Color.parseColor("#142d81"));
+            holder.companyKana.setText("("+company.getKana()+")");
+            holder.companyKana.setTextColor(Color.parseColor("#142d81"));
+
+            int id = company.getId();
+            int totalLines = this.dbAdapter.countTotalLines(id);
+            int answeredLines = this.dbAdapter.countSilhouetteAnsweredLines(id);
+            int locatedLines = this.dbAdapter.countLocationAnsweredLines(id);
+            int totalStations = this.dbAdapter.countTotalStationsInCompany(id);
+            int openedStations = this.dbAdapter.countAnsweredStationsInCompany(id);
+
+            holder.companyTotalScore.setText(String.format("%d",company.getCompanyTotalScore()));
+            // 路線シルエットの進捗
+            holder.silhouetteProgressValue.setText(String.format("%d",answeredLines));
+            holder.silhouetteProgressDenominator.setText(String.format("/%d",totalLines));
+            int silhouetteProgress = 100*answeredLines/totalLines;
+    //        Log.d(TAG,String.format("namedLines = %d, totalLines = %d, silhouetteProgress = %d",namedLines,totalLines,silhouetteProgress));
+            holder.silhouetteProgress.setData(silhouetteProgress,"%", ContextCompat.getColor(this.context, R.color.color_90),90,true);
+            holder.silhouetteScore.setText(String .format("%d",company.getSilhouetteTotalScore()));
+
+            // 地図合わせの進捗
+            holder.locationProgressValue.setText(String.format("%d",locatedLines));
+            holder.locationProgressDenominator.setText(String.format("/%d",totalLines));
+            int trackLayingProgress = 100*locatedLines/totalLines;
+    //        Log.d(TAG,String.format("locatedLines = %d, totalLines = %d, tracklayingProgress = %d",locatedLines,totalLines,locationProgress));
+            holder.locationProgress.setData(trackLayingProgress,"%",ContextCompat.getColor(this.context, R.color.color_60),90,true);
+            holder.locationScore.setText(String.format("%d",company.getLocationTotalScore()));
+
+            // 駅開設の進捗
+            holder.stationsProgressValue.setText(String.format("%d",openedStations));
+            holder.stationsProgressDenominator.setText(String.format("/%d",totalStations));
+            int stationOpenProgress = 100*openedStations/totalStations;
+    //        Log.d(TAG,String.format("opendStations = %d, totalStations = %d, stationProgress = %d",openedStations,totalStations,stationsProgress));
+            holder.stationsProgress.setData(stationOpenProgress,"%",ContextCompat.getColor(this.context, R.color.color_30),90,true);
+            holder.stationsScore.setText(String.format("%d",company.getStationsTotalScore()));
         }
-
-        Company company = this.companies.get(position);
-        holder.companyName.setText(company.getName()+" ");
-        holder.companyName.setTextColor(Color.parseColor("#142d81"));
-        holder.companyKana.setText("("+company.getKana()+")");
-        holder.companyKana.setTextColor(Color.parseColor("#142d81"));
-
-        int id = company.getId();
-        int totalLines = this.dbAdapter.countTotalLines(id);
-        int answeredLines = this.dbAdapter.countSilhouetteAnsweredLines(id);
-        int locatedLines = this.dbAdapter.countLocationAnsweredLines(id);
-        int totalStations = this.dbAdapter.countTotalStationsInCompany(id);
-        int openedStations = this.dbAdapter.countAnsweredStationsInCompany(id);
-        // 路線シルエットの進捗
-        holder.silhouetteProgressValue.setText(String.format("%d",answeredLines));
-        holder.silhouetteProgressDenominator.setText(String.format("/%d",totalLines));
-//        holder.silhouetteProgressValue.setText(String.format("%d/%d",namedLines,totalLines));
-        int nameProgress = 100*answeredLines/totalLines;
-//        Log.d(TAG,String.format("namedLines = %d, totalLines = %d, nameProgress = %d",namedLines,totalLines,nameProgress));
-        holder.silhouetteProgress.setData(nameProgress,"%", ContextCompat.getColor(this.context, R.color.color_90),90,true);
-
-        // 地図合わせの進捗
-        holder.locationProgressValue.setText(String.format("%d",totalLines));
-        holder.locationProgressDenominator.setText(String.format("/%d",locatedLines));
-//        holder.locationProgressValue.setText(String.format("%d/%d",locatedLines,totalLines));
-        int trackLayingProgress = 100*locatedLines/totalLines;
-//        Log.d(TAG,String.format("locatedLines = %d, totalLines = %d, tracklayingProgress = %d",locatedLines,totalLines,locationProgress));
-        holder.locationProgress.setData(trackLayingProgress,"%",ContextCompat.getColor(this.context, R.color.color_60),90,true);
-
-        // 駅開設の進捗
-        holder.stationsProgressValue.setText(String.format("%d",openedStations));
-        holder.stationsProgressDenominator.setText(String.format("/%d",totalStations));
-//        holder.stationsProgressValue.setText(String.format("%d/%d",openedStations,totalStations));
-        int stationOpenProgress = 100*openedStations/totalStations;
-//        Log.d(TAG,String.format("opendStations = %d, totalStations = %d, stationProgress = %d",openedStations,totalStations,stationsProgress));
-        holder.stationsProgress.setData(stationOpenProgress,"%",ContextCompat.getColor(this.context, R.color.color_30),90,true);
 
         return convertView;
     }
@@ -153,14 +166,21 @@ public class CompanyListAdapter extends BaseAdapter {
     private class ViewHolder {
         TextView companyName;
         TextView companyKana;
+        TextView companyTotalScore;
+
         TextView silhouetteProgressDenominator;
         TextView silhouetteProgressValue;
         GaugeView silhouetteProgress;
+        TextView silhouetteScore;
+
         TextView locationProgressDenominator;
         TextView locationProgressValue;
         GaugeView locationProgress;
+        TextView locationScore;
+
         TextView stationsProgressDenominator;
         TextView stationsProgressValue;
         GaugeView stationsProgress;
+        TextView stationsScore;
     }
 }

@@ -40,6 +40,9 @@ public class Line {
     private boolean locationAnswerStatus;
     private boolean stationAnswerStatus;
 
+    private int silhouetteScore;
+    private int locationScore;
+
     public Line(Context context,
                 int lineId,
                 int areaCode,
@@ -64,7 +67,9 @@ public class Line {
                 double init_zoom_level,
                 boolean nameAnswerStatus,
                 boolean locationAnswerStatus,
-                boolean stationAnswerStatus) {
+                boolean stationAnswerStatus,
+                int silhouetteScore,
+                int locationScore) {
 
         this.context = context;
         this.res = this.context.getResources();
@@ -92,6 +97,8 @@ public class Line {
         this.nameAnswerStatus = nameAnswerStatus;
         this.locationAnswerStatus = locationAnswerStatus;
         this.stationAnswerStatus = stationAnswerStatus;
+        this.silhouetteScore = silhouetteScore;
+        this.locationScore = locationScore;
     }
 
     public int getCompanyId(){ return this.companyId; }
@@ -178,4 +185,12 @@ public class Line {
     public void setStationAnswerStatus() { this.stationAnswerStatus=true; }
     public void resetStationAnswerStatus() { this.stationAnswerStatus=false; }
 
+    public int getSilhouetteScore() { return this.silhouetteScore; }
+    public void setSilhouetteScore(int score){
+        this.silhouetteScore = score;
+    }
+    public int getLocationScore() { return this.locationScore; }
+    public void setLocationScore(int score){
+        this.locationScore = score;
+    }
 }

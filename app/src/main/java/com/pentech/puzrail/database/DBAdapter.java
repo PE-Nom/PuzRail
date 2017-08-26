@@ -22,8 +22,7 @@ import java.util.StringTokenizer;
 
 public class DBAdapter {
     static final String DATABASE_NAME = "Railway.db";
-//    static final int DATABASE_VERSION = 2;
-    static final int DATABASE_VERSION = 3;
+    static final int DATABASE_VERSION = 4;
 
     private String TAG = "DBAdapter";
 
@@ -237,7 +236,9 @@ public class DBAdapter {
         double init_zoom_level = c.getDouble(c.getColumnIndex("init_zoom_level"));
         boolean nameAnswerStatus = (c.getInt(c.getColumnIndex("nameAnswerStatus"))==1);
         boolean locationAnswerStatus = (c.getInt(c.getColumnIndex("locationAnswerStatus"))==1);
-        boolean stationAnswerStatus = (c.getInt(c.getColumnIndex("stationAnswerStatus"))==1);;
+        boolean stationAnswerStatus = (c.getInt(c.getColumnIndex("stationAnswerStatus"))==1);
+        int silhouetteScore = c.getInt(c.getColumnIndex("silhouetteScore"));
+        int locationScore = c.getInt(c.getColumnIndex("locationScore"));
         Line line = new Line(this.context,
                 lineId,areaCode,companyId,
                 lineName,lineKana,type,
@@ -245,7 +246,8 @@ public class DBAdapter {
                 correct_leftLng,correct_topLat,correct_rightLng,correct_bottomLat,
                 scroll_max_lat,scroll_min_lat,scroll_max_lng,scroll_min_lng,init_campos_lat,init_campos_lng,
                 max_zoom_level,min_zoom_level,init_zoom_level,
-                nameAnswerStatus,locationAnswerStatus,stationAnswerStatus);
+                nameAnswerStatus,locationAnswerStatus,stationAnswerStatus,
+                silhouetteScore,locationScore);
 /*        Log.d(TAG,String.format("lines: %d,%d,%d," +
                         "%s,%s," +
                         "%d," +
@@ -358,7 +360,7 @@ public class DBAdapter {
     }
 
     /*
-     * 路線名のAnswerStatus更新
+     * 路線シルエットのAnswerStatus更新
      */
     public boolean updateLineNameAnswerStatusInCompany(int companyId,boolean status){
         ContentValues cv = new ContentValues();
@@ -381,6 +383,27 @@ public class DBAdapter {
         else{
             cv.put("nameAnswerStatus",0);
         }
+        db.update("lines",cv,"lineId = "+lineId,null);
+        return true;
+    }
+
+    /*
+     * シルエットスコアの更新
+     */
+    public boolean updateSilhouetteScore(Line line){
+        int lineId = line.getLineId();
+        ContentValues cv = new ContentValues();
+        cv.put("silhouetteScore",line.getSilhouetteScore());
+        db.update("lines",cv,"lineId = "+lineId,null);
+        return true;
+    }
+    /*
+     * ロケーションスコアの更新
+     */
+    public boolean updateLocationScore(Line line){
+        int lineId = line.getLineId();
+        ContentValues cv = new ContentValues();
+        cv.put("locationScore", line.getLocationScore());
         db.update("lines",cv,"lineId = "+lineId,null);
         return true;
     }
@@ -422,10 +445,12 @@ public class DBAdapter {
         double stationLng = c.getDouble(c.getColumnIndex("stationLng"));
         boolean overlaySw = (c.getInt(c.getColumnIndex("overlaySw"))==1);
         boolean answerStatus = (c.getInt(c.getColumnIndex("answerStatus"))==1);
+        int stationScore = c.getInt(c.getColumnIndex("stationScore"));
         Station station = new Station(companyId,lineId,stationOrder,
                                         stationName,stationKana,
                                         stationLat,stationLng,
-                                        overlaySw,answerStatus);
+                                        overlaySw,answerStatus,
+                                        stationScore);
         Log.d(TAG,String.format("station: %d,%d,%d," +
                         "%s,%s," +
                         "%f,%f," +
@@ -507,6 +532,17 @@ public class DBAdapter {
         db.update("stations", cv, "lineId = "+station.getLineId() + " AND stationOrder = " + station.getStationOrder(), null);
         return true;
     }
+
+    /*
+     * 駅並べスコアの更新
+     */
+    public boolean updateStationScore(Station station){
+        ContentValues cv = new ContentValues();
+        cv.put("stationScore",station.getStationScore());
+        db.update("stations", cv, "lineId = "+station.getLineId() + " AND stationOrder = " + station.getStationOrder(), null);
+        return true;
+    }
+
     /*
      * 総駅数の取得
      */

@@ -87,6 +87,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
     private ArrayList<Station> stations = new ArrayList<Station>();
 
     private GoogleMap mMap;
+    private TextView stationsScore;
     private TextView progressTitle;
     private ProgressBar progress;
     private MapView mMapView;
@@ -140,6 +141,16 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
         actionBar.setTitle("線路と駅パズル：駅並べ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
+
+        int stationsTotalScore = 0;
+        ArrayList<Station> stations = db.getStationList(this.line.getLineId());
+        Iterator<Station> stationIterator = stations.iterator();
+        while(stationIterator.hasNext()){
+            Station station = stationIterator.next();
+            stationsTotalScore += station.getStationScore();
+        }
+        this.stationsScore = (TextView) findViewById(R.id.stationsScore);
+        this.stationsScore.setText(String.format("%d",stationsTotalScore));
 
         this.progressTitle = (TextView)findViewById(R.id.ProgressTitle);
         this.progress = (ProgressBar)findViewById(R.id.ProgressBar);

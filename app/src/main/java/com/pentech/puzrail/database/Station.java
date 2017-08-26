@@ -22,6 +22,7 @@ public class Station {
     private double stationLat;
     private boolean overlaySw = false; // 地図上のマーカーオーバレイ表示
     private boolean answerStatus = false; // false:未回答、true:回答済み
+    private int stationScore;
 
     private Marker mMarker = null;
 
@@ -33,7 +34,8 @@ public class Station {
                    double stationLat,
                    double stationLng,
                    boolean overlaySw,
-                   boolean answerStatus){
+                   boolean answerStatus,
+                   int stationScore){
         this.companyId = companyId;
         this.lineId = lineId;
         this.stationOrder = stationOrder;
@@ -43,6 +45,7 @@ public class Station {
         this.stationLat = stationLat;
         this.overlaySw = overlaySw;
         this.answerStatus=answerStatus;
+        this.stationScore = stationScore;
     }
 
     public String getRawName(){
@@ -102,5 +105,10 @@ public class Station {
             this.mMarker = null;
             this.overlaySw = false;
         }
+    }
+
+    public int getStationScore() { return this.stationScore; }
+    public void setStationScore(int score){
+        this.stationScore = score;
     }
 }

@@ -62,6 +62,7 @@ public class StationListAdapter extends BaseAdapter {
     private class ViewHolder {
         ImageView iconStation;
         TextView stationName;
+        TextView stationScore;
         CheckBox mapOverlaySw;
     }
 
@@ -75,54 +76,57 @@ public class StationListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.station_list_item,null);
             holder = new ViewHolder();
             holder.iconStation = (ImageView)convertView.findViewById(R.id.ic_station);
-            holder.stationName = (TextView)convertView.findViewById(R.id.station_name);
+            holder.stationName = (TextView)convertView.findViewById(R.id.stationName);
+            holder.stationScore = (TextView)convertView.findViewById(R.id.stationScore);
             holder.mapOverlaySw = (CheckBox)convertView.findViewById(R.id.mapOverlaySw);
             convertView.setTag(holder);
         }
         else{
             holder = (ViewHolder)convertView.getTag();
-        }
 
-        Station station = (Station)stations.get(position);
-        String name = station.getName() + "(" + station.getKana() + ")";
+            Station station = (Station)stations.get(position);
+            String name = station.getName() + "(" + station.getKana() + ")";
 
-        if(station.isFinished()){   // 当該ステーションが正解済み
-            Drawable drawable;
-            if(position==0){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_start_terminal_station,null);
+            if(station.isFinished()){   // 当該ステーションが正解済み
+                Drawable drawable;
+                if(position==0){
+                    drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_start_terminal_station,null);
+                }
+                else if(position==this.stations.size()-1){
+                    drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_arrival_terminal_open_station,null);
+                }
+                else{
+                    drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_open_station,null);
+                }
+                holder.iconStation.setImageDrawable(drawable);
+                holder.stationName.setText(name);
+                holder.stationScore.setText(String.format("%d",station.getStationScore()));
+                holder.mapOverlaySw.setChecked(station.isOverlaySw());
+                holder.mapOverlaySw.setClickable(true);
+                holder.mapOverlaySw.setOnClickListener(new cbOnClickListener(holder,position));
+                if(station.isOverlaySw()){
+                    station.removeMarker();
+                    LatLng latlng = new LatLng(station.getStationLat(), station.getStationLng());
+                    Log.d(TAG,String.format("initialize overlay : %s, Lat = %3.4f, Lng = %3.4f",station.getRawName(),station.getStationLat(),station.getStationLng()));
+                    MarkerOptions options = new MarkerOptions().position(latlng).title(station.getRawName());
+                    Marker marker = this.mMap.addMarker(options);
+                    station.setMarker(marker);
+                }
             }
-            else if(position==this.stations.size()-1){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_arrival_terminal_open_station,null);
+            else{                       // 当該ステーションが未正解
+                Drawable drawable;
+                if(position==this.stations.size()-1){
+                    drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_arrival_terminal_outofsv_station,null);
+                }
+                else{
+                    drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_out_of_sv_station,null);
+                }
+                holder.iconStation.setImageDrawable(drawable);
+                holder.stationName.setText(name);
+                holder.stationScore.setText(String.format("%d",station.getStationScore()));
+                holder.mapOverlaySw.setChecked(false);
+                holder.mapOverlaySw.setClickable(false);
             }
-            else{
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_open_station,null);
-            }
-            holder.iconStation.setImageDrawable(drawable);
-            holder.stationName.setText(name);
-            holder.mapOverlaySw.setChecked(station.isOverlaySw());
-            holder.mapOverlaySw.setClickable(true);
-            holder.mapOverlaySw.setOnClickListener(new cbOnClickListener(holder,position));
-            if(station.isOverlaySw()){
-                station.removeMarker();
-                LatLng latlng = new LatLng(station.getStationLat(), station.getStationLng());
-                Log.d(TAG,String.format("initialize overlay : %s, Lat = %3.4f, Lng = %3.4f",station.getRawName(),station.getStationLat(),station.getStationLng()));
-                MarkerOptions options = new MarkerOptions().position(latlng).title(station.getRawName());
-                Marker marker = this.mMap.addMarker(options);
-                station.setMarker(marker);
-            }
-        }
-        else{                       // 当該ステーションが未正解
-            Drawable drawable;
-            if(position==this.stations.size()-1){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_arrival_terminal_outofsv_station,null);
-            }
-            else{
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_out_of_sv_station,null);
-            }
-            holder.iconStation.setImageDrawable(drawable);
-            holder.stationName.setText(name);
-            holder.mapOverlaySw.setChecked(false);
-            holder.mapOverlaySw.setClickable(false);
         }
 
         return convertView;

@@ -32,7 +32,9 @@ import android.widget.TextView;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
+import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.database.SettingParameter;
+import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
 
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements
     private SettingParameter settingParameter;
     private FloatingActionButton mFab;
     private boolean fabVisible = true;
+    private int companyTotalScore = 0;
 
     private LinearLayout rootLayout;
 
@@ -81,9 +84,33 @@ public class MainActivity extends AppCompatActivity implements
         this.companies = db.getCompanies();
         Iterator<Company> ite = companies.iterator();
         while(ite.hasNext()){
+            int companyScore = 0;
+            int silhouetteTotalScore = 0;
+            int locationTotalScore = 0;
+            int stationsTotalScore = 0;
             Company company = ite.next();
             names.add(company.getName());
             Log.d(TAG,String.format("names : %s",company.getName()));
+            // totalScoreの計算
+            ArrayList<Line> lines = db.getLineList(company.getId(),false);
+            Iterator<Line> lineIterator = lines.iterator();
+            while(lineIterator.hasNext()){
+                Line line = lineIterator.next();
+                silhouetteTotalScore += line.getSilhouetteScore();
+                locationTotalScore += line.getLocationScore();
+                ArrayList<Station> stations = db.getStationList(line.getLineId());
+                Iterator<Station> stationIterator = stations.iterator();
+                while(stationIterator.hasNext()){
+                    Station station = stationIterator.next();
+                    stationsTotalScore += station.getStationScore();
+                }
+            }
+            companyScore = silhouetteTotalScore + locationTotalScore + stationsTotalScore;
+            company.setCompanyTotalScore(companyScore);
+            company.setCompanyTotalScore(silhouetteTotalScore);
+            company.setLocationTotalScore(locationTotalScore);
+            company.setStationsTotalScore(stationsTotalScore);
+            this.companyTotalScore += companyScore;
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id._toolbar);
@@ -92,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("線路と駅パズル：");
         actionBar.setSubtitle("鉄道事業者選択");
+
+        TextView totalScoreView = (TextView) findViewById(R.id.totalScoreValue);
+        totalScoreView.setText(String.format("%d",this.companyTotalScore));
 
         this.listView = (ListView) findViewById(R.id.company_list_view);
         this.adapter = new CompanyListAdapter(this,this.companies,this.db);
