@@ -395,7 +395,7 @@ public class DBAdapter {
     /*
      * 事業者ごとの路線名完了件数の取得
      */
-    public int countLineNameAnsweredLines(int companyId){
+    public int countSilhouetteAnsweredLines(int companyId){
         int cnt;
         Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and nameAnswerStatus = 1",new String[]{String.valueOf(companyId)});
         cnt = cursor.getCount();

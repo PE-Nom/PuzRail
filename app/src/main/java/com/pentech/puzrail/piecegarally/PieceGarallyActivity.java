@@ -65,8 +65,9 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     private RailwayListAdapter lineListAdapter;
     private DBAdapter db;
     private ArrayList<Line> lines = new ArrayList<Line>();
-    private TextView lineNameProgValue,lineMapProgValue,stationProgValue;
-    private GaugeView lineNameProgress, lineMapProgress,stationsProgress;
+    private TextView silhouetteProgValue, locationProgValue, stationsProgValue;
+    private TextView silhouetteProgDenom, locationProgDenom, stationsProgDenom;
+    private GaugeView silhouetteProgress, locationProgress,stationsProgress;
     private int selectedLineIndex = -1;
     private int companyId;
     private int previewAnswerCount = 0;
@@ -97,15 +98,18 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         this.lines = db.getLineList(this.companyId, false);
 
-        this.lineNameProgValue = (TextView) findViewById(R.id.lineNameProgValue);
-        this.lineNameProgress = (GaugeView) findViewById(R.id.lineNameProgress) ;
-        updateLineNameProgress();
+        this.silhouetteProgDenom = (TextView) findViewById(R.id.silhouetteProgDenominator);
+        this.silhouetteProgValue = (TextView) findViewById(R.id.silhouetteProgValue);
+        this.silhouetteProgress = (GaugeView) findViewById(R.id.silhouetteProgress) ;
+        updateSilhouetteProgress();
 
-        this.lineMapProgValue = (TextView) findViewById(R.id.lineMapProgValue);
-        this.lineMapProgress =(GaugeView) findViewById(R.id.lineMapProgress);
+        this.locationProgDenom = (TextView) findViewById(R.id.locationProgDenominator);
+        this.locationProgValue = (TextView) findViewById(R.id.locationProgValue);
+        this.locationProgress =(GaugeView) findViewById(R.id.locationProgress);
         updateLocationProgress();
 
-        this.stationProgValue = (TextView) findViewById(R.id.stationProgValue);
+        this.stationsProgDenom = (TextView) findViewById(R.id.stationsProgDenominator);
+        this.stationsProgValue = (TextView) findViewById(R.id.stationsProgValue);
         this.stationsProgress = (GaugeView) findViewById(R.id.stationsProgress);
         updateStationsProgress();
 
@@ -170,18 +174,22 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         Log.d(TAG,"onDismissScreen");
     }
 
-    private void updateLineNameProgress(){
-        int cnt = db.countLineNameAnsweredLines(this.companyId);
+    private void updateSilhouetteProgress(){
+        int cnt = db.countSilhouetteAnsweredLines(this.companyId);
         int lineNameProgress = 100*cnt/this.lines.size();
-        this.lineNameProgress.setData(lineNameProgress,"%",  ContextCompat.getColor(this, R.color.color_90), 90, true);
-        this.lineNameProgValue.setText(String.format("%d/%d",cnt,this.lines.size()));
+        this.silhouetteProgress.setData(lineNameProgress,"%",  ContextCompat.getColor(this, R.color.color_90), 90, true);
+//        this.silhouetteProgValue.setText(String.format("%d/%d",cnt,this.lines.size()));
+        this.silhouetteProgValue.setText(String.format("%d",cnt));
+        this.silhouetteProgDenom.setText(String.format("/%d",this.lines.size()));
     }
 
     private void updateLocationProgress(){
         int answeredLines = db.countLocationAnsweredLines(this.companyId);
         int locationProgress = 100*answeredLines/lines.size();
-        this.lineMapProgress.setData(locationProgress,"%",  ContextCompat.getColor(this, R.color.color_60), 90, true);
-        this.lineMapProgValue.setText(String.format("%d/%d",answeredLines,lines.size()));
+        this.locationProgress.setData(locationProgress,"%",  ContextCompat.getColor(this, R.color.color_60), 90, true);
+//        this.locationProgValue.setText(String.format("%d/%d",answeredLines,lines.size()));
+        this.locationProgValue.setText(String.format("%d",answeredLines));
+        this.locationProgDenom.setText(String.format("/%d",this.lines.size()));
     }
 
     private void updateStationsProgress(){
@@ -189,7 +197,9 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         int totalStations = db.countTotalStationsInCompany(this.companyId);
         int stationAnsweredProgress = 100*answeredStations/totalStations;
         this.stationsProgress.setData(stationAnsweredProgress,"%",  ContextCompat.getColor(this, R.color.color_30), 90, true);
-        this.stationProgValue.setText(String.format("%d/%d",answeredStations,totalStations));
+//        this.stationsProgValue.setText(String.format("%d/%d",answeredStations,totalStations));
+        this.stationsProgValue.setText(String.format("%d",answeredStations));
+        this.stationsProgDenom.setText(String.format("/%d",totalStations));
     }
 
     @Override
@@ -290,7 +300,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                                 correctLine.setNameAnswerStatus();
                                 PieceGarallyActivity.this.db.updateLineNameAnswerStatus(correctLine);
                                 PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                PieceGarallyActivity.this.updateLineNameProgress();
+                                PieceGarallyActivity.this.updateSilhouetteProgress();
                             }
                             else{
                                 Toast.makeText(PieceGarallyActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
@@ -470,7 +480,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
             });
 
             // 画面中央に表示
-            onePointTutorial.showAtLocation(findViewById(R.id.lineNameProgValue), Gravity.BOTTOM, 0, 0);
+            onePointTutorial.showAtLocation(findViewById(R.id.silhouetteProgValue), Gravity.BOTTOM, 0, 0);
 
             mOnePointTutorialDisplayingTimer = new Timer(true);
             mOnePointTutorialDisplayingTimer.schedule(new tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
@@ -553,7 +563,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                         PieceGarallyActivity.this.longClickSelectedLine.resetNameAnswerStatus();
                         PieceGarallyActivity.this.db.updateLineNameAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
                         PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                        PieceGarallyActivity.this.updateLineNameProgress();
+                        PieceGarallyActivity.this.updateSilhouetteProgress();
 
                         // 地図合わせ
                         // Log.d(TAG,String.format("%s:地図合わせのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));

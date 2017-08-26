@@ -51,6 +51,40 @@
                 android:scrollbars="vertical"
                 android:weightSum="1">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/totalScoreTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="1dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:text="総合得点："
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textSize="14sp"
+                        android:textStyle="bold|italic"
+                        android:typeface="normal" />
+
+                    <TextView
+                        android:id="@+id/totalScoreValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="1dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:text="3000000"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textSize="14sp"
+                        android:textStyle="bold|italic"
+                        android:typeface="normal" />
+                </LinearLayout>
+
                 <ListView
                     android:id="@+id/company_list_view"
                     style="@style/Widget.AppCompat.ListView"

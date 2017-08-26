@@ -91,13 +91,13 @@ public class RailwayListAdapter extends BaseAdapter {
 
             holder.mapImageBtn = (ImageButton)convertView.findViewById(R.id.mapImageButton);
             holder.staImageBtn = (ImageButton)convertView.findViewById(R.id.stationImageButton);
-            holder.progGauge = (SimpleGaugeView) convertView.findViewById(R.id.stationProgress) ;
+//            holder.progGauge = (SimpleGaugeView) convertView.findViewById(R.id.stationProgress) ;
 
             holder.mapImageBtn.setOnClickListener(list);
             holder.staImageBtn.setOnClickListener(list);
             int progress = 100*dbAdapter.countAnsweredStationsInLine(companyId,lineId)/
                     dbAdapter.countTotalStationsInLine(companyId,lineId);
-            holder.progGauge.setData(progress,"%", ContextCompat.getColor(this.context, R.color.color_30));
+//            holder.progGauge.setData(progress,"%", ContextCompat.getColor(this.context, R.color.color_30));
 
             convertView.setTag(holder);
         }
@@ -155,7 +155,7 @@ public class RailwayListAdapter extends BaseAdapter {
         int progress = 100*dbAdapter.countAnsweredStationsInLine(companyId,lineId)/
                 dbAdapter.countTotalStationsInLine(companyId,lineId);
 //        Log.d(TAG,String.format("AnsweredStation %d, %d, %d",progress,totalStationsInLine,answeredStationsInLine));
-        holder.progGauge.setData(progress,"%", ContextCompat.getColor(this.context, R.color.color_30));
+//        holder.progGauge.setData(progress,"%", ContextCompat.getColor(this.context, R.color.color_30));
 
         return convertView;
     }

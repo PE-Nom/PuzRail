@@ -44,123 +44,7 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/lineNameText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="路線ｼﾙｴｯﾄ"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/lineNameProgValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="路線名進捗"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <com.pentech.puzrail.ui.GaugeView
-                    android:id="@+id/lineNameProgress"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/lineMapText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="地図合わせ"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/lineMapProgValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="敷設進捗"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <com.pentech.puzrail.ui.GaugeView
-                    android:id="@+id/lineMapProgress"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/駅"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="駅並べ"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/stationProgValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:text="敷設進捗"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <com.pentech.puzrail.ui.GaugeView
-                    android:id="@+id/stationsProgress"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp" />
-
-            </LinearLayout>
+            <include layout="@layout/progress_and_score" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -189,18 +73,6 @@
                     app:fabSize="mini" />
 
             </FrameLayout>
-
-            <!--
-                        <ListView
-                            android:id="@+id/railway_list_view"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginBottom="@dimen/activity_vertical_margin"
-                            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                            android:layout_marginRight="@dimen/activity_horizontal_margin"
-                            android:layout_marginTop="2dp"
-                            android:background="@drawable/backgound_bg" />
-            -->
 
         </LinearLayout>
 
