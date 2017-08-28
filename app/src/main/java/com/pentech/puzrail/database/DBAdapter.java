@@ -374,11 +374,12 @@ public class DBAdapter {
         return true;
     }
 
-    public boolean updateLineNameAnswerStatus(Line line){
+    public boolean updateLineSilhouetteAnswerStatus(Line line){
         int lineId = line.getLineId();
         ContentValues cv = new ContentValues();
         if( line.isNameCompleted()){
             cv.put("nameAnswerStatus",1);
+            cv.put("silhouetteScore", line.getSilhouetteScore());
         }
         else{
             cv.put("nameAnswerStatus",0);
@@ -512,6 +513,7 @@ public class DBAdapter {
         ContentValues cv = new ContentValues();
         if(station.isFinished()){
             cv.put("answerStatus", 1);
+            cv.put("stationScore", station.getStationScore());
         }
         else{
             cv.put("answerStatus", 0);
@@ -584,6 +586,16 @@ public class DBAdapter {
                 new String[]{String.valueOf(companyId),String.valueOf(lineId)});
         cnt =cur.getCount();
         return cnt;
+    }
+
+    public int sumStationsScoreInLine(int companyId,int lineId){
+        int score = 0;
+        Cursor cur = db.rawQuery("SELECT sum(ifnull(stationScore),0) as Total from stations WHERE companyId=? and lineId=?",
+                new String[]{String.valueOf(companyId),String.valueOf(lineId)});
+        if(cur.moveToNext()){
+            score = cur.getInt(0);
+        }
+        return score;
     }
 
 }

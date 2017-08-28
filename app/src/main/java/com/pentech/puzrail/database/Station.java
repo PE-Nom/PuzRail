@@ -23,6 +23,8 @@ public class Station {
     private boolean overlaySw = false; // 地図上のマーカーオーバレイ表示
     private boolean answerStatus = false; // false:未回答、true:回答済み
     private int stationScore;
+    private int stationMissingCount = 0;
+    private int stationShowAnswerCount = 0;
 
     private Marker mMarker = null;
 
@@ -107,8 +109,13 @@ public class Station {
         }
     }
 
-    public int getStationScore() { return this.stationScore; }
-    public void setStationScore(int score){
-        this.stationScore = score;
+    public void incrementStationMissingCount() { this.stationMissingCount++; }
+    public void incrementStationShowAnswerCount() { this.stationShowAnswerCount++; }
+    public int computeStationScore(int remainStations ) {
+        int sc = remainStations - this.stationMissingCount;
+        if (sc < 0) this.stationScore = 0;
+        else this.stationScore = sc;
+        return this.stationScore;
     }
+    public int getStationScore() { return this.stationScore; }
 }

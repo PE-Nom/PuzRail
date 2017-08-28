@@ -69,10 +69,10 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     private TextView silhouetteProgValue, locationProgValue, stationsProgValue;
     private TextView silhouetteProgDenom, locationProgDenom, stationsProgDenom;
     private GaugeView silhouetteProgress, locationProgress,stationsProgress;
-    private int companyTotalScore = 0;
-    private int silhouetteTotalScore = 0;
-    private int locationTotalScore = 0;
-    private int stationsTotalScore = 0;
+    private TextView companyTotalScore;
+    private TextView silhouetteTotalScore;
+    private TextView locationTotalScore;
+    private TextView stationsTotalScore;
     private int selectedLineIndex = -1;
     private int companyId;
     private int previewAnswerCount = 0;
@@ -103,28 +103,10 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         this.lines = db.getLineList(this.companyId, false);
 
-        Iterator<Line> lineIterator = lines.iterator();
-        while(lineIterator.hasNext()){
-            Line line = lineIterator.next();
-            this.silhouetteTotalScore+= line.getSilhouetteScore();
-            this.locationTotalScore += line.getLocationScore();
-            ArrayList<Station> stations = db.getStationList(line.getLineId());
-            Iterator<Station> stationIterator = stations.iterator();
-            while(stationIterator.hasNext()){
-                Station station = stationIterator.next();
-                this.stationsTotalScore += station.getStationScore();
-            }
-        }
-        this.companyTotalScore = this.silhouetteTotalScore + this.locationTotalScore + this.stationsTotalScore;
-
-        TextView companyScore = (TextView) findViewById(R.id.companyTotalScore);
-        companyScore.setText(String.format("%d",this.companyTotalScore));
-        TextView silhouetteScore = (TextView) findViewById(R.id.silhouetteScore);
-        silhouetteScore.setText(String.format("%d",this.silhouetteTotalScore));
-        TextView locationScore = (TextView) findViewById(R.id.locationScore);
-        locationScore.setText(String.format("%d",this.locationTotalScore));
-        TextView stationsScore = (TextView) findViewById(R.id.stationsSocre);
-        stationsScore.setText(String.format("%d",this.stationsTotalScore));
+        this.companyTotalScore = (TextView) findViewById(R.id.companyTotalScore);
+        this.silhouetteTotalScore = (TextView) findViewById(R.id.silhouetteScore);
+        this.locationTotalScore = (TextView) findViewById(R.id.locationScore);
+        this.stationsTotalScore = (TextView) findViewById(R.id.stationsSocre);
 
         this.silhouetteProgDenom = (TextView) findViewById(R.id.silhouetteProgDenominator);
         this.silhouetteProgValue = (TextView) findViewById(R.id.silhouetteProgValue);
@@ -140,6 +122,8 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         this.stationsProgValue = (TextView) findViewById(R.id.stationsProgValue);
         this.stationsProgress = (GaugeView) findViewById(R.id.stationsProgress);
         updateStationsProgress();
+
+        updateCompanyScore();
 
         // GridViewのインスタンスを生成
         this.listView = (MultiButtonListView) findViewById(R.id.railway_list_view);
@@ -201,12 +185,12 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         Log.d(TAG,"onDismissScreen");
     }
 
-    private void updateSilhouetteProgress(){
+    private void updateSilhouetteProgress() {
         int cnt = db.countSilhouetteAnsweredLines(this.companyId);
-        int lineNameProgress = 100*cnt/this.lines.size();
-        this.silhouetteProgress.setData(lineNameProgress,"%",  ContextCompat.getColor(this, R.color.color_90), 90, true);
-        this.silhouetteProgValue.setText(String.format("%d",cnt));
-        this.silhouetteProgDenom.setText(String.format("/%d",this.lines.size()));
+        int lineNameProgress = 100 * cnt / this.lines.size();
+        this.silhouetteProgress.setData(lineNameProgress, "%", ContextCompat.getColor(this, R.color.color_90), 90, true);
+        this.silhouetteProgValue.setText(String.format("%d", cnt));
+        this.silhouetteProgDenom.setText(String.format("/%d", this.lines.size()));
     }
 
     private void updateLocationProgress(){
@@ -224,6 +208,28 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         this.stationsProgress.setData(stationAnsweredProgress,"%",  ContextCompat.getColor(this, R.color.color_30), 90, true);
         this.stationsProgValue.setText(String.format("%d",answeredStations));
         this.stationsProgDenom.setText(String.format("/%d",totalStations));
+    }
+
+    private void updateCompanyScore(){
+        int silhouetteScore = 0;
+        int locationScore = 0;
+        int stationsScore = 0;
+        Iterator<Line> lineIterator = lines.iterator();
+        while(lineIterator.hasNext()){
+            Line line = lineIterator.next();
+            silhouetteScore += line.getSilhouetteScore();
+            locationScore += line.getLocationScore();
+            ArrayList<Station> stations = db.getStationList(line.getLineId());
+            Iterator<Station> stationIterator = stations.iterator();
+            while(stationIterator.hasNext()){
+                Station station = stationIterator.next();
+                stationsScore += station.getStationScore();
+            }
+        }
+        this.silhouetteTotalScore.setText(String.format("%d",silhouetteScore));
+        this.locationTotalScore.setText(String.format("%d",locationScore));
+        this.stationsTotalScore.setText(String.format("%d",stationsScore));
+        this.companyTotalScore.setText(String.format("%d",silhouetteScore+locationScore+stationsScore));
     }
 
     @Override
@@ -322,11 +328,14 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             if(correctLine.getLineId() == selectedLine.getLineId()){
                                 Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
                                 correctLine.setNameAnswerStatus();
-                                PieceGarallyActivity.this.db.updateLineNameAnswerStatus(correctLine);
+                                correctLine.computeSilhouetteScore(randomizedRemainLines.size());
+                                PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(correctLine);
                                 PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
                                 PieceGarallyActivity.this.updateSilhouetteProgress();
+                                PieceGarallyActivity.this.updateCompanyScore();
                             }
                             else{
+                                correctLine.incrementSilhouetteMissingCount();
                                 Toast.makeText(PieceGarallyActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -585,7 +594,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                         // 路線シルエット
                         // Log.d(TAG,String.format("%s:路線シルエットのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
                         PieceGarallyActivity.this.longClickSelectedLine.resetNameAnswerStatus();
-                        PieceGarallyActivity.this.db.updateLineNameAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
+                        PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
                         PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
                         PieceGarallyActivity.this.updateSilhouetteProgress();
 
@@ -714,6 +723,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             case 1: // 回答を見る
                                 if(previewAnswerCount < showAnswerMax ){
                                     showRailwaySilhouetteAnswer(longClickSelectedLine);
+                                    longClickSelectedLine.incrementSilhouetteShowAnswerCount();
                                     if(PieceGarallyActivity.this.onReceiveAdCnt > 1){
                                         previewAnswerCount++;
                                     }

@@ -43,6 +43,10 @@ public class Line {
     private int silhouetteScore;
     private int locationScore;
 
+    private int silhouetteMissingCount = 0;
+    private int silhouetteShowAnswerCount = 0;
+    private int locationShowAnswerCount = 0;
+
     public Line(Context context,
                 int lineId,
                 int areaCode,
@@ -185,12 +189,22 @@ public class Line {
     public void setStationAnswerStatus() { this.stationAnswerStatus=true; }
     public void resetStationAnswerStatus() { this.stationAnswerStatus=false; }
 
+    public void incrementSilhouetteMissingCount(){ this.silhouetteMissingCount++; }
+    public void incrementSilhouetteShowAnswerCount() { this.silhouetteShowAnswerCount++; }
+    public int computeSilhouetteScore(int remainLineCount){
+        int sc = remainLineCount - ( this.silhouetteMissingCount + this.silhouetteShowAnswerCount*2 );
+        if( sc < 0 ) this.silhouetteScore = 0;
+        else         this.silhouetteScore = sc;
+        return this.silhouetteScore;
+    }
     public int getSilhouetteScore() { return this.silhouetteScore; }
-    public void setSilhouetteScore(int score){
-        this.silhouetteScore = score;
+
+    public void incrementLocationShowAnswerCount() { this.locationShowAnswerCount++; }
+    public int computeLocationScore(int remainTime){
+        int sc = remainTime - this.locationShowAnswerCount*5;
+        if( sc < 0 ) this.locationScore = 0;
+        else         this.locationScore = sc;
+        return this.locationScore;
     }
     public int getLocationScore() { return this.locationScore; }
-    public void setLocationScore(int score){
-        this.locationScore = score;
-    }
 }

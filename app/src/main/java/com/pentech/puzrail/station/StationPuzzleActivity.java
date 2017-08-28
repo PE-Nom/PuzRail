@@ -142,16 +142,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         actionBar.setTitle("線路と駅パズル：駅並べ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
-        int stationsTotalScore = 0;
-        ArrayList<Station> stations = db.getStationList(this.line.getLineId());
-        Iterator<Station> stationIterator = stations.iterator();
-        while(stationIterator.hasNext()){
-            Station station = stationIterator.next();
-            stationsTotalScore += station.getStationScore();
-        }
         this.stationsScore = (TextView) findViewById(R.id.stationsScore);
-        this.stationsScore.setText(String.format("%d",stationsTotalScore));
-
         this.progressTitle = (TextView)findViewById(R.id.ProgressTitle);
         this.progress = (ProgressBar)findViewById(R.id.ProgressBar);
         updateProgressBar();
@@ -214,15 +205,17 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     private void updateProgressBar(){
         int finishedCnt = 0;
+        int stationsTotalScore = 0;
         Iterator<Station> ite = stations.listIterator();
         while(ite.hasNext()){
             Station station = ite.next();
             if(station.isFinished()) finishedCnt++;
-
+            stationsTotalScore += station.getStationScore();
         }
         this.progressTitle.setText(String.format("%s 駅名解答率 : %d/%d",this.line.getName(), finishedCnt, stations.size()));
         this.progress.setMax(stations.size());
         this.progress.setProgress(finishedCnt);
+        this.stationsScore.setText(String.format("%d",stationsTotalScore));
     }
 
     public DBAdapter getDb(){
@@ -313,12 +306,14 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                             if(answerName.equals(correctName)){ // 駅名が一致する？
                                 Toast.makeText(StationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
                                 correctStationInfo.setFinishStatus();
+                                correctStationInfo.computeStationScore(remaining.size());
                                 StationPuzzleActivity.this.db.updateStationAnswerStatus(correctStationInfo);
                                 StationPuzzleActivity.this.stationsAdapter.notifyDataSetChanged();
                                 // 進捗バーの更新
                                 StationPuzzleActivity.this.updateProgressBar();
                             }
                             else{
+                                correctStationInfo.incrementStationMissingCount();
                                 Toast.makeText(StationPuzzleActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
                             }
                             StationPuzzleActivity.this.selectedStationIndex = -1;
@@ -831,6 +826,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                             case 1: // 回答を見る
                                 if( mAnswerDisplayingTimer == null){
                                     if( showAnswerCount < showAnswerMax ) {
+                                        StationPuzzleActivity.this.longClickSelectedStation.incrementStationShowAnswerCount();
                                         answerDisplay();
                                         if(StationPuzzleActivity.this.onReceiveAdCnt > 1) {
                                             showAnswerCount++;

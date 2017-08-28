@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements
                 Line line = lineIterator.next();
                 silhouetteTotalScore += line.getSilhouetteScore();
                 locationTotalScore += line.getLocationScore();
+//                stationsTotalScore = db.sumStationsScoreInLine(company.getId(),line.getLineId());
                 ArrayList<Station> stations = db.getStationList(line.getLineId());
                 Iterator<Station> stationIterator = stations.iterator();
                 while(stationIterator.hasNext()){
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             companyScore = silhouetteTotalScore + locationTotalScore + stationsTotalScore;
             company.setCompanyTotalScore(companyScore);
-            company.setCompanyTotalScore(silhouetteTotalScore);
+            company.setSilhouetteTotalScore(silhouetteTotalScore);
             company.setLocationTotalScore(locationTotalScore);
             company.setStationsTotalScore(stationsTotalScore);
             this.companyTotalScore += companyScore;
