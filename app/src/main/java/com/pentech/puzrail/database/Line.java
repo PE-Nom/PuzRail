@@ -2,7 +2,6 @@ package com.pentech.puzrail.database;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 
 /**
  * Created by takashi on 2016/11/24.
@@ -36,7 +35,7 @@ public class Line {
     private double min_zoom_level;
     private double init_zoom_level;
 
-    private boolean nameAnswerStatus;
+    private boolean silhouetteAnswerStatus;
     private boolean locationAnswerStatus;
     private boolean stationAnswerStatus;
 
@@ -69,7 +68,7 @@ public class Line {
                 double max_zoom_level,
                 double min_zoom_level,
                 double init_zoom_level,
-                boolean nameAnswerStatus,
+                boolean silhouetteAnswerStatus,
                 boolean locationAnswerStatus,
                 boolean stationAnswerStatus,
                 int silhouetteScore,
@@ -98,7 +97,7 @@ public class Line {
         this.max_zoom_level = max_zoom_level;
         this.min_zoom_level = min_zoom_level;
         this.init_zoom_level = init_zoom_level;
-        this.nameAnswerStatus = nameAnswerStatus;
+        this.silhouetteAnswerStatus = silhouetteAnswerStatus;
         this.locationAnswerStatus = locationAnswerStatus;
         this.stationAnswerStatus = stationAnswerStatus;
         this.silhouetteScore = silhouetteScore;
@@ -110,7 +109,7 @@ public class Line {
     public String getRawName() { return this.lineName; }
     public String getName() {
         String name = this.noneName;
-        if(isNameCompleted()){
+        if(isSilhouetteCompleted()){
             name = this.lineName;
         }
         return name;
@@ -118,7 +117,7 @@ public class Line {
     public String getRawKana() { return this.lineKana; }
     public String getLineKana() {
         String name = this.noneName;
-        if(isNameCompleted()){
+        if(isSilhouetteCompleted()){
             name = this.lineKana;
         }
         return name;
@@ -169,9 +168,9 @@ public class Line {
         return this.init_campos_lng;
     }
 
-    public boolean isNameCompleted() {return this.nameAnswerStatus; }
-    public void setNameAnswerStatus(){ this.nameAnswerStatus=true; }
-    public void resetNameAnswerStatus() { this.nameAnswerStatus=false; }
+    public boolean isSilhouetteCompleted() {return this.silhouetteAnswerStatus; }
+    public void setSilhouetteAnswerStatus(){ this.silhouetteAnswerStatus =true; }
+    public void resetSilhouetteAnswerStatus() { this.silhouetteAnswerStatus =false; }
 
     public boolean isLocationCompleted(){
         return this.locationAnswerStatus;
@@ -200,8 +199,9 @@ public class Line {
     public int getSilhouetteScore() { return this.silhouetteScore; }
 
     public void incrementLocationShowAnswerCount() { this.locationShowAnswerCount++; }
-    public int computeLocationScore(int remainTime){
-        int sc = remainTime - this.locationShowAnswerCount*5;
+    public int computeLocationScore(long elapseTime){
+        int elapse = (int)elapseTime;
+        int sc = 100 - ( elapse + this.locationShowAnswerCount*5);
         if( sc < 0 ) this.locationScore = 0;
         else         this.locationScore = sc;
         return this.locationScore;

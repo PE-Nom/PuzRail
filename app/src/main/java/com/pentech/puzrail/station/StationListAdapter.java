@@ -83,9 +83,11 @@ public class StationListAdapter extends BaseAdapter {
         }
         else{
             holder = (ViewHolder)convertView.getTag();
+        }
 
             Station station = (Station)stations.get(position);
             String name = station.getName() + "(" + station.getKana() + ")";
+            String score = String.format("%d",station.getStationScore());
 
             if(station.isFinished()){   // 当該ステーションが正解済み
                 Drawable drawable;
@@ -100,7 +102,7 @@ public class StationListAdapter extends BaseAdapter {
                 }
                 holder.iconStation.setImageDrawable(drawable);
                 holder.stationName.setText(name);
-                holder.stationScore.setText(String.format("%d",station.getStationScore()));
+                holder.stationScore.setText(score);
                 holder.mapOverlaySw.setChecked(station.isOverlaySw());
                 holder.mapOverlaySw.setClickable(true);
                 holder.mapOverlaySw.setOnClickListener(new cbOnClickListener(holder,position));
@@ -123,11 +125,10 @@ public class StationListAdapter extends BaseAdapter {
                 }
                 holder.iconStation.setImageDrawable(drawable);
                 holder.stationName.setText(name);
-                holder.stationScore.setText(String.format("%d",station.getStationScore()));
+                holder.stationScore.setText(score);
                 holder.mapOverlaySw.setChecked(false);
                 holder.mapOverlaySw.setClickable(false);
             }
-        }
 
         return convertView;
     }

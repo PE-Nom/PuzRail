@@ -32,9 +32,7 @@ import android.widget.TextView;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
-import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.database.SettingParameter;
-import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
 
@@ -84,29 +82,12 @@ public class MainActivity extends AppCompatActivity implements
         this.companies = db.getCompanies();
         Iterator<Company> ite = companies.iterator();
         while(ite.hasNext()){
-            int companyScore = 0;
-            int silhouetteTotalScore = 0;
-            int locationTotalScore = 0;
-            int stationsTotalScore = 0;
             Company company = ite.next();
-            names.add(company.getName());
-            Log.d(TAG,String.format("names : %s",company.getName()));
             // totalScoreの計算
-            ArrayList<Line> lines = db.getLineList(company.getId(),false);
-            Iterator<Line> lineIterator = lines.iterator();
-            while(lineIterator.hasNext()){
-                Line line = lineIterator.next();
-                silhouetteTotalScore += line.getSilhouetteScore();
-                locationTotalScore += line.getLocationScore();
-//                stationsTotalScore = db.sumStationsScoreInLine(company.getId(),line.getLineId());
-                ArrayList<Station> stations = db.getStationList(line.getLineId());
-                Iterator<Station> stationIterator = stations.iterator();
-                while(stationIterator.hasNext()){
-                    Station station = stationIterator.next();
-                    stationsTotalScore += station.getStationScore();
-                }
-            }
-            companyScore = silhouetteTotalScore + locationTotalScore + stationsTotalScore;
+            int silhouetteTotalScore = db.sumSilhouetteScoreInLine(company.getId());
+            int locationTotalScore   = db.sumLocationScoreInLine(company.getId());
+            int stationsTotalScore   = db.sumStationsScoreInLine(company.getId());
+            int companyScore = silhouetteTotalScore + locationTotalScore + stationsTotalScore;
             company.setCompanyTotalScore(companyScore);
             company.setSilhouetteTotalScore(silhouetteTotalScore);
             company.setLocationTotalScore(locationTotalScore);
@@ -168,9 +149,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-    }
+    public void onScrollStateChanged(AbsListView view, int scrollState) { }
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) { Log.d(TAG,"onDismissScreen"); }
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -187,11 +168,6 @@ public class MainActivity extends AppCompatActivity implements
                 MainActivity.this.mFab.animate().translationY(MainActivity.this.mFab.getHeight() + fab_bottomMargin).setInterpolator(new LinearInterpolator()).start();
             }
         }
-    }
-
-    @Override
-    public void onDismissScreen(NendAdView nendAdView) {
-        Log.d(TAG,"onDismissScreen");
     }
 
     /**
@@ -431,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements
                                 case 0:
                                     if(checkedItems[i]){
                                         Log.d(TAG,String.format("%s:路線名回答のクリア",MainActivity.this.longClickSelectedCompany.getName()));
-                                        MainActivity.this.db.updateLineNameAnswerStatusInCompany(MainActivity.this.longClickSelectedCompany.getId(),false);
+                                        MainActivity.this.db.updateLineSilhouetteAnswerStatusInCompany(MainActivity.this.longClickSelectedCompany.getId(),false);
                                         MainActivity.this.adapter.notifyDataSetChanged();
                                     }
                                     break;

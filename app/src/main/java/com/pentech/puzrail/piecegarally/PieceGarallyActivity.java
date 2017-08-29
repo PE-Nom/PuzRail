@@ -36,7 +36,6 @@ import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.database.SettingParameter;
-import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.location.LocationPuzzleActivity;
 import com.pentech.puzrail.station.StationPuzzleActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
@@ -69,7 +68,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     private TextView silhouetteProgValue, locationProgValue, stationsProgValue;
     private TextView silhouetteProgDenom, locationProgDenom, stationsProgDenom;
     private GaugeView silhouetteProgress, locationProgress,stationsProgress;
-    private TextView companyTotalScore;
+    private TextView companyScore;
     private TextView silhouetteTotalScore;
     private TextView locationTotalScore;
     private TextView stationsTotalScore;
@@ -103,7 +102,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         this.lines = db.getLineList(this.companyId, false);
 
-        this.companyTotalScore = (TextView) findViewById(R.id.companyTotalScore);
+        this.companyScore = (TextView) findViewById(R.id.companyScore);
         this.silhouetteTotalScore = (TextView) findViewById(R.id.silhouetteScore);
         this.locationTotalScore = (TextView) findViewById(R.id.locationScore);
         this.stationsTotalScore = (TextView) findViewById(R.id.stationsSocre);
@@ -211,25 +210,13 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     }
 
     private void updateCompanyScore(){
-        int silhouetteScore = 0;
-        int locationScore = 0;
-        int stationsScore = 0;
-        Iterator<Line> lineIterator = lines.iterator();
-        while(lineIterator.hasNext()){
-            Line line = lineIterator.next();
-            silhouetteScore += line.getSilhouetteScore();
-            locationScore += line.getLocationScore();
-            ArrayList<Station> stations = db.getStationList(line.getLineId());
-            Iterator<Station> stationIterator = stations.iterator();
-            while(stationIterator.hasNext()){
-                Station station = stationIterator.next();
-                stationsScore += station.getStationScore();
-            }
-        }
+        int silhouetteScore = db.sumSilhouetteScoreInLine(this.companyId);
+        int locationScore = db.sumLocationScoreInLine(this.companyId);
+        int stationsScore = db.sumStationsScoreInLine(this.companyId);
         this.silhouetteTotalScore.setText(String.format("%d",silhouetteScore));
         this.locationTotalScore.setText(String.format("%d",locationScore));
         this.stationsTotalScore.setText(String.format("%d",stationsScore));
-        this.companyTotalScore.setText(String.format("%d",silhouetteScore+locationScore+stationsScore));
+        this.companyScore.setText(String.format("%d",silhouetteScore+locationScore+stationsScore));
     }
 
     @Override
@@ -268,7 +255,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         // アイコンタップでTextViewにその名前を表示する
         Log.d(TAG, String.format("onItemLongClick position = %d", position));
         Line line = this.lines.get(position);
-        if(!line.isNameCompleted()){
+        if(!line.isSilhouetteCompleted()){
             this.selectedLineIndex = position;
             final ArrayList<Line> sortedRemainLines = new ArrayList<Line>();
             final ArrayList<Line> randomizedRemainLines = new ArrayList<Line>();
@@ -277,7 +264,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
             Iterator<Line> lineIte = this.lines.iterator();
             while(lineIte.hasNext()){
                 Line ln = lineIte.next();
-                if(!ln.isNameCompleted()){
+                if(!ln.isSilhouetteCompleted()){
                     sortedRemainLines.add(ln);
                 }
             }
@@ -327,7 +314,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             //正解判定
                             if(correctLine.getLineId() == selectedLine.getLineId()){
                                 Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
-                                correctLine.setNameAnswerStatus();
+                                correctLine.setSilhouetteAnswerStatus();
                                 correctLine.computeSilhouetteScore(randomizedRemainLines.size());
                                 PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(correctLine);
                                 PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
@@ -357,7 +344,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         Line line = this.lines.get(position);
         switch(view.getId()){
             case R.id.mapImageButton: {
-                    if(line.isNameCompleted()){
+                    if(line.isSilhouetteCompleted()){
                         Intent intent = new Intent(PieceGarallyActivity.this, LocationPuzzleActivity.class);
                         intent.putExtra("SelectedLineId", line.getLineId());
                         intent.putExtra("previewAnswerCount", this.previewAnswerCount);
@@ -370,7 +357,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                 }
                 break;
             case R.id.stationImageButton : {
-                    if(line.isNameCompleted()){
+                    if(line.isSilhouetteCompleted()){
                         Intent intent = new Intent(PieceGarallyActivity.this, StationPuzzleActivity.class);
                         intent.putExtra("SelectedLineId", line.getLineId());
                         intent.putExtra("previewAnswerCount", this.previewAnswerCount);
@@ -593,7 +580,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                     case 0:
                         // 路線シルエット
                         // Log.d(TAG,String.format("%s:路線シルエットのクリア", PieceGarallyActivity.this.longClickSelectedLine.getName()));
-                        PieceGarallyActivity.this.longClickSelectedLine.resetNameAnswerStatus();
+                        PieceGarallyActivity.this.longClickSelectedLine.resetSilhouetteAnswerStatus();
                         PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(PieceGarallyActivity.this.longClickSelectedLine);
                         PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
                         PieceGarallyActivity.this.updateSilhouetteProgress();

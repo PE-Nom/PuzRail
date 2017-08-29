@@ -3,7 +3,6 @@ package com.pentech.puzrail.piecegarally;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,12 +16,9 @@ import android.widget.TextView;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
-import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.ui.MultiButtonListView;
-import com.pentech.puzrail.ui.SimpleGaugeView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Created by takashi on 2016/12/19.
@@ -113,6 +109,7 @@ public class RailwayListAdapter extends BaseAdapter {
         }
         else{
             holder = (ViewHolder)convertView.getTag();
+        }
 
             // 路線名のテキスト表示
             Log.d(TAG,String.format("linename = %s, linekana = %s",line.getRawName(),line.getRawKana()));
@@ -123,7 +120,7 @@ public class RailwayListAdapter extends BaseAdapter {
 
             // 路線シルエットのイメージ表示
             Drawable drawable;
-            if(line.isNameCompleted()){
+            if(line.isSilhouetteCompleted()){
                 drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
             }
             else{
@@ -135,7 +132,7 @@ public class RailwayListAdapter extends BaseAdapter {
             if(line.isLocationCompleted()){
                 drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_completed_button,null);
             }
-            else if(line.isNameCompleted()){
+            else if(line.isSilhouetteCompleted()){
                 drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_button,null);
             }
             else{
@@ -151,7 +148,7 @@ public class RailwayListAdapter extends BaseAdapter {
             {
                 drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_completed_button,null);
             }
-            else if(line.isNameCompleted()){
+            else if(line.isSilhouetteCompleted()){
                 drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_button,null);
             }
             else{
@@ -166,13 +163,7 @@ public class RailwayListAdapter extends BaseAdapter {
             holder.locationScoreAndUnit.setText(String.format("%d pt.",line.getLocationScore()));
 
             // stationsScoreの表示
-            int stationsTotalScore = 0;
-            ArrayList<Station> stations = this.dbAdapter.getStationList(line.getLineId());
-            Iterator<Station> stationIterator = stations.iterator();
-            while(stationIterator.hasNext()){
-                Station station = stationIterator.next();
-                stationsTotalScore += station.getStationScore();
-            }
+            int stationsTotalScore = this.dbAdapter.sumStationsScoreInLine(companyId,lineId);
             holder.stationsScoreAndUnit.setText(String.format("%d pt.",stationsTotalScore));
             // 「駅並べ」の進捗表示
             holder.stationsProgress.setText(String.format("%d/%d",
@@ -182,7 +173,6 @@ public class RailwayListAdapter extends BaseAdapter {
             // 路線合計得点の表示
             int lineTotalScore = line.getSilhouetteScore() + line.getLocationScore() + stationsTotalScore;
             holder.lineTotalScoreAndUnit.setText(String.format("%d pt.",lineTotalScore));
-        }
 
         return convertView;
     }

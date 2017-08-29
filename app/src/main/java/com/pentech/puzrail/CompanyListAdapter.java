@@ -11,12 +11,9 @@ import android.widget.TextView;
 
 import com.pentech.puzrail.database.Company;
 import com.pentech.puzrail.database.DBAdapter;
-import com.pentech.puzrail.database.Line;
-import com.pentech.puzrail.database.Station;
 import com.pentech.puzrail.ui.GaugeView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Created by takashi on 2017/03/26.
@@ -99,7 +96,7 @@ public class CompanyListAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.companyName = (TextView)convertView.findViewById(R.id.companyName);
             holder.companyKana = (TextView)convertView.findViewById(R.id.companyKana);
-            holder.companyTotalScore = (TextView)convertView.findViewById(R.id.companyTotalScore);
+            holder.companyTotalScore = (TextView)convertView.findViewById(R.id.companyScore);
 
             holder.silhouetteProgressDenominator = (TextView)convertView.findViewById(R.id.silhouetteProgDenominator);
             holder.silhouetteProgressValue = (TextView)convertView.findViewById(R.id.silhouetteProgValue);
@@ -120,6 +117,7 @@ public class CompanyListAdapter extends BaseAdapter {
         }
         else{
             holder = (ViewHolder)convertView.getTag();
+        }
 
             Company company = this.companies.get(position);
             holder.companyName.setText(company.getName()+" ");
@@ -158,7 +156,6 @@ public class CompanyListAdapter extends BaseAdapter {
     //        Log.d(TAG,String.format("opendStations = %d, totalStations = %d, stationProgress = %d",openedStations,totalStations,stationsProgress));
             holder.stationsProgress.setData(stationOpenProgress,"%",ContextCompat.getColor(this.context, R.color.color_30),90,true);
             holder.stationsScore.setText(String.format("%d",company.getStationsTotalScore()));
-        }
 
         return convertView;
     }

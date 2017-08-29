@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.StringTokenizer;
 
 /**
  * Created by takashi on 2017/01/06.
@@ -22,7 +21,7 @@ import java.util.StringTokenizer;
 
 public class DBAdapter {
     static final String DATABASE_NAME = "Railway.db";
-    static final int DATABASE_VERSION = 4;
+    static final int DATABASE_VERSION = 5;
 
     private String TAG = "DBAdapter";
 
@@ -234,7 +233,7 @@ public class DBAdapter {
         double max_zoom_level = c.getDouble(c.getColumnIndex("max_zoom_level"));
         double min_zoom_level = c.getDouble(c.getColumnIndex("min_zoom_level"));
         double init_zoom_level = c.getDouble(c.getColumnIndex("init_zoom_level"));
-        boolean nameAnswerStatus = (c.getInt(c.getColumnIndex("nameAnswerStatus"))==1);
+        boolean silhouetteAnswerStatus = (c.getInt(c.getColumnIndex("silhouetteAnswerStatus"))==1);
         boolean locationAnswerStatus = (c.getInt(c.getColumnIndex("locationAnswerStatus"))==1);
         boolean stationAnswerStatus = (c.getInt(c.getColumnIndex("stationAnswerStatus"))==1);
         int silhouetteScore = c.getInt(c.getColumnIndex("silhouetteScore"));
@@ -246,7 +245,7 @@ public class DBAdapter {
                 correct_leftLng,correct_topLat,correct_rightLng,correct_bottomLat,
                 scroll_max_lat,scroll_min_lat,scroll_max_lng,scroll_min_lng,init_campos_lat,init_campos_lng,
                 max_zoom_level,min_zoom_level,init_zoom_level,
-                nameAnswerStatus,locationAnswerStatus,stationAnswerStatus,
+                silhouetteAnswerStatus,locationAnswerStatus,stationAnswerStatus,
                 silhouetteScore,locationScore);
 /*        Log.d(TAG,String.format("lines: %d,%d,%d," +
                         "%s,%s," +
@@ -351,9 +350,11 @@ public class DBAdapter {
         ContentValues cv = new ContentValues();
         if(line.isLocationCompleted()){
             cv.put("locationAnswerStatus", 1);
+            cv.put("locationScore", line.getLocationScore());
         }
         else{
             cv.put("locationAnswerStatus", 0);
+            cv.put("locationScore", 0);
         }
         db.update("lines", cv, "lineId = "+lineId, null);
         return true;
@@ -362,13 +363,13 @@ public class DBAdapter {
     /*
      * 路線シルエットのAnswerStatus更新
      */
-    public boolean updateLineNameAnswerStatusInCompany(int companyId,boolean status){
+    public boolean updateLineSilhouetteAnswerStatusInCompany(int companyId, boolean status){
         ContentValues cv = new ContentValues();
         if(status){
-            cv.put("nameAnswerStatus", 1);
+            cv.put("silhouetteAnswerStatus", 1);
         }
         else{
-            cv.put("nameAnswerStatus", 0);
+            cv.put("silhouetteAnswerStatus", 0);
         }
         db.update("lines", cv, "companyId = "+companyId, null);
         return true;
@@ -377,34 +378,14 @@ public class DBAdapter {
     public boolean updateLineSilhouetteAnswerStatus(Line line){
         int lineId = line.getLineId();
         ContentValues cv = new ContentValues();
-        if( line.isNameCompleted()){
-            cv.put("nameAnswerStatus",1);
+        if( line.isSilhouetteCompleted()){
+            cv.put("silhouetteAnswerStatus",1);
             cv.put("silhouetteScore", line.getSilhouetteScore());
         }
         else{
-            cv.put("nameAnswerStatus",0);
+            cv.put("silhouetteAnswerStatus",0);
+            cv.put("silhouetteScore",0);
         }
-        db.update("lines",cv,"lineId = "+lineId,null);
-        return true;
-    }
-
-    /*
-     * シルエットスコアの更新
-     */
-    public boolean updateSilhouetteScore(Line line){
-        int lineId = line.getLineId();
-        ContentValues cv = new ContentValues();
-        cv.put("silhouetteScore",line.getSilhouetteScore());
-        db.update("lines",cv,"lineId = "+lineId,null);
-        return true;
-    }
-    /*
-     * ロケーションスコアの更新
-     */
-    public boolean updateLocationScore(Line line){
-        int lineId = line.getLineId();
-        ContentValues cv = new ContentValues();
-        cv.put("locationScore", line.getLocationScore());
         db.update("lines",cv,"lineId = "+lineId,null);
         return true;
     }
@@ -413,26 +394,50 @@ public class DBAdapter {
      * 総路線数の取得
      */
     public int countTotalLines(int companyId){
-        Cursor cur = db.rawQuery("SELECT * from lines WHERE companyId=?",new String[]{String.valueOf(companyId)});
+        Cursor cur = db.rawQuery("SELECT * from lines WHERE companyId=?",
+                new String[]{String.valueOf(companyId)});
         return cur.getCount();
     }
-    /*
-     * 事業者ごとの路線名完了件数の取得
-     */
+
+    // シルエット
+    /* 事業者ごと完了数 */
     public int countSilhouetteAnsweredLines(int companyId){
         int cnt;
-        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and nameAnswerStatus = 1",new String[]{String.valueOf(companyId)});
+        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and silhouetteAnswerStatus = 1",
+                new String[]{String.valueOf(companyId)});
         cnt = cursor.getCount();
         return cnt;
     }
-    /*
-     * 事業者ごとの敷設完了路線数の取得
-     */
+    /* 事業者ごとスコア合計値 */
+    public int sumSilhouetteScoreInLine(int companyId){
+        int score = 0;
+        Cursor cur = db.rawQuery("SELECT sum(silhouetteScore) from lines WHERE companyId=?",
+                new String[]{String.valueOf(companyId)});
+        if(cur.moveToNext()){
+            score = cur.getInt(0);
+        }
+        return score;
+    }
+
+    // 地図合わせ
+    /* 事業者ごと完了数 */
     public int countLocationAnsweredLines(int companyId){
         int cnt;
-        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and locationAnswerStatus = 1", new String[]{String.valueOf(companyId)});
+        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and locationAnswerStatus = 1",
+                new String[]{String.valueOf(companyId)});
         cnt = cursor.getCount();
         return cnt;
+    }
+
+    // 事業者ごとの地図合わせスコア合計値
+    public int sumLocationScoreInLine(int companyId){
+        int score = 0;
+        Cursor cur = db.rawQuery("SELECT sum(locationScore) from lines WHERE companyId=?",
+                new String[]{String.valueOf(companyId)});
+        if(cur.moveToNext()){
+            score = cur.getInt(0);
+        }
+        return score;
     }
 
     // stations table
@@ -535,33 +540,26 @@ public class DBAdapter {
         return true;
     }
 
-    /*
-     * 駅並べスコアの更新
-     */
-    public boolean updateStationScore(Station station){
-        ContentValues cv = new ContentValues();
-        cv.put("stationScore",station.getStationScore());
-        db.update("stations", cv, "lineId = "+station.getLineId() + " AND stationOrder = " + station.getStationOrder(), null);
-        return true;
-    }
-
-    /*
-     * 総駅数の取得
-     */
+    //　駅数
+    /* 総駅数 */
     public int countTotalStations(){
         Cursor cur = db.rawQuery("SELECT * from stations",null);
         return cur.getCount();
     }
-    /*
-     * 事業者ごとの総駅数の取得
-     */
+    /* 事業者ごと */
     public int countTotalStationsInCompany(int companyId){
         Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=?", new String[]{String.valueOf(companyId)});
         return cur.getCount();
     }
-    /*
-     * 事業者ごとの開設完了駅数の取得
-     */
+    /* 路線ごと */
+    public int countTotalStationsInLine(int companyId,int lineId){
+        Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and lineId=?",
+                new String[]{String.valueOf(companyId), String.valueOf(lineId)});
+        return cur.getCount();
+    }
+
+    // 駅並べ完了数
+    /* 事業者ごと */
     public int countAnsweredStationsInCompany(int companyId){
         int cnt;
         Cursor cursor = db.rawQuery("SELECT * from stations WHERE companyId=? and answerStatus = 1",
@@ -569,17 +567,7 @@ public class DBAdapter {
         cnt = cursor.getCount();
         return cnt;
     }
-    /*
-     * 路線ごとの総駅数の取得
-     */
-    public int countTotalStationsInLine(int companyId,int lineId){
-        Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and lineId=?",
-                new String[]{String.valueOf(companyId), String.valueOf(lineId)});
-        return cur.getCount();
-    }
-    /*
-     * 路線ごとの開設完了駅数の取得
-     */
+    /* 路線ごと */
     public int countAnsweredStationsInLine(int companyId,int lineId){
         int cnt;
         Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and lineId=? and answerStatus = 1",
@@ -588,9 +576,11 @@ public class DBAdapter {
         return cnt;
     }
 
+    // 駅並べスコア
+    /* 路線ごと */
     public int sumStationsScoreInLine(int companyId,int lineId){
         int score = 0;
-        Cursor cur = db.rawQuery("SELECT sum(ifnull(stationScore),0) as Total from stations WHERE companyId=? and lineId=?",
+        Cursor cur = db.rawQuery("SELECT sum(stationScore) from stations WHERE companyId=? and lineId=?",
                 new String[]{String.valueOf(companyId),String.valueOf(lineId)});
         if(cur.moveToNext()){
             score = cur.getInt(0);
@@ -598,4 +588,14 @@ public class DBAdapter {
         return score;
     }
 
+    /* 事業者ごと   */
+    public int sumStationsScoreInLine(int companyId){
+        int score = 0;
+        Cursor cur = db.rawQuery("SELECT sum(stationScore) from stations WHERE companyId=?",
+                new String[]{String.valueOf(companyId)});
+        if(cur.moveToNext()){
+            score = cur.getInt(0);
+        }
+        return score;
+    }
 }

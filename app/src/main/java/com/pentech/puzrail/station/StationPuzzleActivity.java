@@ -204,17 +204,13 @@ public class StationPuzzleActivity extends AppCompatActivity implements
     }
 
     private void updateProgressBar(){
-        int finishedCnt = 0;
-        int stationsTotalScore = 0;
-        Iterator<Station> ite = stations.listIterator();
-        while(ite.hasNext()){
-            Station station = ite.next();
-            if(station.isFinished()) finishedCnt++;
-            stationsTotalScore += station.getStationScore();
-        }
+
+        int finishedCnt = this.db.countAnsweredStationsInCompany(this.companyId);
         this.progressTitle.setText(String.format("%s 駅名解答率 : %d/%d",this.line.getName(), finishedCnt, stations.size()));
         this.progress.setMax(stations.size());
         this.progress.setProgress(finishedCnt);
+
+        int stationsTotalScore = this.db.sumStationsScoreInLine(this.companyId,this.selectedLineId);
         this.stationsScore.setText(String.format("%d",stationsTotalScore));
     }
 

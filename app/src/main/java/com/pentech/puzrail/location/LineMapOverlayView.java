@@ -30,6 +30,7 @@ import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,7 +43,7 @@ import static android.content.Context.VIBRATOR_SERVICE;
 public class LineMapOverlayView extends android.support.v7.widget.AppCompatImageView {
 
     private static final boolean DEBUG = true;	// TODO for debugging
-    private static String TAG = "RailwayLineImageView";
+    private static String TAG = "LineMapOverlayView";
     private static final float EPS = 0.1f;
     private static final int MOVE_LIMIT = 100; //limit value to prevent the image disappearing from the view when moving
     private static final float DEFAULT_MAX_SCALE = 8.f;
@@ -67,6 +68,8 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     private Context context;
     private float density;
     private boolean initState = false;
+    private boolean started = false;
+    private long playingTimer = 0;
 
     public LineMapOverlayView(Context context) {
         super(context);
@@ -122,6 +125,43 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         this.initState = false;
         super.setImageDrawable(null);
     }
+
+    public void start(){
+        this.started = true;
+        this.startPlayingTimer();
+    }
+    public void stop(){
+        if(isStarted()){
+            this.playTimeCountUpTimer.cancel();
+            this.playingTimer = 0;
+            this.started = false;
+        }
+    }
+    public boolean isStarted(){
+        return this.started;
+    }
+    public long getPlayingTimer() { return this.playingTimer; }
+
+    private Timer playTimeCountUpTimer = null;
+    private Handler countUpTimerHandler = new Handler();
+    private long PLAY_TIME_COUNT_UP_PERIOD = 1000;
+    private class playTimeCountUpTimeElapse extends TimerTask {
+        @Override
+        public void run() {
+            countUpTimerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    LineMapOverlayView.this.playingTimer++;
+                    playTimeCountUpTimer.schedule(new LineMapOverlayView.playTimeCountUpTimeElapse(),PLAY_TIME_COUNT_UP_PERIOD);
+                }
+            });
+        }
+    }
+    private void startPlayingTimer(){
+        playTimeCountUpTimer = new Timer(true);
+        playTimeCountUpTimer.schedule(new LineMapOverlayView.playTimeCountUpTimeElapse(),PLAY_TIME_COUNT_UP_PERIOD);
+    }
+
     // pinch in/out操作のイベントハンドラ
     private class RailwayLineViewScaleGestureDetector
             implements ScaleGestureDetector.OnScaleGestureListener{
@@ -322,30 +362,30 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         float y = event.getY();
 
         RectF imageRectF = getCurrentImageRect();
-
-//        if(DEBUG) Log.d(TAG,"onTouchEvent : "
-//                + " event.x =" + x + ", event.y =" + y
-//                + ", left = " + imageRectF.left + ", top  = " + imageRectF.top + ", bottom = " + imageRectF.bottom  + ", right = " + imageRectF.right);
-
-        if( imageRectF.left < x && x < imageRectF.right && imageRectF.top < y && y < imageRectF.bottom && getDrawable()!=null){
-            super.onTouchEvent(event);
-            mDragging = true;
-            boolean a = mGestureDetector.onTouchEvent(event);
-            boolean b = mScaleDetector.onTouchEvent(event);
-            if(event.getAction()==MotionEvent.ACTION_UP){
-                mDragging = false;
-                if(mScrolling){
-                    Log.d(TAG,"ピース移動完了");
-                    if(this.listener!=null) this.listener.onScrollEnd();
-                    mScrolling = false;
-                }
-            }
-            return a|b;
+        if( !this.started && !this.line.isLocationCompleted()){
+            return false;
         }
         else{
-            mScrolling = false;
-            mDragging = false;
-            return false;
+            if( imageRectF.left < x && x < imageRectF.right && imageRectF.top < y && y < imageRectF.bottom && getDrawable()!=null){
+                super.onTouchEvent(event);
+                mDragging = true;
+                boolean a = mGestureDetector.onTouchEvent(event);
+                boolean b = mScaleDetector.onTouchEvent(event);
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    mDragging = false;
+                    if(mScrolling){
+                        Log.d(TAG,"ピース移動完了");
+                        if(this.listener!=null) this.listener.onScrollEnd();
+                        mScrolling = false;
+                    }
+                }
+                return a|b;
+            }
+            else{
+                mScrolling = false;
+                mDragging = false;
+                return false;
+            }
         }
     }
 
@@ -785,15 +825,13 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         }
 
         if(!this.line.isLocationCompleted()){
-            int margin = 5;
             Paint paint = new Paint();
+            Paint.FontMetrics fm = new Paint.FontMetrics();
 
             paint.setTextLocale(Locale.JAPANESE);
             paint.setTypeface(Typeface.DEFAULT_BOLD);
             paint.setStyle(Paint.Style.FILL);
-//        paint.setColor(Color.parseColor("#142d81"));
             paint.setTextSize(12*this.density); // 12sp*density
-            Paint.FontMetrics fm = new Paint.FontMetrics();
             paint.getFontMetrics(fm);
 
             String positionErr = String.format("【%s】（位置ズレ,縮尺ズレ）= (%d,%.2f)",difficulty_name[this.difficulty_mode],err,scaleError);
@@ -808,6 +846,18 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             canvas.drawRoundRect(bkGroundRect,2,2,paint);
             paint.setColor(ContextCompat.getColor(this.context, R.color.color_WHITE));
             canvas.drawText(positionErr, 1*this.density, 15*this.density, paint);
+
+            if(this.isStarted()){
+
+                SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+                long elapseTime = this.playingTimer * 1000;
+                String dispTime = sdf.format(elapseTime);
+                paint.setTextSize(36*this.density); // 36sp*density
+                paint.setColor(ContextCompat.getColor(LineMapOverlayView.this.context, R.color.color_10));
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                paint.getTextBounds(dispTime,0,dispTime.length(),rect);
+                canvas.drawText(dispTime, 10*this.density, 32*this.density + bkGroundRect.height(), paint);
+            }
         }
         super.onDraw(canvas);
     }

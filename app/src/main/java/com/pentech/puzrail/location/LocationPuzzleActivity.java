@@ -133,7 +133,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showInformation();
+                showOnePointTutorial();
             }
         });
         fabVisible = settingParameter.isFabVisibility();
@@ -264,13 +264,22 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                 this.initLatLng,
                 this.line.getInitZoomLevel())
         );
-//
+
         mImageView.setMap(this.mMap);
         mImageView.setImageDrawable();
         mImageView.setDifficulty_mode(this.settingParameter.getDifficultyMode());
         mImageView.setVibrationMode(this.settingParameter.isVibrate());
-        if(hasAlreadyLocated()) setGeoJsonVisible();
-
+        if(hasAlreadyLocated()){
+            mUiSetting.setScrollGesturesEnabled(true);
+            mUiSetting.setZoomGesturesEnabled(true);
+            setGeoJsonVisible();
+        }
+        else{
+            mUiSetting.setScrollGesturesEnabled(false);
+            mUiSetting.setZoomGesturesEnabled(false);
+            Toast.makeText(LocationPuzzleActivity.this,"シルエットピースをタップ！\n　　　　３秒後にスタートします。",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean hasAlreadyLocated(){
@@ -357,12 +366,20 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.db.updateLineLocationAnswerStatus(LocationPuzzleActivity.this.line);
                         LocationPuzzleActivity.this.resetGeoJsonVisible();
                         LocationPuzzleActivity.this.mImageView.resetImageDrawable();
+                        LocationPuzzleActivity.this.mImageView.stop();
                         LocationPuzzleActivity.this.mMap.moveCamera(
                                 CameraUpdateFactory.newLatLngZoom(
                                     LocationPuzzleActivity.this.initLatLng,
                                         LocationPuzzleActivity.this.line.getInitZoomLevel())
                                 );
                         LocationPuzzleActivity.this.mImageView.setImageDrawable();
+                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
+                        mUiSetting.setScrollGesturesEnabled(false);
+                        mUiSetting.setZoomGesturesEnabled(false);
+                        LocationPuzzleActivity.this.waitTime = 3;
+                        Toast.makeText(LocationPuzzleActivity.this,"シルエットピースをタップ！\n　　　　３秒後にスタートします。",
+                                Toast.LENGTH_LONG).show();
+
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -442,7 +459,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         Log.d(TAG,"onMapLongClick");
 
         final ArrayList<String> contextMenuList = new ArrayList<String>();
-        contextMenuList.add("難易度 設定");
         contextMenuList.add("回答クリア");
         contextMenuList.add("回答を見る");
         contextMenuList.add("最初の位置に戻す");
@@ -460,15 +476,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                         LocationPuzzleActivity.this.mDialog.dismiss();
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>)adapterView.getAdapter();
                         switch(position){
-                            case 0: // 難易度設定
-                                settingDifficulty();
-                                break;
-                            case 1: // 回答をクリア（回答済みの場合）
+                            case 0: // 回答をクリア（回答済みの場合）
                                 if(LocationPuzzleActivity.this.hasAlreadyLocated()){
                                     answerClear();
                                 }
                                 break;
-                            case 2: // 回答を見る（未回答の場合）
+                            case 1: // 回答を見る（未回答の場合）
                                 if(!LocationPuzzleActivity.this.hasAlreadyLocated() && mAnswerDisplayingTimer == null ){
                                     if( showAnswerCount < showAnswerMax ){
                                         answerDisplay();
@@ -487,7 +500,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                     }
                                 }
                                 break;
-                            case 3: // 最初の位置に戻す
+                            case 2: // 最初の位置に戻す
                                 LocationPuzzleActivity.this.mMap.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
                                                 LocationPuzzleActivity.this.initLatLng,
@@ -496,8 +509,8 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
                                 LocationPuzzleActivity.this.mImageView.resetImageDrawable();
                                 LocationPuzzleActivity.this.mImageView.setImageDrawable();;
                                 break;
-                            case 4: // Webを検索する
-                                if(LocationPuzzleActivity.this.line.isNameCompleted()){
+                            case 3: // Webを検索する
+                                if(LocationPuzzleActivity.this.line.isSilhouetteCompleted()){
                                     Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     intent.putExtra(SearchManager.QUERY, LocationPuzzleActivity.this.line.getName()); // query contains search string
                                     startActivity(intent);
@@ -526,6 +539,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         Log.d(TAG,"onMapClick");
         // ToDo
         // タイムトライアルのタイマー開始／停止操作実装
+        if(!this.mImageView.isStarted() && !this.line.isLocationCompleted()) startCountDownToPlay();
     }
 
     @Override
@@ -558,11 +572,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         Log.d(TAG,String.format("error = %d",err));
         if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
             // 正解
+            Toast.makeText(LocationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
             mImageView.resetImageDrawable();
             setGeoJsonVisible();
             this.line.setLocationAnswerStatus();
+            this.line.computeLocationScore(this.mImageView.getPlayingTimer());
             db.updateLineLocationAnswerStatus(this.line);
-            Toast.makeText(LocationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
         }
         else{
         }
@@ -667,7 +682,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         }
     }
 
-    private void showInformation(){
+    private void showOnePointTutorial(){
         if(onePointTutorial == null){
 
             onePointTutorial = new PopupWindow(this);
@@ -727,6 +742,69 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         }
     }
 
+    // タイマスタートまでのカウントダウン表示
+    private PopupWindow countDownTimerWindow = null;
+    private Timer countDownTimer = null;
+    private Handler countDownTimerHandler = new Handler();
+    private long WAIT_TIME_TO_START = 1000;
+    private int waitTime = 3;
+    private TextView cdt = null;
+    private class countDownTimerElapse extends TimerTask {
+        @Override
+        public void run() {
+            countDownTimerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    LocationPuzzleActivity.this.waitTime--;
+                    if( waitTime > 0 ){
+                        countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
+                        cdt.setText(String.format("%d",LocationPuzzleActivity.this.waitTime));
+                        Log.d(TAG,String.format("Wait Timer = %d sec",LocationPuzzleActivity.this.waitTime));
+                    }
+                    else{
+                        LocationPuzzleActivity.this.countDownTimerWindow.dismiss();
+                        LocationPuzzleActivity.this.countDownTimerWindow = null;
+                        LocationPuzzleActivity.this.countDownTimer = null;
+                        LocationPuzzleActivity.this.cdt = null;
+                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
+                        mUiSetting.setScrollGesturesEnabled(true);
+                        mUiSetting.setZoomGesturesEnabled(true);
+                        Toast.makeText(LocationPuzzleActivity.this,"地図合わせ スタート!", Toast.LENGTH_SHORT).show();
+                        LocationPuzzleActivity.this.mImageView.start();
+                    }
+                }
+            });
+        }
+    }
+    private void startCountDownToPlay(){
+        if( countDownTimerWindow == null){
+
+            countDownTimerWindow = new PopupWindow(this);
+
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.location_activity_start_timer, null);
+            // ワンポイント　アドバイスのテキスト
+            cdt = (TextView)popupView.findViewById(R.id.countDownTimer);
+            cdt.setTextColor(ContextCompat.getColor(this, R.color.color_10));
+            cdt.setText(String.format("%d",this.waitTime));
+            Log.d(TAG,String.format("Wait Timer = %d sec",this.waitTime));
+
+            countDownTimerWindow.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            countDownTimerWindow.setBackgroundDrawable(background);
+            // タップ時に他のViewでキャッチされないための設定
+            countDownTimerWindow.setOutsideTouchable(true);
+            countDownTimerWindow.setFocusable(true);
+            // 画面中央に表示
+            countDownTimerWindow.showAtLocation(findViewById(R.id.transparent), Gravity.CENTER, 0, 0);
+
+            countDownTimer = new Timer(true);
+            countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
+        }
+    }
+
     /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
@@ -763,6 +841,10 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             }
             settingParameter.setFabVisibility(fabVisible);
             LocationPuzzleActivity.this.db.updateFabVisibility(fabVisible);
+            return true;
+        }
+        else if (id == R.id.action_level) {
+            settingDifficulty();
             return true;
         }
         else if (id == R.id.action_AboutPuzzRail) {
