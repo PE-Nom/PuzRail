@@ -44,7 +44,8 @@ public class Line {
 
     private int silhouetteMissingCount = 0;
     private int silhouetteShowAnswerCount = 0;
-    private int locationShowAnswerCount = 0;
+    private int locationShowAnswerCount =0;
+    private long locationTime = 0;
 
     public Line(Context context,
                 int lineId,
@@ -72,7 +73,8 @@ public class Line {
                 boolean locationAnswerStatus,
                 boolean stationAnswerStatus,
                 int silhouetteScore,
-                int locationScore) {
+                int locationScore,
+                int locationTime) {
 
         this.context = context;
         this.res = this.context.getResources();
@@ -102,6 +104,7 @@ public class Line {
         this.stationAnswerStatus = stationAnswerStatus;
         this.silhouetteScore = silhouetteScore;
         this.locationScore = locationScore;
+        this.locationTime = (long)locationTime;
     }
 
     public int getCompanyId(){ return this.companyId; }
@@ -184,6 +187,7 @@ public class Line {
     public void resetLocationAnswerStatus() {
         this.locationAnswerStatus=false;
         this.locationScore = 0;
+        this.locationTime = 0;
     }
 
     public void incrementSilhouetteMissingCount(){ this.silhouetteMissingCount++; }
@@ -196,4 +200,7 @@ public class Line {
     public void incrementLocationShowAnswerCount() { this.locationShowAnswerCount++; }
     public void setLocationScore(int score) { this.locationScore = score; }
     public int getLocationScore() { return this.locationScore; }
+
+    public void setLocationTime(long time) { this.locationTime = time; }
+    public long getLocationTime() { return this.locationTime; }
 }

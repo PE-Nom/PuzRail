@@ -399,8 +399,10 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             mImageView.resetImageDrawable();
             setGeoJsonVisible();
             this.line.setLocationAnswerStatus();
-            int sc = computeSocre(this.mImageView.getPlayingTimer(),this.line.getLocationShowAnswerCount());
+            long timer = this.mImageView.getPlayingTimer();
+            int sc = computeSocre(timer,this.line.getLocationShowAnswerCount());
             this.line.setLocationScore(sc);
+            this.line.setLocationTime(timer);
             db.updateLineLocationAnswerStatus(this.line);
         }
         else{

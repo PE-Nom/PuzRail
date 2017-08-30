@@ -21,7 +21,7 @@ import java.util.Random;
 
 public class DBAdapter {
     static final String DATABASE_NAME = "Railway.db";
-    static final int DATABASE_VERSION = 5;
+    static final int DATABASE_VERSION = 6;
 
     private String TAG = "DBAdapter";
 
@@ -238,6 +238,7 @@ public class DBAdapter {
         boolean stationAnswerStatus = (c.getInt(c.getColumnIndex("stationAnswerStatus"))==1);
         int silhouetteScore = c.getInt(c.getColumnIndex("silhouetteScore"));
         int locationScore = c.getInt(c.getColumnIndex("locationScore"));
+        int locationTime = c.getInt(c.getColumnIndex("locationTime"));
         Line line = new Line(this.context,
                 lineId,areaCode,companyId,
                 lineName,lineKana,type,
@@ -246,7 +247,7 @@ public class DBAdapter {
                 scroll_max_lat,scroll_min_lat,scroll_max_lng,scroll_min_lng,init_campos_lat,init_campos_lng,
                 max_zoom_level,min_zoom_level,init_zoom_level,
                 silhouetteAnswerStatus,locationAnswerStatus,stationAnswerStatus,
-                silhouetteScore,locationScore);
+                silhouetteScore,locationScore,locationTime);
 /*        Log.d(TAG,String.format("lines: %d,%d,%d," +
                         "%s,%s," +
                         "%d," +
@@ -351,10 +352,12 @@ public class DBAdapter {
         if(line.isLocationCompleted()){
             cv.put("locationAnswerStatus", 1);
             cv.put("locationScore", line.getLocationScore());
+            cv.put("locationTime", (int)(line.getLocationTime()));
         }
         else{
             cv.put("locationAnswerStatus", 0);
             cv.put("locationScore", 0);
+            cv.put("locationTime", 0);
         }
         db.update("lines", cv, "lineId = "+lineId, null);
         return true;

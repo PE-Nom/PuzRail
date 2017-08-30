@@ -18,6 +18,7 @@ import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.Line;
 import com.pentech.puzrail.ui.MultiButtonListView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -64,6 +65,7 @@ public class RailwayListAdapter extends BaseAdapter {
         ImageButton staImageBtn;
 
         TextView locationScoreAndUnit;
+        TextView locationTime;
         TextView stationsScoreAndUnit;
         TextView stationsProgress;
         TextView lineTotalScoreAndUnit;
@@ -101,6 +103,7 @@ public class RailwayListAdapter extends BaseAdapter {
             holder.staImageBtn.setOnClickListener(list);
 
             holder.locationScoreAndUnit = (TextView) convertView.findViewById(R.id.locationScoreAndUnit);
+            holder.locationTime = (TextView) convertView.findViewById(R.id.locationTime);
             holder.stationsScoreAndUnit = (TextView) convertView.findViewById(R.id.stationsScoreAndUnit);
             holder.stationsProgress = (TextView) convertView.findViewById(R.id.stationsProgress);
             holder.lineTotalScoreAndUnit = (TextView) convertView.findViewById(R.id.lineTotalScoreAndUnit);
@@ -161,6 +164,11 @@ public class RailwayListAdapter extends BaseAdapter {
             holder.silhouetteScoreAndUnit.setText(String.format("%d pt.",line.getSilhouetteScore()));
             // locationScoreの表示
             holder.locationScoreAndUnit.setText(String.format("%d pt.",line.getLocationScore()));
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+            long elapseTime = line.getLocationTime() * 1000;
+            String dispTime = sdf.format(elapseTime);
+        Log.d(TAG,String.format("dispTime = %s",dispTime));
+            holder.locationTime.setText(dispTime);
 
             // stationsScoreの表示
             int stationsTotalScore = this.dbAdapter.sumStationsScoreInLine(companyId,lineId);
