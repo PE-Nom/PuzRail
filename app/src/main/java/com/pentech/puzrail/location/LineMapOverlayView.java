@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.database.Line;
+import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -36,6 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.content.Context.VIBRATOR_SERVICE;
+import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_AMATEUR;
 
 /**
  * Created by takashi on 2016/11/12.
@@ -247,7 +249,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                         }
                         LineMapOverlayView.this.positionLocked = true;
                         // ロックバイブレーション
-                        if(LineMapOverlayView.this.vibration_mode){
+                        if(LineMapOverlayView.this.prm.isVibrate()){
                             Vibrator vib =  (Vibrator)LineMapOverlayView.this.context.getSystemService(VIBRATOR_SERVICE);
                             vib.vibrate(50); // 10msec 1shotでバイブレーション
                         }
@@ -607,10 +609,6 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             0.0f,   0.0f,   0.0f,  1.0f,  0.0f,
     };
 
-    // 難易度設定
-    public final static int DIFFICULTY_PROFESSIONAL = 0;
-    public final static int DIFFICULTY_AMATEUR = 1;
-    public final static int DIFFICULTY_BEGINNER = 2;
     //　位置誤差のレベル番号
     public final static int ERR_LEVEL0 = 0;
     public final static int ERR_LEVEL1 = 1;
@@ -637,10 +635,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 
     private Line line;
     private GoogleMap map;
+    private SettingParameter prm;
     private boolean lightingSw = true;
     private int colorCount = 0;
-    private int difficulty_mode = DIFFICULTY_AMATEUR;
-    private boolean vibration_mode= true;
 
     public void setLine(Line line){
         this.line = line;
@@ -648,8 +645,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     public void setMap(GoogleMap map){
         this.map = map;
     }
-    public void setDifficulty_mode(int mode){ this.difficulty_mode = mode; }
-    public void setVibrationMode(boolean mode){ this.vibration_mode = mode; }
+    public void setLevelParameter(SettingParameter prm){
+        this.prm = prm;
+    }
 
     public void displayCorrectCoordinate(String tag){
         RectF railwayImageRect = getCurrentImageRect();
@@ -775,8 +773,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 //       final double positionError[] = computePositionError();
         float scaleError = computeScaleError();
         int err = computeLocationError();
+        int difficulty_mode = this.prm.getDifficultyMode();
 
-        if( err < ERR_RANGE[this.difficulty_mode][ERR_LEVEL0] ){
+        if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL0] ){
             if(!this.positionLock && !this.positionLocked){ // 未固定の場合
                 // 正解の位置に一定時間固定
                 this.positionLock = true;
@@ -784,7 +783,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             }
             else{
                 //  固定時間のカウントアップ
-                if(this.positionLockTimeCnt < this.PositionLockTime[this.difficulty_mode]){ // 固定時間経過
+                if(this.positionLockTimeCnt < this.PositionLockTime[difficulty_mode]){ // 固定時間経過
                     this.positionLockTimeCnt++;
                     Log.d(TAG,String.format("positionLockTimeCnt = %d",this.positionLockTimeCnt));
                     super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL0)));
@@ -803,13 +802,13 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         else{
             this.positionLock = false;
             this.positionLocked = false;
-            if( err < ERR_RANGE[this.difficulty_mode][ERR_LEVEL1] ){
+            if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL1] ){
                 super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL1)));
             }
-            else if( err < ERR_RANGE[this.difficulty_mode][ERR_LEVEL2] ) {
+            else if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL2] ) {
                 super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL2)));
             }
-            else if(err < ERR_RANGE[this.difficulty_mode][ERR_LEVEL3] ){
+            else if(err < ERR_RANGE[difficulty_mode][ERR_LEVEL3] ){
                 super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
             }
             else{
@@ -834,8 +833,8 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             paint.setTextSize(12*this.density); // 12sp*density
             paint.getFontMetrics(fm);
 
-            String positionErr = String.format("【%s】（位置ズレ,縮尺ズレ）= (%d,%.2f)",difficulty_name[this.difficulty_mode],err,scaleError);
-            paint.setColor(ContextCompat.getColor(this.context, R.color.color_bkGroundREct));
+            String positionErr = String.format("【%s】（位置ズレ,縮尺ズレ）= (%d,%.2f)",difficulty_name[difficulty_mode],err,scaleError);
+            paint.setColor(ContextCompat.getColor(this.context, R.color.color_10));
             Rect rect = new Rect();
             paint.getTextBounds(positionErr,0,positionErr.length(),rect);
             RectF bkGroundRect = new RectF(

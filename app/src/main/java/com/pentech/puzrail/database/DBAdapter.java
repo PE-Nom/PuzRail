@@ -509,6 +509,7 @@ public class DBAdapter {
         }
         else{
             cv.put("answerStatus", 0);
+            cv.put("stationScore", 0);
         }
         db.update("stations", cv, "lineId = "+lineId + " AND stationOrder != 1", null);
         return true;

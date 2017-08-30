@@ -170,7 +170,10 @@ public class Line {
 
     public boolean isSilhouetteCompleted() {return this.silhouetteAnswerStatus; }
     public void setSilhouetteAnswerStatus(){ this.silhouetteAnswerStatus =true; }
-    public void resetSilhouetteAnswerStatus() { this.silhouetteAnswerStatus =false; }
+    public void resetSilhouetteAnswerStatus() {
+        this.silhouetteAnswerStatus =false;
+        this.silhouetteScore = 0;
+    }
 
     public boolean isLocationCompleted(){
         return this.locationAnswerStatus;
@@ -178,33 +181,19 @@ public class Line {
     public void setLocationAnswerStatus(){
         this.locationAnswerStatus=true;
     }
-    public void resetLocationAnswerStatus(){
+    public void resetLocationAnswerStatus() {
         this.locationAnswerStatus=false;
+        this.locationScore = 0;
     }
-
-    public boolean isStationCompleted(){
-        return this.stationAnswerStatus;
-    }
-    public void setStationAnswerStatus() { this.stationAnswerStatus=true; }
-    public void resetStationAnswerStatus() { this.stationAnswerStatus=false; }
 
     public void incrementSilhouetteMissingCount(){ this.silhouetteMissingCount++; }
+    public int getSilhouetteMissingCount() { return this.silhouetteMissingCount; }
     public void incrementSilhouetteShowAnswerCount() { this.silhouetteShowAnswerCount++; }
-    public int computeSilhouetteScore(int remainLineCount){
-        int sc = remainLineCount - ( this.silhouetteMissingCount + this.silhouetteShowAnswerCount*2 );
-        if( sc < 0 ) this.silhouetteScore = 0;
-        else         this.silhouetteScore = sc;
-        return this.silhouetteScore;
-    }
+    public int getLocationShowAnswerCount() { return this.silhouetteShowAnswerCount; }
+    public void setSilhouetteScore( int score ){ this.silhouetteScore = score; }
     public int getSilhouetteScore() { return this.silhouetteScore; }
 
     public void incrementLocationShowAnswerCount() { this.locationShowAnswerCount++; }
-    public int computeLocationScore(long elapseTime){
-        int elapse = (int)elapseTime;
-        int sc = 100 - ( elapse + this.locationShowAnswerCount*5);
-        if( sc < 0 ) this.locationScore = 0;
-        else         this.locationScore = sc;
-        return this.locationScore;
-    }
+    public void setLocationScore(int score) { this.locationScore = score; }
     public int getLocationScore() { return this.locationScore; }
 }

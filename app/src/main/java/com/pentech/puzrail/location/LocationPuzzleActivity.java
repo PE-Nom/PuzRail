@@ -17,19 +17,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +44,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.VisibleRegion;
+import com.pentech.puzrail.ui.OnePointTutorialDialog;
+import com.pentech.puzrail.ui.SettingParameterDialog;
 import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonLineStringStyle;
 
@@ -61,6 +58,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_AMATEUR;
+import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_BEGINNER;
+import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_PROFESSIONAL;
 
 public class LocationPuzzleActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -99,6 +100,8 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
     private FloatingActionButton mFab;
     private boolean fabVisible = true;
 
+    private OnePointTutorialDialog onePointTutorial;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,11 +132,12 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         actionBar.setTitle("線路と駅パズル：地図合わせ");
         actionBar.setSubtitle(companyName+"／"+this.lineName);
 
+        onePointTutorial = new OnePointTutorialDialog(this, OnePointTutorialDialog._LOCATION_,R.id.transparent);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showOnePointTutorial();
+                onePointTutorial.show();
             }
         });
         fabVisible = settingParameter.isFabVisibility();
@@ -147,63 +151,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
         nendAdView.setListener(this);
         nendAdView.loadAd();
-
-    }
-
-    @Override
-    public void onReceiveAd(NendAdView nendAdView) {
-        Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
-        this.onReceiveAdCnt++;
-    }
-
-    @Override
-    public void onFailedToReceiveAd(NendAdView nendAdView) {
-        Log.d(TAG,"onFailedToReceiveAd");
-    }
-
-    @Override
-    public void onClick(NendAdView nendAdView) {
-        Log.d(TAG,"onClick");
-        this.showAnswerCount = 0;
-        this.onReceiveAdCnt = 0;
-    }
-
-    @Override
-    public void onDismissScreen(NendAdView nendAdView) {
-        Log.d(TAG,"onDismissScreen");
-    }
-
-    /**
-     * Take care of popping the fragment back stack or finishing the activity
-     * as appropriate.
-     */
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this.getApplicationContext(), PieceGarallyActivity.class);
-        intent.putExtra("SelectedCompanyId", this.companyId);
-        intent.putExtra("previewAnswerCount", this.previewLineAnswerCount);
-        startActivityForResult(intent, 1);
-        // アニメーションの設定
-        overridePendingTransition(R.anim.in_left, R.anim.out_right);
-        this.db.close();
-    	finish();
-    }
-
-    private void setUpMap(Bundle savedInstanceState){
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-
-        this.mMapView = (MapView)findViewById(R.id.mapView);
-        this.mMapView.onCreate(savedInstanceState);
-        this.mMapView.getMapAsync(this);
-
-        mImageView = (LineMapOverlayView)findViewById(R.id.imageview);
-        mImageView.setOnScrollEndListener(this);
-        mImageView.setLine(this.line); //
-        views.add(mImageView);
-
-        transparent = (ImageView)findViewById(R.id.transparent);
-
-        this.mMapView.addFocusables(views,View.FOCUS_FORWARD);
 
     }
 
@@ -267,8 +214,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 
         mImageView.setMap(this.mMap);
         mImageView.setImageDrawable();
-        mImageView.setDifficulty_mode(this.settingParameter.getDifficultyMode());
-        mImageView.setVibrationMode(this.settingParameter.isVibrate());
         if(hasAlreadyLocated()){
             mUiSetting.setScrollGesturesEnabled(true);
             mUiSetting.setZoomGesturesEnabled(true);
@@ -282,10 +227,225 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         }
     }
 
+    private void setUpMap(Bundle savedInstanceState){
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        this.mMapView = (MapView)findViewById(R.id.mapView);
+        this.mMapView.onCreate(savedInstanceState);
+        this.mMapView.getMapAsync(this);
+
+        mImageView = (LineMapOverlayView)findViewById(R.id.imageview);
+        mImageView.setOnScrollEndListener(this);
+        mImageView.setLine(this.line); //
+        mImageView.setLevelParameter(this.settingParameter);
+        views.add(mImageView);
+
+        transparent = (ImageView)findViewById(R.id.transparent);
+
+        this.mMapView.addFocusables(views,View.FOCUS_FORWARD);
+
+    }
+
     private boolean hasAlreadyLocated(){
         return this.line.isLocationCompleted();
     }
 
+    // --------------------
+    // タイマスタートまでのカウントダウン表示
+    private PopupWindow countDownTimerWindow = null;
+    private Timer countDownTimer = null;
+    private Handler countDownTimerHandler = new Handler();
+    private long WAIT_TIME_TO_START = 1000;
+    private int waitTime = 3;
+    private TextView cdt = null;
+    private class countDownTimerElapse extends TimerTask {
+        @Override
+        public void run() {
+            countDownTimerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    LocationPuzzleActivity.this.waitTime--;
+                    if( waitTime > 0 ){
+                        countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
+                        cdt.setText(String.format("%d",LocationPuzzleActivity.this.waitTime));
+                        Log.d(TAG,String.format("Wait Timer = %d sec",LocationPuzzleActivity.this.waitTime));
+                    }
+                    else{
+                        LocationPuzzleActivity.this.countDownTimerWindow.dismiss();
+                        LocationPuzzleActivity.this.countDownTimerWindow = null;
+                        LocationPuzzleActivity.this.countDownTimer = null;
+                        LocationPuzzleActivity.this.cdt = null;
+                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
+                        mUiSetting.setScrollGesturesEnabled(true);
+                        mUiSetting.setZoomGesturesEnabled(true);
+                        Toast.makeText(LocationPuzzleActivity.this,"地図合わせ スタート!", Toast.LENGTH_SHORT).show();
+                        LocationPuzzleActivity.this.mImageView.start();
+                    }
+                }
+            });
+        }
+    }
+
+    private void startCountDownToPlay(){
+        if( countDownTimerWindow == null){
+
+            countDownTimerWindow = new PopupWindow(this);
+
+            // レイアウト設定
+            View popupView = getLayoutInflater().inflate(R.layout.location_activity_start_timer, null);
+            // ワンポイント　アドバイスのテキスト
+            cdt = (TextView)popupView.findViewById(R.id.countDownTimer);
+            cdt.setTextColor(ContextCompat.getColor(this, R.color.color_10));
+            cdt.setText(String.format("%d",this.waitTime));
+            Log.d(TAG,String.format("Wait Timer = %d sec",this.waitTime));
+
+            countDownTimerWindow.setContentView(popupView);
+
+            // 背景設定
+            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
+            countDownTimerWindow.setBackgroundDrawable(background);
+            // タップ時に他のViewでキャッチされないための設定
+            countDownTimerWindow.setOutsideTouchable(true);
+            countDownTimerWindow.setFocusable(true);
+            // 画面中央に表示
+            countDownTimerWindow.showAtLocation(findViewById(R.id.transparent), Gravity.CENTER, 0, 0);
+
+            countDownTimer = new Timer(true);
+            countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
+        }
+    }
+
+    // --------------------
+    // NendAdListener
+    @Override
+    public void onReceiveAd(NendAdView nendAdView) {
+        Log.d(TAG,String.format("onReceiveAd onReceiveAdCnt = %d",this.onReceiveAdCnt));
+        this.onReceiveAdCnt++;
+    }
+
+    @Override
+    public void onFailedToReceiveAd(NendAdView nendAdView) {
+        Log.d(TAG,"onFailedToReceiveAd");
+    }
+
+    @Override
+    public void onClick(NendAdView nendAdView) {
+        Log.d(TAG,"onClick");
+        this.showAnswerCount = 0;
+        this.onReceiveAdCnt = 0;
+    }
+
+    @Override
+    public void onDismissScreen(NendAdView nendAdView) {
+        Log.d(TAG,"onDismissScreen");
+    }
+
+    // --------------------
+    // onMapClick() の処理
+    // --------------------
+    @Override
+    public void onMapClick(LatLng latLng) {
+    Log.d(TAG,"onMapClick");
+    // ToDo
+    // タイムトライアルのタイマー開始／停止操作実装
+    if(!this.mImageView.isStarted() && !this.line.isLocationCompleted()) startCountDownToPlay();
+}
+
+    // --------------------
+    // onCameraIdle() の処理
+    // --------------------
+    @Override
+    public void onCameraIdle() {
+        Log.d(TAG,"onCamelaIdel");
+        if(mImageView.getDrawable()!=null){
+            checkLocation();
+        }
+        CameraPosition campos = mMap.getCameraPosition();
+        Log.d(TAG,String.format("カメラ現在位置 lat = %f, Lng = %f, zoom = %f", campos.target.latitude,campos.target.longitude,campos.zoom));
+        Projection proj = mMap.getProjection();
+        VisibleRegion vRegion = proj.getVisibleRegion();
+        // 北東 = top/right, 南西 = bottom/left
+        double topLatitude = vRegion.latLngBounds.northeast.latitude;
+        double bottomLatitude = vRegion.latLngBounds.southwest.latitude;
+        double leftLongitude = vRegion.latLngBounds.southwest.longitude;
+        double rightLongitude = vRegion.latLngBounds.northeast.longitude;
+        Log.d(TAG, "地図表示範囲\n緯度:" + bottomLatitude + "～" + topLatitude + "\n経度:" + leftLongitude + "～" + rightLongitude);
+    }
+
+    // --------------------
+    // onScrollEnd() の処理
+    // --------------------
+    @Override
+    public void onScrollEnd() {
+        Log.d(TAG,"onScrollEnd");
+        checkLocation();
+    }
+
+    private static int initialScore[] =  { 300,250,100 };
+    private int computeSocre(long elapseTime, int showAnswerCount){
+        int level = this.settingParameter.getDifficultyMode();
+        int elapse = (int)elapseTime;
+        int sc = initialScore[level] - ( elapse + this.showAnswerCount*5);
+        if( sc < 0 ) sc = 0;
+        return sc;
+    }
+    private boolean checkLocation(){
+        mImageView.displayCorrectCoordinate(TAG);
+        int err = mImageView.computeLocationError();
+        Log.d(TAG,String.format("error = %d",err));
+        if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
+            // 正解
+            Toast.makeText(LocationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
+            mImageView.resetImageDrawable();
+            setGeoJsonVisible();
+            this.line.setLocationAnswerStatus();
+            int sc = computeSocre(this.mImageView.getPlayingTimer(),this.line.getLocationShowAnswerCount());
+            this.line.setLocationScore(sc);
+            db.updateLineLocationAnswerStatus(this.line);
+        }
+        else{
+        }
+        return true;
+
+    }
+
+    // --------------------
+    // onMapLongClick() の処理
+    // --------------------
+    // 「回答クリア」
+    private void answerClear(){
+        new AlertDialog.Builder(this)
+                .setTitle(this.line.getName()+" : 回答クリア")
+                .setMessage("地図合わせの回答をクリアします。"+"\n"+"　　よろしいですか？")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG,String.format("%s:敷設回答クリア",LocationPuzzleActivity.this.line.getName()));
+                        LocationPuzzleActivity.this.line.resetLocationAnswerStatus();
+                        LocationPuzzleActivity.this.db.updateLineLocationAnswerStatus(LocationPuzzleActivity.this.line);
+                        LocationPuzzleActivity.this.resetGeoJsonVisible();
+                        LocationPuzzleActivity.this.mImageView.resetImageDrawable();
+                        LocationPuzzleActivity.this.mImageView.stop();
+                        LocationPuzzleActivity.this.mMap.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                        LocationPuzzleActivity.this.initLatLng,
+                                        LocationPuzzleActivity.this.line.getInitZoomLevel())
+                        );
+                        LocationPuzzleActivity.this.mImageView.setImageDrawable();
+                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
+                        mUiSetting.setScrollGesturesEnabled(false);
+                        mUiSetting.setZoomGesturesEnabled(false);
+                        LocationPuzzleActivity.this.waitTime = 3;
+                        Toast.makeText(LocationPuzzleActivity.this,"シルエットピースをタップ！\n　　　　３秒後にスタートします。",
+                                Toast.LENGTH_LONG).show();
+
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // 「回答を見る」
     // GeoJsonLayerの生成とColorの指定、Mapへの登録
     private void retrieveFileFromResource() {
         try {
@@ -303,19 +463,16 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             Log.e(TAG, "GeoJSON file could not be converted to a JSONObject");
         }
     }
-
     private void setGeoJsonVisible(){
         retrieveFileFromResource();
         layer.addLayerToMap();
     }
-
     private void resetGeoJsonVisible(){
         if(layer!=null){
             layer.removeLayerFromMap();
             layer = null;
         }
     }
-
     // 回答表示の消去
     private class displayTimerElapse extends TimerTask {
         /**
@@ -343,115 +500,14 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             });
         }
     }
-
     // 回答の表示と消去タイマ起動
     private void answerDisplay(){
         if (mAnswerDisplayingTimer == null) {
             setGeoJsonVisible();
+            this.line.incrementLocationShowAnswerCount();
             mAnswerDisplayingTimer = new Timer(true);
             mAnswerDisplayingTimer.schedule(new displayTimerElapse(),DISPLAY_ANSWER_TIME);
         }
-    }
-
-    // 回答クリア
-    private void answerClear(){
-        new AlertDialog.Builder(this)
-                .setTitle(this.line.getName()+" : 回答クリア")
-                .setMessage("地図合わせの回答をクリアします。"+"\n"+"　　よろしいですか？")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG,String.format("%s:敷設回答クリア",LocationPuzzleActivity.this.line.getName()));
-                        LocationPuzzleActivity.this.line.resetLocationAnswerStatus();
-                        LocationPuzzleActivity.this.db.updateLineLocationAnswerStatus(LocationPuzzleActivity.this.line);
-                        LocationPuzzleActivity.this.resetGeoJsonVisible();
-                        LocationPuzzleActivity.this.mImageView.resetImageDrawable();
-                        LocationPuzzleActivity.this.mImageView.stop();
-                        LocationPuzzleActivity.this.mMap.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    LocationPuzzleActivity.this.initLatLng,
-                                        LocationPuzzleActivity.this.line.getInitZoomLevel())
-                                );
-                        LocationPuzzleActivity.this.mImageView.setImageDrawable();
-                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
-                        mUiSetting.setScrollGesturesEnabled(false);
-                        mUiSetting.setZoomGesturesEnabled(false);
-                        LocationPuzzleActivity.this.waitTime = 3;
-                        Toast.makeText(LocationPuzzleActivity.this,"シルエットピースをタップ！\n　　　　３秒後にスタートします。",
-                                Toast.LENGTH_LONG).show();
-
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void settingDifficulty(){
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View dialogLayout = inflater.inflate(R.layout.activity_line_location_setting_dialog, (ViewGroup) findViewById(R.id.layout_root));
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("難易度設定");
-        //builder.setMessage("");
-        builder.setView(dialogLayout);
-
-        // radioボタンの初期化
-        RadioGroup radioGroup = (RadioGroup) dialogLayout.findViewById(R.id.settingDifficulty);
-        int dif = this.settingParameter.getDifficultyMode();
-        if(dif == LineMapOverlayView.DIFFICULTY_BEGINNER){
-            radioGroup.check(R.id.difficulty_beginner);
-        }
-        else if(dif == LineMapOverlayView.DIFFICULTY_AMATEUR){
-            radioGroup.check(R.id.difficulty_amateur);
-        }
-        else{
-            radioGroup.check(R.id.difficulty_professional);
-        }
-
-        // switchの初期化
-        Switch vibrationSwitch = (Switch) dialogLayout.findViewById(R.id.vibration_mode);
-        vibrationSwitch.setChecked(this.settingParameter.isVibrate());
-
-        // ok 選択操作
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                int difficulty_mode = 0;
-                RadioGroup radioGroup = (RadioGroup) dialogLayout.findViewById(R.id.settingDifficulty);
-                Switch vibrationSwitch = (Switch) dialogLayout.findViewById(R.id.vibration_mode);
-                if (radioGroup.getCheckedRadioButtonId() == R.id.difficulty_beginner) {
-                    difficulty_mode = LineMapOverlayView.DIFFICULTY_BEGINNER;
-                    Log.d(TAG,"beginner selected");
-                }
-                else if(radioGroup.getCheckedRadioButtonId() == R.id.difficulty_amateur){
-                    difficulty_mode = LineMapOverlayView.DIFFICULTY_AMATEUR;
-                    Log.d(TAG,"amateur selected");
-                }
-                else{
-                    difficulty_mode = LineMapOverlayView.DIFFICULTY_PROFESSIONAL;
-                    Log.d(TAG,"professional selected");
-                }
-                if(vibrationSwitch.isChecked()){
-                    Log.d(TAG,"vibration checked");
-                }
-                else{
-                    Log.d(TAG,"vibration no checked");
-                }
-                boolean vibration = vibrationSwitch.isChecked();
-                LocationPuzzleActivity.this.settingParameter.setDifficultyMode(difficulty_mode);
-                LocationPuzzleActivity.this.settingParameter.setVibrationMode(vibration);
-                LocationPuzzleActivity.this.mImageView.setDifficulty_mode(difficulty_mode);
-                LocationPuzzleActivity.this.mImageView.setVibrationMode(vibration);
-                LocationPuzzleActivity.this.db.updateDifficultySetting(difficulty_mode);
-                LocationPuzzleActivity.this.db.updateVibrationSetting(vibration);
-           }
-        });
-
-        // cancel操作
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                }
-        );
-        builder.create().show();
     }
 
     @Override
@@ -534,57 +590,34 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
 
     }
 
+    // --------------------
+    // 戻るボタンの処理
+    // --------------------
+    /**
+     * Take care of popping the fragment back stack or finishing the activity
+     * as appropriate.
+     */
     @Override
-    public void onMapClick(LatLng latLng) {
-        Log.d(TAG,"onMapClick");
-        // ToDo
-        // タイムトライアルのタイマー開始／停止操作実装
-        if(!this.mImageView.isStarted() && !this.line.isLocationCompleted()) startCountDownToPlay();
+    public void onBackPressed() {
+        Intent intent = new Intent(this.getApplicationContext(), PieceGarallyActivity.class);
+        intent.putExtra("SelectedCompanyId", this.companyId);
+        intent.putExtra("previewAnswerCount", this.previewLineAnswerCount);
+        startActivityForResult(intent, 1);
+        // アニメーションの設定
+        overridePendingTransition(R.anim.in_left, R.anim.out_right);
+        this.db.close();
+        finish();
     }
 
-    @Override
-    public void onCameraIdle() {
-        Log.d(TAG,"onCamelaIdel");
-        if(mImageView.getDrawable()!=null){
-            checkLocation();
-        }
-        CameraPosition campos = mMap.getCameraPosition();
-        Log.d(TAG,String.format("カメラ現在位置 lat = %f, Lng = %f, zoom = %f", campos.target.latitude,campos.target.longitude,campos.zoom));
-        Projection proj = mMap.getProjection();
-        VisibleRegion vRegion = proj.getVisibleRegion();
-        // 北東 = top/right, 南西 = bottom/left
-        double topLatitude = vRegion.latLngBounds.northeast.latitude;
-        double bottomLatitude = vRegion.latLngBounds.southwest.latitude;
-        double leftLongitude = vRegion.latLngBounds.southwest.longitude;
-        double rightLongitude = vRegion.latLngBounds.northeast.longitude;
-        Log.d(TAG, "地図表示範囲\n緯度:" + bottomLatitude + "～" + topLatitude + "\n経度:" + leftLongitude + "～" + rightLongitude);
+    // --------------------
+    // OptionMenuの処理
+    // --------------------
+    // レベル設定
+    private void settingDifficulty(){
+        SettingParameterDialog set = new SettingParameterDialog(this,this.settingParameter,this.db);
+        set.show();
+        Log.d(TAG,String.format("mode = %d, vib = %b",this.settingParameter.getDifficultyMode(),this.settingParameter.isVibrate()));
     }
-
-    @Override
-    public void onScrollEnd() {
-        Log.d(TAG,"onScrollEnd");
-        checkLocation();
-    }
-
-    private boolean checkLocation(){
-        mImageView.displayCorrectCoordinate(TAG);
-        int err = mImageView.computeLocationError();
-        Log.d(TAG,String.format("error = %d",err));
-        if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
-            // 正解
-            Toast.makeText(LocationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
-            mImageView.resetImageDrawable();
-            setGeoJsonVisible();
-            this.line.setLocationAnswerStatus();
-            this.line.computeLocationScore(this.mImageView.getPlayingTimer());
-            db.updateLineLocationAnswerStatus(this.line);
-        }
-        else{
-        }
-        return true;
-
-    }
-
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.
@@ -616,7 +649,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
     /**
      * Prepare the Screen's standard options menu to be displayed.  This is
      * called right before the menu is shown, every time it is shown.  You can
@@ -644,167 +676,6 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         }
         return super.onPrepareOptionsMenu(menu);
     }
-
-    // --------------------
-    // ワンポイント　チュートリアルの表示
-    private PopupWindow onePointTutorial = null;
-    private Timer mOnePointTutorialDisplayingTimer = null;
-    private Handler tutorialTimerHandler = new Handler();
-    private final static long TUTORIAL_DISPLAY_TIME = 1000*5;
-    // ワンポイント チュートリアルの表示の消去
-    private class tutorialDisplayTimerElapse extends TimerTask {
-        /**
-         * The action to be performed by this timer task.
-         */
-        @Override
-        public void run() {
-            tutorialTimerHandler.post(new Runnable(){
-                /**
-                 * When an object implementing interface <code>Runnable</code> is used
-                 * to create a thread, starting the thread causes the object's
-                 * <code>run</code> method to be called in that separately executing
-                 * thread.
-                 * <p>
-                 * The general contract of the method <code>run</code> is that it may
-                 * take any action whatsoever.
-                 *
-                 * @see Thread#run()
-                 */
-                @Override
-                public void run() {
-                    if(onePointTutorial !=null){
-                        onePointTutorial.dismiss();
-                        onePointTutorial = null;
-                    }
-                    mOnePointTutorialDisplayingTimer = null;
-                }
-            });
-        }
-    }
-
-    private void showOnePointTutorial(){
-        if(onePointTutorial == null){
-
-            onePointTutorial = new PopupWindow(this);
-            // レイアウト設定
-            View popupView = getLayoutInflater().inflate(R.layout.one_point_tutorial_popup, null);
-
-            // ワンポイント　アドバイスのテキスト
-            TextView information = (TextView)popupView.findViewById(R.id.information);
-            information.setText("■シルエットピース■と■地図■の大きさ、位置を合わせてね");
-
-            // 「詳しく...」ボタン設定
-            Button moreBtn = (Button)popupView.findViewById(R.id.more);
-            moreBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onePointTutorial.isShowing()) {
-                        onePointTutorial.dismiss();
-                        // この呼び出しでOnDismissListenerが呼び出されるので
-                        // ここでは以下の呼び出しは不要（OnDismissListenerに委譲）
-                        // onePointTutorial = null;
-                        // mOnePointTutorialDisplayingTimer.cancel();
-                        // mOnePointTutorialDisplayingTimer = null;
-                    }
-                    Intent intent = new Intent(LocationPuzzleActivity.this, TutorialActivity.class);
-                    intent.putExtra("page", 3);
-                    startActivity(intent);
-                }
-            });
-            onePointTutorial.setContentView(popupView);
-
-            // 背景設定
-            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
-            onePointTutorial.setBackgroundDrawable(background);
-
-            // タップ時に他のViewでキャッチされないための設定
-            onePointTutorial.setOutsideTouchable(true);
-            onePointTutorial.setFocusable(true);
-
-            // Popup以外のタップでPopup消去
-            // 「詳しく...」ボタンのOnClickListener.onClick()で呼び出すdismiss()でも呼び出される
-            onePointTutorial.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-                    if (onePointTutorial != null) {
-                        onePointTutorial = null;
-                        mOnePointTutorialDisplayingTimer.cancel();
-                        mOnePointTutorialDisplayingTimer = null;
-                    }
-                }
-            });
-
-            // 画面中央に表示
-            onePointTutorial.showAtLocation(findViewById(R.id.transparent), Gravity.BOTTOM, 0, 0);
-
-            mOnePointTutorialDisplayingTimer = new Timer(true);
-            mOnePointTutorialDisplayingTimer.schedule(new LocationPuzzleActivity.tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
-        }
-    }
-
-    // タイマスタートまでのカウントダウン表示
-    private PopupWindow countDownTimerWindow = null;
-    private Timer countDownTimer = null;
-    private Handler countDownTimerHandler = new Handler();
-    private long WAIT_TIME_TO_START = 1000;
-    private int waitTime = 3;
-    private TextView cdt = null;
-    private class countDownTimerElapse extends TimerTask {
-        @Override
-        public void run() {
-            countDownTimerHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    LocationPuzzleActivity.this.waitTime--;
-                    if( waitTime > 0 ){
-                        countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
-                        cdt.setText(String.format("%d",LocationPuzzleActivity.this.waitTime));
-                        Log.d(TAG,String.format("Wait Timer = %d sec",LocationPuzzleActivity.this.waitTime));
-                    }
-                    else{
-                        LocationPuzzleActivity.this.countDownTimerWindow.dismiss();
-                        LocationPuzzleActivity.this.countDownTimerWindow = null;
-                        LocationPuzzleActivity.this.countDownTimer = null;
-                        LocationPuzzleActivity.this.cdt = null;
-                        UiSettings mUiSetting = LocationPuzzleActivity.this.mMap.getUiSettings();
-                        mUiSetting.setScrollGesturesEnabled(true);
-                        mUiSetting.setZoomGesturesEnabled(true);
-                        Toast.makeText(LocationPuzzleActivity.this,"地図合わせ スタート!", Toast.LENGTH_SHORT).show();
-                        LocationPuzzleActivity.this.mImageView.start();
-                    }
-                }
-            });
-        }
-    }
-    private void startCountDownToPlay(){
-        if( countDownTimerWindow == null){
-
-            countDownTimerWindow = new PopupWindow(this);
-
-            // レイアウト設定
-            View popupView = getLayoutInflater().inflate(R.layout.location_activity_start_timer, null);
-            // ワンポイント　アドバイスのテキスト
-            cdt = (TextView)popupView.findViewById(R.id.countDownTimer);
-            cdt.setTextColor(ContextCompat.getColor(this, R.color.color_10));
-            cdt.setText(String.format("%d",this.waitTime));
-            Log.d(TAG,String.format("Wait Timer = %d sec",this.waitTime));
-
-            countDownTimerWindow.setContentView(popupView);
-
-            // 背景設定
-            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
-            countDownTimerWindow.setBackgroundDrawable(background);
-            // タップ時に他のViewでキャッチされないための設定
-            countDownTimerWindow.setOutsideTouchable(true);
-            countDownTimerWindow.setFocusable(true);
-            // 画面中央に表示
-            countDownTimerWindow.showAtLocation(findViewById(R.id.transparent), Gravity.CENTER, 0, 0);
-
-            countDownTimer = new Timer(true);
-            countDownTimer.schedule(new LocationPuzzleActivity.countDownTimerElapse(),WAIT_TIME_TO_START);
-        }
-    }
-
     /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
@@ -870,6 +741,7 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    // --------------------
     @Override
     public void onStart() {
         super.onStart();

@@ -5,6 +5,12 @@ package com.pentech.puzrail.database;
  */
 
 public class SettingParameter {
+
+    // レベル設定
+    public final static int DIFFICULTY_PROFESSIONAL = 0;
+    public final static int DIFFICULTY_AMATEUR = 1;
+    public final static int DIFFICULTY_BEGINNER = 2;
+
     private int difficulty_mode = 0;
     private boolean vibrationMode = true;
     private boolean fabVisibility = true;

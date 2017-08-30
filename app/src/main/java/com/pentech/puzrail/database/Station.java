@@ -110,12 +110,10 @@ public class Station {
     }
 
     public void incrementStationMissingCount() { this.stationMissingCount++; }
+    public int getMissingCount() { return stationMissingCount; }
     public void incrementStationShowAnswerCount() { this.stationShowAnswerCount++; }
-    public int computeStationScore(int remainStations ) {
-        int sc = remainStations - this.stationMissingCount;
-        if (sc < 0) this.stationScore = 0;
-        else this.stationScore = sc;
-        return this.stationScore;
-    }
+    public int getShowAnswerCount() { return this.stationShowAnswerCount; }
+
+    public void setStationScore(int sc) { this.stationScore = sc; }
     public int getStationScore() { return this.stationScore; }
 }

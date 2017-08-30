@@ -4,18 +4,14 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +19,8 @@ import android.view.animation.LinearInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.pentech.puzrail.database.Company;
@@ -35,14 +28,20 @@ import com.pentech.puzrail.database.DBAdapter;
 import com.pentech.puzrail.database.SettingParameter;
 import com.pentech.puzrail.piecegarally.PieceGarallyActivity;
 import com.pentech.puzrail.tutorial.TutorialActivity;
+import com.pentech.puzrail.ui.OnePointTutorialDialog;
+import com.pentech.puzrail.ui.SettingParameterDialog;
 
 import net.nend.android.NendAdListener;
 import net.nend.android.NendAdView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import static net.nend.android.NendAdInterstitial.NendAdInterstitialStatusCode.INVALID_RESPONSE_TYPE;
+import static net.nend.android.NendAdView.NendError.AD_SIZE_DIFFERENCES;
+import static net.nend.android.NendAdView.NendError.AD_SIZE_TOO_LARGE;
+import static net.nend.android.NendAdView.NendError.FAILED_AD_DOWNLOAD;
+import static net.nend.android.NendAdView.NendError.FAILED_AD_REQUEST;
 
 /**
  * Created by takashi on 2017/01/11.
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener,
         AbsListView.OnScrollListener,
-        NendAdListener{
+        NendAdListener {
 
     private static final int RESULTCODE = 1;
 
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements
     private ListView listView;
     private DBAdapter db;
     private ArrayList<Company> companies = new ArrayList<Company>();
-    private ArrayList<String> names = new ArrayList<String>();
     private CompanyListAdapter adapter;
     private AlertDialog mDialog;
     private SettingParameter settingParameter;
@@ -69,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements
     private boolean fabVisible = true;
     private int companyTotalScore = 0;
 
-    private LinearLayout rootLayout;
+    private OnePointTutorialDialog onePointTutorial = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,11 +109,12 @@ public class MainActivity extends AppCompatActivity implements
         this.listView.setOnItemClickListener(this);
         this.listView.setOnItemLongClickListener(this);
 
+        onePointTutorial = new OnePointTutorialDialog(this,OnePointTutorialDialog._COMPANY_,R.id.company_list_view);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showInformation();
+                onePointTutorial.show();
             }
         });
         this.settingParameter = db.getSettingParameter();
@@ -133,6 +132,8 @@ public class MainActivity extends AppCompatActivity implements
         nendAdView.loadAd();
     }
 
+    // --------------------
+    // NendAdListener
     @Override
     public void onReceiveAd(NendAdView nendAdView) {
         Log.d(TAG,"onReceiveAd");
@@ -140,6 +141,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onFailedToReceiveAd(NendAdView nendAdView) {
+        NendAdView.NendError nendError = nendAdView.getNendError();
+        switch (nendError) {
+            case INVALID_RESPONSE_TYPE:
+                // 不明な広告ビュータイプ
+                break;
+            case FAILED_AD_DOWNLOAD:
+                // 広告画像の取得失敗
+                break;
+            case FAILED_AD_REQUEST:
+                // 広告取得失敗
+                break;
+            case AD_SIZE_TOO_LARGE:
+                // 広告サイズがディスプレイサイズよりも大きい
+                break;
+            case AD_SIZE_DIFFERENCES:
+                // リクエストしたサイズと取得したサイズが異なる
+                break;
+        }
+        // エラーメッセージをログに出力
+        Log.e(TAG, nendError.getMessage());
         Log.d(TAG,"onFailedToReceiveAd");
     }
 
@@ -147,12 +168,18 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(NendAdView nendAdView) {
         Log.d(TAG,"onClick");
     }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) { }
     @Override
     public void onDismissScreen(NendAdView nendAdView) { Log.d(TAG,"onDismissScreen"); }
 
+    // --------------------
+    // onScrollStateChangedの処理
+    // --------------------
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) { }
+
+    // --------------------
+    // onScrollの処理
+    // --------------------
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         final int remainingItemCount = totalItemCount - (firstVisibleItem + visibleItemCount);
@@ -170,6 +197,9 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // --------------------
+    // onItemClickの処理
+    // --------------------
     /**
      * Callback method to be invoked when an item in this AdapterView has
      * been clicked.
@@ -193,199 +223,9 @@ public class MainActivity extends AppCompatActivity implements
         finish();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    /**
-     * Prepare the Screen's standard options menu to be displayed.  This is
-     * called right before the menu is shown, every time it is shown.  You can
-     * use this method to efficiently enable/disable items or otherwise
-     * dynamically modify the contents.
-     * <p>
-     * <p>The default implementation updates the system menu items based on the
-     * activity's state.  Deriving classes should always call through to the
-     * base class implementation.
-     *
-     * @param menu The options menu as last shown or first initialized by
-     *             onCreateOptionsMenu().
-     * @return You must return true for the menu to be displayed;
-     * if you return false it will not be shown.
-     * @see #onCreateOptionsMenu
-     */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.getItem(0);
-        if(fabVisible){
-            item.setTitle("iボタンを消す");
-        }
-        else{
-            item.setTitle("iボタンを表示");
-        }
-        return super.onPrepareOptionsMenu(menu);
-    }
-
     // --------------------
-    // ワンポイント　チュートリアルの表示
-    private PopupWindow onePointTutorial = null;
-    private Timer mOnePointTutorialDisplayingTimer = null;
-    private Handler tutorialTimerHandler = new Handler();
-    private final static long TUTORIAL_DISPLAY_TIME = 1000*5;
-    // ワンポイント チュートリアルの表示の消去
-    private class tutorialDisplayTimerElapse extends TimerTask {
-        /**
-         * The action to be performed by this timer task.
-         */
-        @Override
-        public void run() {
-            tutorialTimerHandler.post(new Runnable(){
-                /**
-                 * When an object implementing interface <code>Runnable</code> is used
-                 * to create a thread, starting the thread causes the object's
-                 * <code>run</code> method to be called in that separately executing
-                 * thread.
-                 * <p>
-                 * The general contract of the method <code>run</code> is that it may
-                 * take any action whatsoever.
-                 *
-                 * @see Thread#run()
-                 */
-                @Override
-                public void run() {
-                    if(onePointTutorial !=null){
-                        onePointTutorial.dismiss();
-                        onePointTutorial = null;
-                    }
-                    mOnePointTutorialDisplayingTimer = null;
-                }
-            });
-        }
-    }
-
-    private void showInformation(){
-        if(onePointTutorial == null){
-
-            onePointTutorial = new PopupWindow(this);
-            // レイアウト設定
-            View popupView = getLayoutInflater().inflate(R.layout.one_point_tutorial_popup, null);
-
-            // ワンポイント　アドバイスのテキスト
-            TextView information = (TextView)popupView.findViewById(R.id.information);
-            information.setText("運営会社をタップしてね");
-
-            // 「詳しく...」ボタン設定
-            Button moreBtn = (Button)popupView.findViewById(R.id.more);
-            moreBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onePointTutorial.isShowing()) {
-                        onePointTutorial.dismiss();
-                        // この呼び出しでOnDismissListenerが呼び出されるので
-                        // ここでは以下の呼び出しは不要（OnDismissListenerに委譲）
-                        // onePointTutorial = null;
-                        // mOnePointTutorialDisplayingTimer.cancel();
-                        // mOnePointTutorialDisplayingTimer = null;
-                    }
-                    Intent intent = new Intent(MainActivity.this, TutorialActivity.class);
-                    intent.putExtra("page", 1);
-                    startActivity(intent);
-                }
-            });
-            onePointTutorial.setContentView(popupView);
-
-            // 背景設定
-            Drawable background = ResourcesCompat.getDrawable(this.getResources(), R.drawable.popup_background, null);
-            onePointTutorial.setBackgroundDrawable(background);
-
-            // タップ時に他のViewでキャッチされないための設定
-            onePointTutorial.setOutsideTouchable(true);
-            onePointTutorial.setFocusable(true);
-
-            // Popup以外のタップでPopup消去
-            // 「詳しく...」ボタンのOnClickListener.onClick()で呼び出すdismiss()でも呼び出される
-            onePointTutorial.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-                    if (onePointTutorial != null) {
-                        onePointTutorial = null;
-                        mOnePointTutorialDisplayingTimer.cancel();
-                        mOnePointTutorialDisplayingTimer = null;
-                    }
-                }
-            });
-
-            // 画面中央に表示
-            onePointTutorial.showAtLocation(findViewById(R.id.company_list_view), Gravity.BOTTOM, 0, 0);
-
-            mOnePointTutorialDisplayingTimer = new Timer(true);
-            mOnePointTutorialDisplayingTimer.schedule(new MainActivity.tutorialDisplayTimerElapse(),TUTORIAL_DISPLAY_TIME);
-        }
-    }
-
-    /**
-     * This hook is called whenever an item in your options menu is selected.
-     * The default implementation simply returns false to have the normal
-     * processing happen (calling the item's Runnable or sending a message to
-     * its Handler as appropriate).  You can use this method for any items
-     * for which you would like to do processing without those other
-     * facilities.
-     * <p>
-     * <p>Derived classes should call through to the base class for it to
-     * perform the default menu handling.</p>
-     *
-     * @param item The menu item that was selected.
-     * @return boolean Return false to allow normal menu processing to
-     * proceed, true to consume it here.
-     * @see #onCreateOptionsMenu
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if(id == R.id.action_information) {
-            if(fabVisible){
-                fabVisible = false;
-                mFab.hide();
-                item.setTitle("iボタンを表示");
-                Log.d(TAG,String.format("visibility = %b",fabVisible));
-            }
-            else{
-                fabVisible = true;
-                mFab.show();
-                item.setTitle("iボタンを消す");
-                Log.d(TAG,String.format("visibility = %b",fabVisible));
-            }
-            settingParameter.setFabVisibility(fabVisible);
-            MainActivity.this.db.updateFabVisibility(fabVisible);
-            return true;
-        }
-        else if (id == R.id.action_AboutPuzzRail) {
-            Intent intent = new Intent(mContext, TutorialActivity.class);
-            intent.putExtra("page", 0);
-            startActivity(intent);
-            return true;
-        }
-        else if (id == R.id.action_Help) {
-            Intent intent = new Intent(mContext, TutorialActivity.class);
-            intent.putExtra("page", 1);
-            startActivity(intent);
-            return true;
-        }
-        else if(id == R.id.action_Ask) {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("plain/text");
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
-            intent.putExtra(Intent.EXTRA_SUBJECT, "「線路と駅」のお問い合わせ");
-            startActivity(Intent.createChooser(intent, ""));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
+    // onItemLongClickの処理
+    // --------------------
     // クリア対象の回答データ選択
     private Company longClickSelectedCompany = null;
     private void answerClear(){
@@ -490,4 +330,113 @@ public class MainActivity extends AppCompatActivity implements
         mDialog.show();
         return true;
     }
+
+    // --------------------
+    // OptionMenuの処理
+    // --------------------
+    // レベル設定
+    private void settingDifficulty(){
+        SettingParameterDialog set = new SettingParameterDialog(this,this.settingParameter,this.db);
+        set.show();
+        Log.d(TAG,String.format("mode = %d, vib = %b",this.settingParameter.getDifficultyMode(),this.settingParameter.isVibrate()));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+    /**
+     * Prepare the Screen's standard options menu to be displayed.  This is
+     * called right before the menu is shown, every time it is shown.  You can
+     * use this method to efficiently enable/disable items or otherwise
+     * dynamically modify the contents.
+     * <p>
+     * <p>The default implementation updates the system menu items based on the
+     * activity's state.  Deriving classes should always call through to the
+     * base class implementation.
+     *
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     * @return You must return true for the menu to be displayed;
+     * if you return false it will not be shown.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.getItem(0);
+        if(fabVisible){
+            item.setTitle("iボタンを消す");
+        }
+        else{
+            item.setTitle("iボタンを表示");
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     * <p>
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.</p>
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if(id == R.id.action_information) {
+            if(fabVisible){
+                fabVisible = false;
+                mFab.hide();
+                item.setTitle("iボタンを表示");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            else{
+                fabVisible = true;
+                mFab.show();
+                item.setTitle("iボタンを消す");
+                Log.d(TAG,String.format("visibility = %b",fabVisible));
+            }
+            settingParameter.setFabVisibility(fabVisible);
+            MainActivity.this.db.updateFabVisibility(fabVisible);
+            return true;
+        }
+        else if (id == R.id.action_level) {
+            settingDifficulty();
+            return true;
+        }
+        else if (id == R.id.action_AboutPuzzRail) {
+            Intent intent = new Intent(mContext, TutorialActivity.class);
+            intent.putExtra("page", 0);
+            startActivity(intent);
+            return true;
+        }
+        else if (id == R.id.action_Help) {
+            Intent intent = new Intent(mContext, TutorialActivity.class);
+            intent.putExtra("page", 1);
+            startActivity(intent);
+            return true;
+        }
+        else if(id == R.id.action_Ask) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("plain/text");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "puzrail@gmail.com" });
+            intent.putExtra(Intent.EXTRA_SUBJECT, "「線路と駅」のお問い合わせ");
+            startActivity(Intent.createChooser(intent, ""));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }
