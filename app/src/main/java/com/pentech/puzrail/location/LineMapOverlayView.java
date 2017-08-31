@@ -823,17 +823,17 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             }
         }
 
+        Paint paint = new Paint();
+        Paint.FontMetrics fm = new Paint.FontMetrics();
+
+        paint.setTextLocale(Locale.JAPANESE);
+        paint.setTypeface(Typeface.DEFAULT_BOLD);
+        paint.setStyle(Paint.Style.FILL);
+        paint.getFontMetrics(fm);
+
         if(!this.line.isLocationCompleted()){
-            Paint paint = new Paint();
-            Paint.FontMetrics fm = new Paint.FontMetrics();
-
-            paint.setTextLocale(Locale.JAPANESE);
-            paint.setTypeface(Typeface.DEFAULT_BOLD);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(12*this.density); // 12sp*density
-            paint.getFontMetrics(fm);
-
             String positionErr = String.format("【%s】（位置ズレ,縮尺ズレ）= (%d,%.2f)",difficulty_name[difficulty_mode],err,scaleError);
+            paint.setTextSize(12*this.density); // 12sp*density
             paint.setColor(ContextCompat.getColor(this.context, R.color.color_10));
             Rect rect = new Rect();
             paint.getTextBounds(positionErr,0,positionErr.length(),rect);
@@ -853,10 +853,29 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                 String dispTime = sdf.format(elapseTime);
                 paint.setTextSize(36*this.density); // 36sp*density
                 paint.setColor(ContextCompat.getColor(LineMapOverlayView.this.context, R.color.color_10));
-                paint.setTypeface(Typeface.DEFAULT_BOLD);
                 paint.getTextBounds(dispTime,0,dispTime.length(),rect);
                 canvas.drawText(dispTime, 10*this.density, 32*this.density + bkGroundRect.height(), paint);
             }
+        }
+        else{
+
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+            String dispTime = String.format("【得点】 %d",this.line.getLocationScore())
+                    + ",【TIME】 "
+                    + sdf.format(this.line.getLocationTime() * 1000);
+            paint.setTextSize(12*this.density); // 36sp*density
+            paint.setColor(ContextCompat.getColor(LineMapOverlayView.this.context, R.color.color_10));
+            Rect rect = new Rect();
+            paint.getTextBounds(dispTime,0,dispTime.length(),rect);
+            RectF bkGroundRect = new RectF(
+                    (float)rect.left,
+                    (float)rect.top   + 14*this.density,
+                    (float)rect.right +  2*this.density,
+                    (float)rect.bottom+ 15*this.density);
+            canvas.drawRoundRect(bkGroundRect,2,2,paint);
+            paint.setColor(ContextCompat.getColor(this.context, R.color.color_WHITE));
+            canvas.drawText(dispTime, 1*this.density, 15*this.density, paint);
+
         }
         super.onDraw(canvas);
     }

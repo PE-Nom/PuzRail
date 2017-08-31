@@ -224,7 +224,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
     private void updateProgressBar(){
 
-        int finishedCnt = this.db.countAnsweredStationsInCompany(this.companyId);
+        int finishedCnt = this.db.countAnsweredStationsInLine(this.companyId,this.selectedLineId);
         this.progressTitle.setText(String.format("%s 駅名解答率 : %d/%d",this.line.getName(), finishedCnt, stations.size()));
         this.progress.setMax(stations.size());
         this.progress.setProgress(finishedCnt);
