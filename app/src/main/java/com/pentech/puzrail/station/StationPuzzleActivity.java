@@ -459,7 +459,8 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                             Log.d(TAG,String.format("answerName = %s, correctName = %s\r\n",answerName,correctName));
 
                             if(answerName.equals(correctName)){ // 駅名が一致する？
-                                Toast.makeText(StationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(StationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(StationPuzzleActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
                                 correctStationInfo.setFinishStatus();
                                 int sc = computeScore(remaining.size(),correctStationInfo.getMissingCount(),correctStationInfo.getShowAnswerCount());
                                 correctStationInfo.setStationScore(sc);
@@ -470,7 +471,8 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                             }
                             else{
                                 correctStationInfo.incrementStationMissingCount();
-                                Toast.makeText(StationPuzzleActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(StationPuzzleActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(StationPuzzleActivity.this,"残念･･･    \uD83D\uDE23",Toast.LENGTH_SHORT).show();
                             }
                             StationPuzzleActivity.this.selectedStationIndex = -1;
                         }
@@ -752,10 +754,10 @@ public class StationPuzzleActivity extends AppCompatActivity implements
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.getItem(0);
         if(fabVisible){
-            item.setTitle("iボタンを消す");
+            item.setTitle("ⓘボタンを消す");
         }
         else{
-            item.setTitle("iボタンを表示");
+            item.setTitle("ⓘボタンを表示");
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -768,13 +770,13 @@ public class StationPuzzleActivity extends AppCompatActivity implements
             if(fabVisible){
                 fabVisible = false;
                 mFab.hide();
-                item.setTitle("iボタンを表示");
+                item.setTitle("ⓘボタンを表示");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             else{
                 fabVisible = true;
                 mFab.show();
-                item.setTitle("iボタンを消す");
+                item.setTitle("ⓘボタンを消す");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             settingParameter.setFabVisibility(fabVisible);

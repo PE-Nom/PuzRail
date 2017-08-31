@@ -5,13 +5,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.pentech.puzrail.MainActivity;
 import com.pentech.puzrail.R;
 import com.pentech.puzrail.tutorial.TutorialActivity;
 
@@ -135,32 +136,114 @@ public class OnePointTutorialDialog {
         }
     }
 
-    private static String tutorialMessages[] ={
-            "線路と駅について",
-            "運営会社をタップしてね",
-            "■シルエット■をタップして正解すると\n■地図合わせ■、■駅並べ■が遊べるよ",
-            "■シルエットピース■と■地図■の大きさ、位置を合わせてね",
-            "■未回答■をタップして駅を正しい順に並べてね"
-    };
-    private String createMessage(int page){
-        String str = "None";
+    //　絵文字入りのメッセージ生成
+    private SpannableStringBuilder createMessage(int page){
+        SpannableStringBuilder ssb = new SpannableStringBuilder().append("none");
         switch(page){
             case 0:
-                str = this.tutorialMessages[OnePointTutorialDialog._ABOUT_];
+                ssb = createTutorialMessage_ABOUT_();
                 break;
             case 1:
-                str = this.tutorialMessages[OnePointTutorialDialog._COMPANY_];
+                ssb = createTutorialMessage_COMPANY_();
                 break;
             case 2:
-                str = this.tutorialMessages[OnePointTutorialDialog._SILHOUETTE_];
+                ssb = createTutorialMessage_SILHOUETTE_();
                 break;
             case 3:
-                str = this.tutorialMessages[OnePointTutorialDialog._LOCATION_];
+                ssb = createTutorialMessage_LOCATION_();
                 break;
             case 4:
-                str = this.tutorialMessages[OnePointTutorialDialog._STATION_];
+                ssb = createTutorialMessage_STATION_();
                 break;
         }
-        return str;
+        return ssb;
+    }
+
+    private SpannableStringBuilder createTutorialMessage_ABOUT_(){
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        int start,end;
+
+        ssb.append("線路と駅について");
+
+        return ssb;
+    }
+
+    private SpannableStringBuilder createTutorialMessage_COMPANY_(){
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        int start,end;
+
+        ssb.append("運営会社をタップしてね");
+
+        return ssb;
+    }
+
+    private SpannableStringBuilder createTutorialMessage_SILHOUETTE_(){
+
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        int start,end;
+
+        ssb.append(" ");
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_line_question), start, end, flag);
+        ssb.append(" をタップして正解すると");
+        ssb.append('\n');
+
+        ssb.append(" ");
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_tracklaying), start, end, flag);
+        ssb.append(" と ");
+
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_station_open), start, end, flag);
+        ssb.append(" が遊べるようになります。");
+
+        return ssb;
+    }
+
+    private SpannableStringBuilder createTutorialMessage_LOCATION_(){
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        int start,end;
+
+        ssb.append(" ");
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_silhouette_piece), start, end, flag);
+        ssb.append(" と");
+
+        ssb.append(" ");
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        // TODO:地図のイメージに差し替えのこと!!
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.common_google_signin_btn_icon_light), start, end, flag);
+        ssb.append(" の大きさ、位置を合わせてね");
+
+        return ssb;
+    }
+
+    private SpannableStringBuilder createTutorialMessage_STATION_(){
+        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        int start,end;
+
+        ssb.append(" ");
+        start = ssb.length();
+        ssb.append('\uFFFC'); // Unicode replacement character
+        end = ssb.length();
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_out_of_sv_station), start, end, flag);
+        ssb.append(" の駅をタップして正しい駅名を選んでね");
+
+        return ssb;
     }
 }

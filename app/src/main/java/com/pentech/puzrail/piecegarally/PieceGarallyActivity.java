@@ -323,7 +323,8 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             Log.d(TAG,String.format("correct %s, selected %s",correctLineName,selectedLineName));
                             //正解判定
                             if(correctLine.getLineId() == selectedLine.getLineId()){
-                                Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PieceGarallyActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
                                 correctLine.setSilhouetteAnswerStatus();
                                 correctLine.setSilhouetteScore(PieceGarallyActivity.this.computeScore(randomizedRemainLines.size(),
                                                                 correctLine.getSilhouetteMissingCount(),
@@ -335,7 +336,8 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             }
                             else{
                                 correctLine.incrementSilhouetteMissingCount();
-                                Toast.makeText(PieceGarallyActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(PieceGarallyActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PieceGarallyActivity.this,"残念･･･    \uD83D\uDE23",Toast.LENGTH_SHORT).show();
                             }
                         }
                     }
@@ -629,10 +631,10 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.getItem(0);
         if(fabVisible){
-            item.setTitle("iボタンを消す");
+            item.setTitle("ⓘボタンを消す");
         }
         else{
-            item.setTitle("iボタンを表示");
+            item.setTitle("ⓘボタンを表示");
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -648,13 +650,13 @@ public class PieceGarallyActivity extends AppCompatActivity implements
             if(fabVisible){
                 fabVisible = false;
                 mFab.hide();
-                item.setTitle("iボタンを表示");
+                item.setTitle("ⓘボタンを表示");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             else{
                 fabVisible = true;
                 mFab.show();
-                item.setTitle("iボタンを消す");
+                item.setTitle("ⓘボタンを消す");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             settingParameter.setFabVisibility(fabVisible);

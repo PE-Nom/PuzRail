@@ -47,6 +47,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignTop="@+id/nend"
                 android:layout_weight="1"
+                android:background="@drawable/backgound_bg"
                 android:orientation="vertical"
                 android:scrollbars="vertical"
                 android:weightSum="1">

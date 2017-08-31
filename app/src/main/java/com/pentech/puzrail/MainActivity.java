@@ -367,10 +367,10 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.getItem(0);
         if(fabVisible){
-            item.setTitle("iボタンを消す");
+            item.setTitle("ⓘボタンを消す");
         }
         else{
-            item.setTitle("iボタンを表示");
+            item.setTitle("ⓘボタンを表示");
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -399,13 +399,13 @@ public class MainActivity extends AppCompatActivity implements
             if(fabVisible){
                 fabVisible = false;
                 mFab.hide();
-                item.setTitle("iボタンを表示");
+                item.setTitle("ⓘボタンを表示");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             else{
                 fabVisible = true;
                 mFab.show();
-                item.setTitle("iボタンを消す");
+                item.setTitle("ⓘボタンを消す");
                 Log.d(TAG,String.format("visibility = %b",fabVisible));
             }
             settingParameter.setFabVisibility(fabVisible);
