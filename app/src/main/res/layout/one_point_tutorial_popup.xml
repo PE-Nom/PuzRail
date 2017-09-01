@@ -30,7 +30,7 @@
             android:layout_marginTop="10dp"
             android:elevation="10dp"
             android:text="ワンポイント チュートリアル"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/onepoint_tutorial_text_accent"
             android:textSize="12sp" />
 
         <TextView
@@ -55,7 +55,7 @@
             android:background="@color/cardview_light_background"
             android:elevation="10dp"
             android:text="詳しく..."
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/onepoint_tutorial_text_accent"
             android:textSize="12sp" />
 
     </LinearLayout>

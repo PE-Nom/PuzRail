@@ -22,6 +22,7 @@
     <color name="color_RED">#ff0000</color>
     <color name="color_WHITE">#ffffffff</color>
     <color name="color_bkGroundREct">#af6868</color>
+    <color name="onepoint_tutorial_text_accent">#00c000</color>
 
     <color name="transparent">#40637e99</color>
     <color name="color_fab">#c0ff4444</color>

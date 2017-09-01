@@ -12,10 +12,10 @@ public class UserInfoViewPagerAdapter extends FragmentPagerAdapter {
     private static final int PAGE_NUM = 5;
     private static String urlString[] = {
             "file:///android_asset/about_puzrail.html",
-            "file:///android_asset/jquerytest.html",
-            "file:///android_asset/help_puzrail.html",
-            "file:///android_asset/help_puzrail.html",
-            "file:///android_asset/help_puzrail.html",
+            "file:///android_asset/company_select_tutorial.html",
+            "file:///android_asset/silhouette_tutorial.html",
+            "file:///android_asset/location_tutorial.html",
+            "file:///android_asset/station_tutorial.html",
     };
 
     public UserInfoViewPagerAdapter(FragmentManager fm) {

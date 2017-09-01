@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>チュートリアル</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+    -->
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <style type="text/css">
+<!--
+body {
+	margin: 0;
+	padding: 0;
+}
+#header h2{
+    font-size: 10px;
+    color: #777;
+    line-height: 20px;
+    display: inline-block;
+    margin: 8px;
+}
+#header h2 + p{
+    float: right;
+    text-align: right;
+    margin: 8px;
+}
+#header h2 + p a {
+    font-weight: bold;
+    font-size: 10px;
+    color: #bf0000;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-decoration: none;
+    text-align: center;
+    border: 2px solid #bf0000;
+    border-radius: 50%;
+}
+#header h2 + p a.pc {
+    color: #bf0000;
+}
+#header h2 + p a.rakuten {
+    background: #bf0000;
+    color: #fff;
+}
+#header h1 {
+    margin: 0;
+}
+#header ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+#header ul li {
+    display: table-cell;
+    border-left: 1px solid #ccc;
+    width: 25%;
+    background: #f8f8f8;
+}
+#header ul li:first-child {
+    border-left: none;
+}
+#header ul li a {
+    display: block;
+    font-size: 12px;
+    color: #444;
+    text-align: center;
+    line-height: 48px;
+    text-decoration: none;
+}
+#QandA-2 {
+    width: auto;
+    font-family: メイリオ;
+    font-size: 12px;
+    padding: 8px;
+}
+#QandA-2 h3 {
+    font-size: 16px;
+    margin: 24px 0 0 0;
+}
+#QandA-2 dl {
+    border: 1px solid #ccc;
+}
+#QandA-2 dt {
+    font-weight: bold;
+    color: #111;
+    background: #f4f4f4; /* 「Q」タイトルの背景色 */
+    padding: 8px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+#QandA-2 dt:first-child {
+    border-top: none;
+}
+#QandA-2 dt:before {
+    content: "Q.";
+    font-weight: bold;
+    margin-right: 8px;
+}
+#QandA-2 dd {
+    padding: 16px 16px 16px 30px;
+    margin: 0;
+    line-height: 140%;
+}
+#QandA-2 dd:first-line {
+    font-weight: bold;
+    color: #bf0000;
+}
+#QandA-2 dd:before {
+    content: "A.";
+    font-weight: bold;
+    margin-right: 8px;
+    margin-left: -21px;
+}
+-->
+</style>
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+</head>
+<!-- https://www.accesstrade.ne.jp/study/affidai/detail/10 -->
+<body>
+
+<div data-role="page" id="pcontents">
+
+    <div data-role="header">
+        <h1>線路と駅の遊び方　チュートリアル</h1>
+    </div>
+
+	<!-- 本文 -->
+    <div data-role="content">
+
+        <h2><b>「駅並べ」</b><font size='3'>知ってて当然？</font></h2>
+        <h3>■<strong>駅並べ画面</strong>の説明 <font size='2'>(起動後はこんな感じ)</font></h3>
+        <p>路線を選んで、駅名を順番に応えるクイズです。<br>
+		<p>★「路線シルエット」に正解すると遊べるようになります★</p>
+
+        <p>
+          ■■■■■■■■■<br>
+          ■　　　　　　　■<br>
+          ■　駅並べ　　　■<br>
+          ■　地図表示　　■<br>
+          ■　駅順リスト　■<br>
+          ■　　　　　　　■<br>
+          ■■■■■■■■■<br>
+        </p>
+
+        <p>ここでは以下の内容を説明する</p>
+        <ol>
+          <li>画面の全体構成</li>
+          <li>駅リスト、地図
+        </ol>
+
+		<h3>■遊び方の説明</h3>
+		
+		<!-- これ以下、アコーディオンで伸縮 -->
+        <div data-role="collapsible-set">
+        
+			<!-- 「路線シルエット」の遊び方チュートリアル -->
+            <div data-role="collapsible" data-theme="b" data-content-theme="c">
+                <h3>遊び方の説明</h3>
+                <dl>
+                <dt>駅の並べ方</dt>
+                  <dd>
+                    <p>
+                      最初は、起点となるターミナル駅だけ表示されています。<br>
+                      ■未回答■の駅をタップし、リストから駅名を選びます。
+                    </p>
+                    <p>
+                      ■■■■■■■■■■　■■■■■■■■<br>
+                      ■　　　　　　　　■　■　　　　　　■<br>
+                      ■　駅順リスト　　■　■　駅リスト　■<br>
+                      ■　とタップ位置　■　■　　　　　　■<br>
+                      ■　　　　　　　　■　■　　　　　　■<br>
+                      ■■■■■■■■■■　■■■■■■■■<br>
+                    </p>
+                    <p>
+                      正解で■どや顔■が表示され、駅リストのアイコンが■回答済み■に変わり得点が得られます。<br>
+                      間違えると■泣き顔■が表示されます。
+                    </p>
+                  </dd>
+                <dt>地図上の位置表示</dt>
+                  <dd>
+                    <p>
+                      正解した駅をチェックすると、地図上に駅の位置がマーキングされ位置を確認できます。
+                    </p>
+                    <p>
+                      ■■■■■■■■■■　■■■■■■■■<br>
+                      ■　　　　　　　　■　■　　　　　　■<br>
+                      ■　駅順リストと　■　■　地図上の　■<br>
+                      ■　チェック位置　■　■　駅の位置　■<br>
+                      ■　　　　　　　　■　■　　　　　　■<br>
+                      ■■■■■■■■■■　■■■■■■■■<br>
+                    </p>
+                    <p>
+                      地図上のマーカーをタップすると、その駅をWebで検索できます。
+                    </p>
+                  </dd>
+                </dl>
+            </div>
+            
+			<!-- 「その他操作」のチュートリアル -->
+            <div data-role="collapsible" data-theme="b" data-content-theme="c">
+                <h3>その他の操作</h3>
+                <p>長押しメニューの操作内容</p>
+                <div id="QandA-2">
+                	<dl>
+                	<dt>・ちょっとだけ答えをみたい</dt><dd>長押しメニューで「回答を見る」を選択。<br>画面の下の方にちょっとだけ駅名が表示されます。</dd>
+                	<dt>・この路線をもう一度遊ぶ</dt><dd>長押しメニューの「回答をクリア」を選択。</dd>
+                	<dt>・この駅についてWeb検索</dt><dd>長押しメニューで「Webを検索」を選択する</dd>
+                	</dl>
+				</div>
+            </div>
+            <!---->
+
+        </div>
+        <!--アコーディオンここまで-->
+
+        <p>Next</p>
+</div>
+
+</body>
+</html>
