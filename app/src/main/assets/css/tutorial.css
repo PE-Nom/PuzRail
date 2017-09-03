@@ -1,0 +1,120 @@
+@charset "utf-8";
+body {
+	margin: 0;
+	padding: 0;
+}
+dd {
+    margin-left: 1em;
+}
+ol {
+    padding-left: 30px;
+}
+ul {
+    padding-left: 30px;
+}
+
+#header h2{
+    font-size: 10px;
+    color: #777;
+    line-height: 20px;
+    display: inline-block;
+    margin: 8px;
+}
+#header h2 + p{
+    float: right;
+    text-align: right;
+    margin: 8px;
+}
+#header h2 + p a {
+    font-weight: bold;
+    font-size: 10px;
+    color: #bf0000;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-decoration: none;
+    text-align: center;
+    border: 2px solid #bf0000;
+    border-radius: 50%;
+}
+
+#header h1 {
+    margin: 0;
+}
+#header ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+#header ul li {
+    display: table-cell;
+    border-left: 1px solid #ccc;
+    width: 25%;
+    background: #f8f8f8;
+}
+#header ul li:first-child {
+    border-left: none;
+}
+#header ul li a {
+    display: block;
+    font-size: 12px;
+    color: #444;
+    text-align: center;
+    line-height: 48px;
+    text-decoration: none;
+}
+/*-----*/
+#QandA-2 {
+    width: auto;
+    font-family: メイリオ;
+    font-size: 12px;
+/*    padding: 8px;*/
+}
+#QandA-2 h3 {
+    font-size: 8px;
+    margin: 24px 0 0 0;
+}
+#QandA-2 dl {
+    border: 1px solid #ccc;
+}
+#QandA-2 dt {
+    font-weight: bold;
+    color: #111;
+    background: #f4f4f4; /* 「Q」タイトルの背景色 */
+    padding: 4px 2px 4px 2px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+/*
+#QandA-2 dt:first-child {
+    border-top: none;
+}
+*/
+#QandA-2 dt:before {
+    content: "・";
+    font-weight: bold;
+    margin-right: 8px;
+}
+#QandA-2 dd {
+    padding: 4px 2px 4px 2px;
+    margin: 0;
+    line-height: 140%;
+    color: #bf0000;
+}
+/*
+#QandA-2 dd:first-line {
+    font-weight: bold;
+    color: #bf0000;
+}
+*/
+#QandA-2 dd:before {
+/*    content: "A.";*/
+    font-weight: bold;
+    margin-right: 8px;
+    margin-left: -21px;
+}
