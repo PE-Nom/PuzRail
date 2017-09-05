@@ -20,19 +20,11 @@
     <div data-role="page" id="pcontents">
 
         <!-- 本文 -->
-        <div>
+        <div data-role="content">
             <p><b>「運営会社の選択」</b><font size="2">ここから始めます</font></p>
             <p><font size=2>〜アプリ起動後はこんな感じです〜</font></p>
             <font size=2>
-                <p>■■■■■■■■■■■■■■■■■<br>
-                   ■　　　　　　　　　　　　　　　■<br>
-                   ■　運営会社リスト　　　　　　　■<br>
-                   ■　運営会社名　　　　　　　　　■<br>
-                   ■　路線シルエット進捗ゲージ　　■<br>
-                   ■　地図合わせ進捗ゲージ　　　　■<br>
-                   ■　駅並べ進捗ゲージ　　　　　　■<br>
-                   ■　　　　　　　　　　　　　　　■<br>
-                   ■■■■■■■■■■■■■■■■■</p>
+                <img border="0" src="images/company_select_screenshot.png" width="128">
             </font>
         </div>
         <div>
@@ -43,13 +35,14 @@
                 <div data-role="collapsible" data-theme="b" data-content-theme="c">
                     <h3>画面の説明</h3>
                     <font size=2>
-                        <p>ここでは以下の内容を説明する</p>
-                        <ol>
-                            <li>画面の全体構成</li>
-                            <li>運営会社リストの「路線シルエット」の進捗、得点</li>
-                            <li>運営会社リストの「地図合わせ」の進捗、得点</li>
-                            <li>運営会社リストの「駅並べ」の進捗、得点</li>
-                        </ol>
+                        <img border="0" src="images/company_select_totalscore.png" width="128">
+                        <img border="0" src="images/company_select_companylist.png" width="128">
+                        <img border="0" src="images/company_select_listitem.png" width="128">
+                        <ul>
+                            <li>「路線シルエット」<br><font size=1> 進捗（正解路線数/全路線数、％）と得点</font></li>
+                            <li>「地図合わせ」<br><font size=1> 進捗（正解路線数/全路線数、％）と得点</font></li>
+                            <li>「駅並べ」<br><font size=1> 進捗（正解駅数（始点除く）/全駅数、％）と得点</font></li>
+                        </ul>
                     </font>
                 </div>
 
@@ -57,16 +50,7 @@
                     <h3>アクティビティの開始</h3>
                     <font size=2>
                         <p>リストから運営会社を選んでタップ、「路線シルエット当て」アクティビティをスタートします</p>
-                        <p>■■■■■■■■■■■■■■■■■<br>
-                           ■　　　　　　　　　　　　　　　■<br>
-                           ■　運営会社リストとタップ位置　■<br>
-                           ■　　　　　　　　　　　　　　　■<br>
-                           ■■■■■■■■■■■■■■■■■</p>
-                        <p>ここでは以下の内容を説明する</p>
-                        <ol>
-                            <li>スワイプ操作でスクロール</li>
-                            <li>タップする位置</li>
-                        </ol>
+                        <img border="0" src="images/company_select_tap.png" width="128">
                     </font>
                 </div>
 
@@ -74,25 +58,25 @@
                 <div data-role="collapsible" data-theme="b" data-content-theme="c">
                     <h3>その他の操作</h3>
                     <font size=2>
-                        <p>長押しメニューの操作内容</p>
-                        <div id="QandA-2">
-                            <dl>
-                            <dt>もう一度はじめから遊ぶ</dt><dd>長押しメニューの「回答をクリア」を選択</dd>
-                            <dt>運営会社をWeb検索</dt><dd>長押しメニューで「Webを検索」を選択する</dd>
-                            </dl>
-                        </div>
-
-                        <ul>
-                            <li>このように、</li>
-                            <li>「アコーディオン式コンテンツ」は、</li>
-                            <li>複数項目のうち、同時に1つの項目しか</li>
-                            <li>開けない表示形態です。</li>
-                        </ul>
+                      <div id="QandA-2">
+                        <p><b><u>運営会社別の操作</u></b></p>
+                        <dl>
+                          <dt>もう一度はじめから遊ぶ</dt><dd>長押しメニューの「回答をクリア」を選択</dd>
+                          <dt>運営会社をWeb検索</dt><dd>長押しメニューで「Webを検索」を選択する</dd>
+                        </dl>
+                        <p><b><u>全体共通の操作</u></b></p>
+                        <dl>
+                          <dt>ⓘボタンの表示／非表示を切り替える</dt><dd>オプションメニューの「ⓘボタンを消す（表示する）」を選択</dd>
+                          <dt>「線路と駅」の説明、免責事項を見る</dt><dd>オプションメニューの「線路と駅について」を選択する</dd>
+                          <dt>難しさのレベルを変える</dt><dd>オプションメニューの「レベル設定」を選択する</dd>
+                          <dt>使い方の説明を見る</dt><dd>オプションメニューの「使い方」を選択する</dd>
+                          <dt>ご意見、お問い合わせ</dt><dd>オプションメニューの「お問い合わせ」からメーラを起動する</dd>
+                        </dl>
+                      </div>
                     </font>
                 </div>
             </div>
             <!--アコーディオンここまで-->
-            <p>Next</p>
         </div>
     </div>
 </body>
