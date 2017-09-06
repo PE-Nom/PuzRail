@@ -37,12 +37,6 @@ import net.nend.android.NendAdView;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import static net.nend.android.NendAdInterstitial.NendAdInterstitialStatusCode.INVALID_RESPONSE_TYPE;
-import static net.nend.android.NendAdView.NendError.AD_SIZE_DIFFERENCES;
-import static net.nend.android.NendAdView.NendError.AD_SIZE_TOO_LARGE;
-import static net.nend.android.NendAdView.NendError.FAILED_AD_DOWNLOAD;
-import static net.nend.android.NendAdView.NendError.FAILED_AD_REQUEST;
-
 /**
  * Created by takashi on 2017/01/11.
  */

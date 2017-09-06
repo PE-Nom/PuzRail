@@ -75,7 +75,7 @@
             </FrameLayout>
 
         </LinearLayout>
-
+<!--
         <net.nend.android.NendAdView
             android:id="@+id/nend"
             android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
             NendApiKey="@string/nend_api_key"
             NendSpotId="@integer/nend_spot_id"
             NendAdjustSize="true" />
-
+-->
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
