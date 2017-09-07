@@ -24,8 +24,8 @@
         <p><b>「シルエット当て」</b><font size='2'>マニアなら一目瞭然？</font></p>
         <p> <font size='2'>〜アクティビティ起動後はこんな感じ〜</font></p>
         <font size=2>
-            <img border="0" src="images/silhouette/silhouette_screenshot.png" width="128"><br>
-            <p>選択した運営会社が管理する路線の一覧が表示されます。各路線のシルエットを当てるクイズです。</p>
+            <img border="0" src="images/silhouette/silhouette_screenshot.png" width="128" align="left">
+            選択した運営会社が管理する路線の一覧が表示されます。各路線のシルエットを当てるクイズです。<br>
         </font>
     </div>
     <div>
@@ -35,22 +35,58 @@
             <div data-role="collapsible" data-theme="b" data-content-theme="c">
                 <h3>画面の説明</h3>
                 <font size=2>
-                    <img border="0" src="images/silhouette/silhouette_company_score.png" width="128">
-                    <img border="0" src="images/silhouette/silhouette_linelist.png" width="128"><br>
-                    <img border="0" src="images/silhouette/listitem.png" width="128"><br>
-
-                    <p>ここでは以下の内容を説明する</p>
-                    <ol>
-                        <li>画面の全体構成</li>
-                        <li>ヘッダ部 事業会社の総合情報 合計得点</li>
-                        <li>ヘッダ部 事業会社の総合情報 「路線シルエット」の合計得点、進捗</li>
-                        <li>ヘッダ部 事業会社の総合情報 「地図合わせ」の合計得点、進捗
-                        <li>ヘッダ部 事業会社の総合情報 「駅並べ」の合計得点、進捗
-                        <li>路線リスト部 路線別「シルエット」ピース</li>
-                        <li>路線リスト部 路線別 「地図合わせ」のボタン表示、得点、タイム</li>
-                        <li>路線リスト部 路線別 「駅並べ」のボタン表示、得点、進捗</li>
-                        <li>路線リスト部 路線別の合計得点</li>
-                    </ol>
+                    <ul>
+                        <li class="listitem"><b>画面の全体構成</b><br>
+                            <br>
+                            <img border="0" src="images/silhouette/silhouette_company_score.png" width="128">
+                            <img border="0" src="images/silhouette/silhouette_linelist.png" width="128"><br>
+                            事業会社の合計スコアと路線選択リストが表示されます。
+                        </li>
+                        <li class="listitem"><b>路線選択リストのアイテム</b><br>
+                            <br>
+                            <img border="0" src="images/silhouette/listitem.png" width="256"><br>
+                            <br>
+                            <ol>
+                                <li class="listitem">
+                                    <b>「路線名」</b><br><br>
+                                    漢字と仮名で路線の名前を表示
+                                </li>
+                                <li class="listitem">
+                                    <b>「路線シルエット」</b><br><br>
+                                    <font size=1>
+                                        <img border="0" src="images/silhouette/silhouette_changing.png" width="192"><br>
+                                        路線のシルエットイメージを表示します。未解答だと「？」と表示されます。<br>
+                                        正解するとシルエットイメージと合わせて得点（pt.)を表示します。
+                                    </font>
+                                </li>
+                                <li class="listitem">
+                                    <b>「地図合わせ」</b><br><br>
+                                    <font size=1>
+                                        <img border="0" src="images/silhouette/location_disable.png" width="64" align="left">
+                                        「地図合わせ」アクティビティのスタートボタン、得点(pt.)、プレイタイム(mm:ss)を表示します。<br><br>
+                                        <img border="0" src="images/silhouette/location_button_changing.png" width="192"><br><br>
+                                        スタートボタンは「路線シルエット」が未正解だと押せず、正解すると押せるようになります。「地図合わせ」に正解するとスタートボタンに「済」マークが付き、得点とタイムが表示されます。
+                                    </font>
+                                </li>
+                                <li class="listitem">
+                                    <b>「駅並べ」</b><br><br>
+                                    <font size=1>
+                                        <img border="0" src="images/silhouette/station_disable.png" width="64" align="left">
+                                        「駅並べ」アクティビティのスタートボタン、得点（pt.）、進捗（正解駅数／路線内駅数）を表示します。<br><br>
+                                        <img border="0" src="images/silhouette/station_button_changing.png" width="192"><br><br>
+                                        スタートボタンは「路線シルエット」が未正解だと押せず、正解すると押せるようになります。「駅並べ」の進捗が100%（路線内の全駅回答）でとスタートボタンに「済」マークが付きます。
+                                    </font>
+                                </li>
+                                <li class="listitem">
+                                    <b>合計得点</b><br><br>
+                                    <font size=1>
+                                        <img border="0" src="images/silhouette/line_score.png" width="64" align="left">
+                                        「路線シルエット」の得点、「地図合わせ」の得点、「駅並べ」の得点の合計点です。
+                                    </font>
+                                </li>
+                            </ol>
+                        </li>
+                    </ul>
                 </font>
             </div>
 
@@ -58,21 +94,31 @@
             <div data-role="collapsible" data-theme="b" data-content-theme="c">
                 <h3>遊び方の説明</h3>
                 <font size=2>
-                    <p>路線の■？■をタップ、<br>シルエット一覧から路線のシルエットをタップして選択。</p>
-                    <p>■■■■■■■■■■　■■■■■■■■■■■<br>
-                        ■　　　　　　　　■　■　　　　　　　　　■<br>
-                        ■　路線リストと　■　■　シルエット一覧　■<br>
-                        ■　タップ位置　　■→■　　　　　　　　　■<br>
-                        ■　　　　　　　　■　■　　　　　　　　　■<br>
-                        ■■■■■■■■■■　■■■■■■■■■■■<br></p>
-                    <p>ここでは以下の内容を説明する</p>
+                    <p>「？」の路線をタップすると候補のシルエット一覧が表示されます。正解のシルエットをタップして選択してください。</p>
+                    <img border="0" src="images/silhouette/silhouette_selection.png" width="256"><br>
                     <ol>
-                        <li>正解で■どや顔■が表示され得点が得られます。</li>
-                        <li>間違えると■泣き顔■が表示されます。</li>
+                        <li>正解で<br><br>
+                            <img border="0" src="images/silhouette/silhouette_correct.png" width="64">
+                            と表示され得点が得られます。<br><br>
+                        </li>
+                        <li>間違えると<br><br>
+                            <img border="0" src="images/silhouette/silhouette_wrong.png" width="64">
+                            と表示されます。<br><br>
+                        </li>
                     </ol>
                     <p>「シルエット当て」に正解すると、<br>「地図合わせ」、「駅並べ」が遊べるようになります。</p>
-                    <p>■地図合わせ■　→　■地図合わせ■　に変化。タップすると「地図合わせ」がスタート</p>
-                    <p>■　駅並べ　■　→　■　駅並べ　■　に変化。タップすると「駅並べ」がスタート</p>
+                    <ul>
+                        <li><b>「地図合わせ」アクティビティのスタート</b><br><br>
+                            <img border="0" src="images/silhouette/location_enable.png" width="64" align="bottom">または、
+                            <img border="0" src="images/silhouette/location_completed.png" width="64"><br><br>
+                            をタップすると「地図合わせ」アクティビティに移ります<br><br>
+                        </li>
+                        <li><b>「駅並べ」アクティビティのスタート</b><br><br>
+                            <img border="0" src="images/silhouette/station_enable.png" width="64" align="bottom">または、
+                            <img border="0" src="images/silhouette/station_completed.png" width="64"><br><br>
+                            をタップすると「駅並べ」アクティビティに移ります
+                        </li>
+                    </ul>
                 </font>
             </div>
 
@@ -96,13 +142,6 @@
                         <dt>ご意見、お問い合わせ</dt><dd>オプションメニューの「お問い合わせ」からメーラを起動する</dd>
                       </dl>
                     </div>
-
-                    <ul>
-                        <li>このように、</li>
-                        <li>「アコーディオン式コンテンツ」は、</li>
-                        <li>複数項目のうち、同時に1つの項目しか</li>
-                        <li>開けない表示形態です。</li>
-                    </ul>
                 </font>
             </div>
         </div>
