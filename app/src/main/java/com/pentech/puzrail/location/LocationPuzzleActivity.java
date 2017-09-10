@@ -148,9 +148,9 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             mFab.hide();
         }
 
-        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
-        nendAdView.setListener(this);
-        nendAdView.loadAd();
+//        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+//        nendAdView.setListener(this);
+//        nendAdView.loadAd();
 
     }
 
@@ -393,20 +393,20 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
         mImageView.displayCorrectCoordinate(TAG);
         int err = mImageView.computeLocationError();
         Log.d(TAG,String.format("error = %d",err));
-        if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
-            // 正解
+        if(!this.line.isLocationCompleted()){
+            if( err < LineMapOverlayView.ERR_RANGE[0][LineMapOverlayView.ERR_LEVEL0] ){
+                // 正解
 //            Toast.makeText(LocationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
-            Toast.makeText(LocationPuzzleActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
-            mImageView.resetImageDrawable();
-            setGeoJsonVisible();
-            this.line.setLocationAnswerStatus();
-            long timer = this.mImageView.getPlayingTimer();
-            int sc = computeSocre(timer,this.line.getLocationShowAnswerCount());
-            this.line.setLocationScore(sc);
-            this.line.setLocationTime(timer);
-            db.updateLineLocationAnswerStatus(this.line);
-        }
-        else{
+                Toast.makeText(LocationPuzzleActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
+                mImageView.resetImageDrawable();
+                setGeoJsonVisible();
+                this.line.setLocationAnswerStatus();
+                long timer = this.mImageView.getPlayingTimer();
+                int sc = computeSocre(timer,this.line.getLocationShowAnswerCount());
+                this.line.setLocationScore(sc);
+                this.line.setLocationTime(timer);
+                db.updateLineLocationAnswerStatus(this.line);
+            }
         }
         return true;
 

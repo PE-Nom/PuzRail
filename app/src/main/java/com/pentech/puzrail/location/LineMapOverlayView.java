@@ -768,60 +768,62 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
     private boolean positionLocked = false;
     private int positionLockTimeCnt = 0;
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-//       final double positionError[] = computePositionError();
-        float scaleError = computeScaleError();
-        int err = computeLocationError();
-        int difficulty_mode = this.prm.getDifficultyMode();
+    private void positionLockJudgement(int err,int difficulty_mode){
 
-        if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL0] ){
-            if(!this.positionLock && !this.positionLocked){ // 未固定の場合
-                // 正解の位置に一定時間固定
-                this.positionLock = true;
-                this.positionLockTimeCnt = 0;
-            }
-            else{
-                //  固定時間のカウントアップ
-                if(this.positionLockTimeCnt < this.PositionLockTime[difficulty_mode]){ // 固定時間経過
-                    this.positionLockTimeCnt++;
-                    Log.d(TAG,String.format("positionLockTimeCnt = %d",this.positionLockTimeCnt));
-                    super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL0)));
+//        if(!this.line.isLocationCompleted()){
+            if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL0] ){
+                if(!this.positionLock && !this.positionLocked){ // 未固定の場合
+                    // 正解の位置に一定時間固定
+                    this.positionLock = true;
+                    this.positionLockTimeCnt = 0;
                 }
                 else{
-                    this.positionLock = false;
-                    if(mDragging) {
-                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE_DRAGGING)));
+                    //  固定時間のカウントアップ
+                    if(this.positionLockTimeCnt < this.PositionLockTime[difficulty_mode]){ // 固定時間経過
+                        this.positionLockTimeCnt++;
+                        Log.d(TAG,String.format("positionLockTimeCnt = %d",this.positionLockTimeCnt));
+                        super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL0)));
                     }
                     else{
-                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE)));
+                        this.positionLock = false;
+                        if(mDragging) {
+                            super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE_DRAGGING)));
+                        }
+                        else{
+                            super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(REVERSE)));
+                        }
                     }
                 }
             }
-        }
-        else{
-            this.positionLock = false;
-            this.positionLocked = false;
-            if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL1] ){
-                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL1)));
-            }
-            else if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL2] ) {
-                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL2)));
-            }
-            else if(err < ERR_RANGE[difficulty_mode][ERR_LEVEL3] ){
-                super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
-            }
             else{
-                if(mDragging) {
-                    super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL_DRAGGING)));
+                this.positionLock = false;
+                this.positionLocked = false;
+                if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL1] ){
+                    super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL1)));
+                }
+                else if( err < ERR_RANGE[difficulty_mode][ERR_LEVEL2] ) {
+                    super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL2)));
+                }
+                else if(err < ERR_RANGE[difficulty_mode][ERR_LEVEL3] ){
+                    super.setColorFilter(new ColorMatrixColorFilter(getColorMatrix(ERR_LEVEL3)));
                 }
                 else{
-                    super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
+                    if(mDragging) {
+                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL_DRAGGING)));
+                    }
+                    else{
+                        super.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(NORMAL)));
+                    }
+                    colorCount =0;
+                    lightingSw = true;
                 }
-                colorCount =0;
-                lightingSw = true;
             }
-        }
+//        }
+    }
+
+    private void updateSupportInformation(int err,int difficulty_mode, Canvas canvas){
+//       final double positionError[] = computePositionError();
+        float scaleError = computeScaleError();
 
         Paint paint = new Paint();
         Paint.FontMetrics fm = new Paint.FontMetrics();
@@ -831,7 +833,6 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         paint.setStyle(Paint.Style.FILL);
         paint.getFontMetrics(fm);
 
-        if(!this.line.isLocationCompleted()){
             String positionErr = String.format("【%s】（位置ズレ,縮尺ズレ）= (%d,%.2f)",difficulty_name[difficulty_mode],err,scaleError);
             paint.setTextSize(12*this.density); // 12sp*density
             paint.setColor(ContextCompat.getColor(this.context, R.color.color_10));
@@ -846,6 +847,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             paint.setColor(ContextCompat.getColor(this.context, R.color.color_WHITE));
             canvas.drawText(positionErr, 1*this.density, 15*this.density, paint);
 
+        if(!this.line.isLocationCompleted()){
             if(this.isStarted()){
 
                 SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
@@ -865,18 +867,26 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
                     + sdf.format(this.line.getLocationTime() * 1000);
             paint.setTextSize(12*this.density); // 36sp*density
             paint.setColor(ContextCompat.getColor(LineMapOverlayView.this.context, R.color.color_10));
-            Rect rect = new Rect();
-            paint.getTextBounds(dispTime,0,dispTime.length(),rect);
-            RectF bkGroundRect = new RectF(
-                    (float)rect.left,
-                    (float)rect.top   + 14*this.density,
-                    (float)rect.right +  2*this.density,
-                    (float)rect.bottom+ 15*this.density);
-            canvas.drawRoundRect(bkGroundRect,2,2,paint);
+            Rect rectSocre = new Rect();
+            paint.getTextBounds(dispTime,0,dispTime.length(),rectSocre);
+            RectF bkGroundRectScore = new RectF(
+                    (float)rectSocre.left,
+                    (float)rect.bottom+ 16*this.density,
+                    (float)rectSocre.right +  2*this.density,
+                    (float)rectSocre.bottom+ 16*this.density+(float)rect.bottom+ 15*this.density);
+            canvas.drawRoundRect(bkGroundRectScore,2,2,paint);
             paint.setColor(ContextCompat.getColor(this.context, R.color.color_WHITE));
-            canvas.drawText(dispTime, 1*this.density, 15*this.density, paint);
+            canvas.drawText(dispTime, 1*this.density, bkGroundRectScore.top+14*this.density, paint);
 
         }
+    }
+    @Override
+    protected void onDraw(Canvas canvas) {
+        int err = computeLocationError();
+        int difficulty_mode = this.prm.getDifficultyMode();
+
+        positionLockJudgement(err,difficulty_mode);
+        updateSupportInformation(err,difficulty_mode,canvas);
         super.onDraw(canvas);
     }
 }
