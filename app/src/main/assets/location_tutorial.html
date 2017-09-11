@@ -44,19 +44,19 @@
                             <ul>
     	                    	<font size="2">
 	    	                    	<li>
-                                        <b>未正解時</b><br>
+                                        <b>まだ正解していないときは</b><br>
                                         <img border="0" src="images/location/location_supportinfo_standby.png" width="192"><br>
-                                        <font size="1">レベル、位置のズレ、大きさのズレを表示します。</font><br><br>
+                                        <font size="1">レベル、位置のズレ、大きさのズレだけが表示します。</font><br><br>
                                     </li>
 	    	                    	<li>
                                         <b>プレイ中の表示内容</b><br>
                                         <img border="0" src="images/location/location_supportinfo_playing.png" width="192"><br>
-                                        <font size="1">レベル、位置のズレ、大きさのズレに加えてプレイ開始からの経過時間を表示します。</font><br><br>
+                                        <font size="1">プレイ開始後はレベル、位置のズレ、大きさのズレに加えて経過時間を表示します。</font><br><br>
                                     </li>
 	    	                    	<li>
-                                        <b>正解後</b><br>
+                                        <b>正解すると</b><br>
                                         <img border="0" src="images/location/location_supportinfo_completed.png" width="192"><br>
-                                        <font size="1">現在のレベル、表示されているシルエットと地図の位置のズレ、大きさのズレに加えてタイムとスコアを表示します。</font><br>
+                                        <font size="1">現在のレベル、表示されているシルエットと地図の位置のズレ、大きさのズレに加えて正解時のタイムとスコアを表示します。</font><br>
                                     </li>
     	                	    </font>
     	                    </ul>
@@ -64,13 +64,13 @@
                         <li><b>シルエットピース</b><br>
                             <br>
                             <img border="0" src="images/location/location_piece_area.png" width="128"><br>
-                            赤枠で囲われたエリアが路線のシルエットを表すピースになります。<br><br>
+                            赤枠で囲われたエリアが路線シルエットのピースです。<br><br>
                         	<ul>
     	                    	<font size="2">
 	                        		<li>
                                         <b>ドラッグ時の枠色変化</b><br>
                                         <img border="0" src="images/location/location_piece_border_color_changing.png" width="192"><br>
-                                        <font size="1">ピースをドラッグすると枠の色が赤→緑に変化します。枠が緑であればスクロールやピンチイン・アウトでピースを操作できます。</font><br>
+                                        <font size="1">ピースをドラッグすると枠の色が赤→緑に、タップを離すと緑→赤に変わります。枠が緑のときにスクロールやピンチイン・アウトでピースを操作できます。</font><br>
                                         <br>
                                     </li>
 	                        		<li>
@@ -89,7 +89,7 @@
                         	</ul><br>
                         <li><b>地図エリア</b><br>
                             <img border="0" src="images/location/location_map_area.png" width="128"><br>
-                        	ピースの赤枠の外側全域が地図エリアになります。<br><br>
+                        	ピース枠の外側全域が地図エリアになります。<br><br>
                         <ul>
     	                    	<font size="2">
 	                        		<li>
@@ -118,50 +118,59 @@
                     <dl>
                         <dt><b>【アクティビティの開始】</b></dt>
                         <dd>
-                            シルエットピースをタップすると３秒後にプレイ開始です。シルエットピースと地図はプレイ中だけ操作できます。<br>
+                            <br>
+                            アクティビティ起動直後はプレイ開始操作の待ち状態です。待ち状態ではピース、地図の操作ができません。<br>
+                            シルエットピースをタップすると３秒後にプレイを開始し、シルエットピースと地図を操作できるようになります。<br>
+                            <br>
+                            <font size="1">アクティビティ起動直後はこんな表示です。ここでピースをタップしてください。</font><br>
                             <img border="0" src="images/location/location_start_message.png" width="128"><br>
-                            これは、地図合わせアクティビティ起動直後の表示です。ここでピースをタップしてください。<br>
+                            <br>
+                            <font size="1">カウントダウンが始まり、3秒後にプレイ開始になります。</font><br>
                             <img border="0" src="images/location/location_start_countdown_3.png" width="128">
                             <img border="0" src="images/location/location_start_countdown_2.png" width="128">
-                            ・・・<br>
-                            カウントダウンが進み、3秒後にプレイ開始になります。<br>
+                            <font size="1">・・・</font><br>
+                            <br>
+                            <font size="1">プレイ開始になると、シルエットピースと地図の操作が可能となり、開始からの経過時間が左上に表示されます。</font><br>
                             <img border="0" src="images/location/location_start_countdown_0.png" width="128"><br>
-                            経過時間が左上に表示され、シルエットピースと地図が操作できるようになります。<br>
                             <br>
                         </dd>
                         <dt><b>【大きさの合わせ方】</b></dt>
                         <dd>
-                            <p>
-                                シルエットピースをピンチイン、アウトし拡大・縮小します。<br>
-                                同様に地図をピンチイン・アウト操作し拡大・縮小します。
-                            </p>
-                            <p>■■■■■■■■■■■■　■■■■■■■■■■■■■<br>
-                                ■　　　　　　　　　　■　■　　　　　　　　　　　■<br>
-                                ■　地図の拡大・縮小　■　■　ピースの拡大・縮小　■<br>
-                                ■　　　　　　　　　　■　■　　　　　　　　　　　■<br>
-                                ■■■■■■■■■■■■　■■■■■■■■■■■■■<br>
-                            </p>
-                            <p>サポート情報を参考に同じ縮尺に近づけます。<br>
-                                サポート情報が1.00で同じ縮尺です。
-                            </p>
+                            <br>
+                            <font size="1">シルエットピースをピンチイン、アウトし拡大・縮小します。</font><br>
+                            <img border="0" src="images/location/location_piece_scaling.png" width="256"><br>
+                            <br>
+                            <font size="1">同様に地図をピンチイン・アウト操作し拡大・縮小します。</font><br>
+                            <img border="0" src="images/location/location_map_scaling.png" width="256"><br>
+                            <br>
+                            <font size="1">
+                                サポート情報を参考に同じ縮尺に近づけます。<br>
+                                サポート情報が1.00で同じ縮尺です。<br>
+                                （縮尺ズレ = ピース縮尺率 ÷ 地図縮尺率）<br>
+                            </font>
+                            <img border="0" src="images/location/location_supportinfo_scalingfactor.png" width="192"><br>
+                            <br>
+
                         </dd>
                         <dt><b>【位置の合わせ方】</b></dt>
                         <dd>
+                            <br>
+                            <font size="1">シルエットピースをドラッグ＆スクロールして位置を合わせます。</font><br>
+                            <img border="0" src="images/location/location_piece_moving.png" width="256"><br>
+                            <br>
+                            <font size="1">地図をドラッグ＆スクロールして位置を合わせます。</font><br>
+                            <img border="0" src="images/location/location_map_moving.png" width="256"><br>
+                            <br>
+                            <font size="1">
+                                サポート情報を参考に重なる様にスクロールさせます。<br>
+                                位置ズレが0.00となる様に位置を合わせます。<br>
+                            </font>
+                            <img border="0" src="images/location/location_position_factor.png" width="192"><br>
+                            <br>
                             <p>
-                                シルエットピースまたは地図をドラッグ＆スクロールして位置を合わせます。<br>
-                                シルエットピース、地図をドロップして答え合わせ
-                            </p>
-                            <p>■■■■■■■■■■■■　■■■■■■■■■■■■■<br>
-                               ■　　　　　　　　　　■　■　　　　　　　　　　　■<br>
-                               ■　地図のスクロール　■　■　ピースのスクロール　■<br>
-                               ■　　　　　　　　　　■　■　　　　　　　　　　　■<br>
-                               ■■■■■■■■■■■■　■■■■■■■■■■■■■<br>
-                            </p>
-                            <p>サポート情報を参考に重なる様にスクロールさせます。<br>
                                 正解近くでシルエットピースの表示が変わります。<br>
                                 正解に近づくに従って青→点滅→早点滅と変化します。
-                            </p>
-                            <p>
+                                <font size="1">シルエットピース、地図をドロップして答え合わせ</font><br>
                                 ■■■■■■■■■■■■<br>
                                 ■　　　　　　　　　　■<br>
                                 ■　正解近辺　青　　　■<br>
