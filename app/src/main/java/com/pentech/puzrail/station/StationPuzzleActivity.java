@@ -68,9 +68,6 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_AMATEUR;
-import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_BEGINNER;
-
 public class StationPuzzleActivity extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener,
@@ -135,7 +132,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
         this.db = new DBAdapter(this);
         this.db.open();
         this.line = db.getLine(this.selectedLineId);
-        this.stations = db.getStationList(this.selectedLineId);
+        this.stations = db.getLineStationList(this.selectedLineId);
 
         String companyName = db.getCompany(line.getCompanyId()).getName();
         String lineName = line.getName();
@@ -401,16 +398,17 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
             // 正解の配列インデックスを保持
             this.selectedStationIndex = position;
-            final ArrayList<String> remaining = new ArrayList<String>();
-            final ArrayList<Station> remainStations = new ArrayList<Station>();
+            ArrayList<Station> selectOptionStations = new ArrayList<Station>();
+            final ArrayList<String> randomizedOptionStationsName = new ArrayList<String>();
 
+/*
             // 未正解アイテムリストの生成
             // 未正解のStationInfoを抽出(stations→remainStations)
             Iterator<Station> staIte = this.stations.iterator();
             while(staIte.hasNext()){
                 Station sta = staIte.next();
                 if(!sta.isFinished()){
-                    remainStations.add(sta);
+                    selectOptionStations.add(sta);
                 }
             }
             // 0～未正解件数までの整数をランダムに生成
@@ -418,12 +416,12 @@ public class StationPuzzleActivity extends AppCompatActivity implements
             // remainingの件数が未正解の件数に到達するまで
             // reimainsから駅名を取得しremainingに追加していく
             Random rnd = new Random();
-            while(remaining.size()<remainStations.size()){
+            while(randomizedOptionStationsName.size()<selectOptionStations.size()){
                 // 0～未正解件数までの整数をランダムに生成
-                int idx = rnd.nextInt(remainStations.size());
-                Station sta = remainStations.get(idx);
+                int idx = rnd.nextInt(selectOptionStations.size());
+                Station sta = selectOptionStations.get(idx);
                 // remaining走査用のイテレータを生成
-                Iterator<String> strIte = remaining.iterator();
+                Iterator<String> strIte = randomizedOptionStationsName.iterator();
                 boolean already = false;						// 登録済フラグ
                 String name = "";								// 登録する駅名
                 // remainingを走査し、既に登録済みか否かを判定
@@ -432,13 +430,51 @@ public class StationPuzzleActivity extends AppCompatActivity implements
                     if(name.equals(sta.getRawName()+"("+sta.getRawKana()+")")) already = true;
                 }
                 if(!already){
-                    remaining.add(sta.getRawName()+"("+sta.getRawKana()+")");
+                    randomizedOptionStationsName.add(sta.getRawName()+"("+sta.getRawKana()+")");
                 }
             }
-            Log.d(TAG,String.format("remaining.size() = %d, remainCnt = %d\r\n",remaining.size(),remainStations.size()));
+            Log.d(TAG,String.format("remaining.size() = %d, remainCnt = %d\r\n",randomizedOptionStationsName.size(),selectOptionStations.size()));
+*/
+
+            int optionItemNum = 0;
+            int level = this.settingParameter.getDifficultyMode();
+            switch(level){
+                case SettingParameter.DIFFICULTY_BEGINNER:
+                    optionItemNum = 8;
+                    break;
+                case SettingParameter.DIFFICULTY_AMATEUR:
+                    optionItemNum = 12;
+                    break;
+                case SettingParameter.DIFFICULTY_PROFESSIONAL:
+                    optionItemNum = 16;
+                    break;
+            }
+            selectOptionStations = this.db.getCompanyStationList(this.companyId);
+            Random rnd = new Random();
+            while(randomizedOptionStationsName.size()<optionItemNum){
+                // 0～未正解件数までの整数をランダムに生成
+                int idx = rnd.nextInt(selectOptionStations.size());
+                Station sta = selectOptionStations.get(idx);
+                // remaining走査用のイテレータを生成
+                Iterator<String> strIte = randomizedOptionStationsName.iterator();
+                boolean already = false;						// 登録済フラグ
+                String name = "";								// 登録する駅名
+                // remainingを走査し、既に登録済みか否かを判定
+                while(strIte.hasNext()){
+                    name = strIte.next();
+                    if(name.equals(sta.getRawName()+"("+sta.getRawKana()+")")) already = true;
+                }
+                if(!already){
+                    randomizedOptionStationsName.add(sta.getRawName()+"("+sta.getRawKana()+")");
+                }
+            }
+            int correctPosition = rnd.nextInt(optionItemNum);
+            Station answerStation = this.stationsAdapter.getStationInfo(this.selectedStationIndex);
+            String answerStationName = answerStation.getRawName()+"("+answerStation.getRawKana()+")";
+            randomizedOptionStationsName.set(correctPosition,answerStationName);
 
             ArrayAdapter<String> remainStationsAdapter
-                    = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,remaining);
+                    = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,randomizedOptionStationsName);
 
             // 未正解アイテムのリストビュー生成
             ListView remainingStationsListView = new ListView(this);
@@ -454,7 +490,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 
                             Station correctStationInfo = adapter.getStationInfo(correctAnswerIndex);
                             String correctName = correctStationInfo.getRawName() + "(" + correctStationInfo.getRawKana() + ")";
-                            String answerName  = remaining.get(position);
+                            String answerName  = randomizedOptionStationsName.get(position);
 
                             Log.d(TAG,String.format("answerName = %s, correctName = %s\r\n",answerName,correctName));
 
@@ -462,7 +498,7 @@ public class StationPuzzleActivity extends AppCompatActivity implements
 //                                Toast.makeText(StationPuzzleActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
                                 Toast.makeText(StationPuzzleActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
                                 correctStationInfo.setFinishStatus();
-                                int sc = computeScore(remaining.size(),correctStationInfo.getMissingCount(),correctStationInfo.getShowAnswerCount());
+                                int sc = computeScore(randomizedOptionStationsName.size(),correctStationInfo.getMissingCount(),correctStationInfo.getShowAnswerCount());
                                 correctStationInfo.setStationScore(sc);
                                 StationPuzzleActivity.this.db.updateStationAnswerStatus(correctStationInfo);
                                 StationPuzzleActivity.this.stationsAdapter.notifyDataSetChanged();

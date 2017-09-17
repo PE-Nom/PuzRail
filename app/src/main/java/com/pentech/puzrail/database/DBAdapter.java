@@ -293,7 +293,13 @@ public class DBAdapter {
         ArrayList<Line> lines = new ArrayList<Line>();
         ArrayList<Line> randomizedLines = new ArrayList<Line>();
 
-        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=?",new String[]{String.valueOf(companyId)});
+        Cursor cursor;
+        if(companyId<0){
+            cursor = db.rawQuery("SELECT * from lines",null);
+        }
+        else{
+            cursor = db.rawQuery("SELECT * from lines WHERE companyId=?",new String[]{String.valueOf(companyId)});
+        }
         try{
             if(cursor.moveToFirst()){
                 do{
@@ -472,7 +478,24 @@ public class DBAdapter {
         return station;
     }
 
-    public ArrayList<Station> getStationList(int lineId){
+    public ArrayList<Station> getCompanyStationList(int companyId){
+        ArrayList<Station> stations = new ArrayList<Station>();
+        Cursor cursor = db.rawQuery("SELECT * from stations WHERE companyId=?",new String[]{String.valueOf(companyId)});
+        try{
+            if(cursor.moveToFirst()){
+                do{
+                    stations.add(extractStation(cursor));
+                }while(cursor.moveToNext());
+            }
+            else{
+                Log.d(TAG,"No record selected");
+            }
+        }finally {
+            cursor.close();
+        }
+        return stations;
+    }
+    public ArrayList<Station> getLineStationList(int lineId){
         ArrayList<Station> stations = new ArrayList<Station>();
         Cursor cursor = db.rawQuery("SELECT * from stations WHERE lineId=? ORDER BY stationOrder",new String[]{String.valueOf(lineId)});
         try{
@@ -488,7 +511,6 @@ public class DBAdapter {
             cursor.close();
         }
         return stations;
-
     }
 
     // companyIdで指定される事業者内全路線の初ターミナルを除くすべて駅の回答ステータスを変更する

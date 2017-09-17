@@ -267,24 +267,24 @@ public class PieceGarallyActivity extends AppCompatActivity implements
         Line line = this.lines.get(position);
         if(!line.isSilhouetteCompleted()){
             this.selectedLineIndex = position;
-            final ArrayList<Line> sortedRemainLines = new ArrayList<Line>();
-            final ArrayList<Line> randomizedRemainLines = new ArrayList<Line>();
-
+            ArrayList<Line> selectOptionLines = new ArrayList<Line>();
+            final ArrayList<Line> randomizedOptionLines = new ArrayList<Line>();
+/*
             //路線名　未正解の路線を抽出（lines→sortedRemainLines)
             Iterator<Line> lineIte = this.lines.iterator();
             while(lineIte.hasNext()){
                 Line ln = lineIte.next();
                 if(!ln.isSilhouetteCompleted()){
-                    sortedRemainLines.add(ln);
+                    selectOptionLines.add(ln);
                 }
             }
 
             Random rnd = new Random();
-            while(randomizedRemainLines.size()<sortedRemainLines.size()){
+            while(randomizedOptionLines.size()<selectOptionLines.size()){
                 // 0～未正解件数までの整数をランダムに生成
-                int idx = rnd.nextInt(sortedRemainLines.size());
-                Line fromLine = sortedRemainLines.get(idx);
-                Iterator<Line> li = randomizedRemainLines.iterator();
+                int idx = rnd.nextInt(selectOptionLines.size());
+                Line fromLine = selectOptionLines.get(idx);
+                Iterator<Line> li = randomizedOptionLines.iterator();
                 boolean already = false;
                 while(li.hasNext()){
                     Line toLine = li.next();
@@ -294,9 +294,45 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                     }
                 }
                 if(!already){
-                    randomizedRemainLines.add(fromLine);
+                    randomizedOptionLines.add(fromLine);
                 }
             }
+*/
+
+            int optionItemNum = 0;
+            int level = this.settingParameter.getDifficultyMode();
+            switch(level){
+                case SettingParameter.DIFFICULTY_BEGINNER:
+                    optionItemNum = 8;
+                    break;
+                case SettingParameter.DIFFICULTY_AMATEUR:
+                    optionItemNum = 12;
+                    break;
+                case SettingParameter.DIFFICULTY_PROFESSIONAL:
+                    optionItemNum = 16;
+                    break;
+            }
+            selectOptionLines = this.db.getLineList(-1,false);
+            Random rnd = new Random();
+            while(randomizedOptionLines.size()<optionItemNum){
+                // 0～未正解件数までの整数をランダムに生成
+                int idx = rnd.nextInt(selectOptionLines.size());
+                Line fromLine = selectOptionLines.get(idx);
+                Iterator<Line> li = randomizedOptionLines.iterator();
+                boolean already = false;
+                while(li.hasNext()){
+                    Line toLine = li.next();
+                    if(toLine.getLineId() == fromLine.getLineId()){
+                        already = true;
+                        break;
+                    }
+                }
+                if(!already){
+                    randomizedOptionLines.add(fromLine);
+                }
+            }
+            int correctListPosition = rnd.nextInt(optionItemNum);
+            randomizedOptionLines.set(correctListPosition,(Line)this.lineListAdapter.getItem(this.selectedLineIndex));
 
             // 未正解路線のシルエットのグリッドビュー生成
             GridView remainLinesGridView = new GridView(this);
@@ -305,7 +341,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
             remainLinesGridView.setGravity(Gravity.CENTER);
             remainLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
 
-            RailwayGridAdapter remainLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), randomizedRemainLines );
+            RailwayGridAdapter remainLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), randomizedOptionLines );
             remainLinesGridView.setAdapter(remainLinesAdapter);
             remainLinesGridView.setOnItemClickListener(
                     // ダイアログ上の未正解アイテムがクリックされたら答え合わせする
@@ -317,7 +353,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
                             Line correctLine = (Line)(PieceGarallyActivity.this.lineListAdapter.getItem(correctAnswerIdx));
                             String correctLineName = correctLine.getRawName()+"("+correctLine.getRawKana()+")";
 
-                            Line selectedLine = randomizedRemainLines.get(position);
+                            Line selectedLine = randomizedOptionLines.get(position);
                             String selectedLineName = selectedLine.getRawName()+"("+selectedLine.getRawKana()+")";
 
                             Log.d(TAG,String.format("correct %s, selected %s",correctLineName,selectedLineName));
@@ -326,7 +362,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 //                                Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
                                 Toast.makeText(PieceGarallyActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
                                 correctLine.setSilhouetteAnswerStatus();
-                                correctLine.setSilhouetteScore(PieceGarallyActivity.this.computeScore(randomizedRemainLines.size(),
+                                correctLine.setSilhouetteScore(PieceGarallyActivity.this.computeScore(randomizedOptionLines.size(),
                                                                 correctLine.getSilhouetteMissingCount(),
                                                                 correctLine.getLocationShowAnswerCount()));
                                 PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(correctLine);
