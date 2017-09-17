@@ -174,7 +174,7 @@ public class OnePointTutorialDialog {
         final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
         int start,end;
 
-        ssb.append("運営会社をタップしてね");
+        ssb.append("運営会社をタップして始めます");
 
         return ssb;
     }
@@ -190,7 +190,7 @@ public class OnePointTutorialDialog {
         ssb.append('\uFFFC'); // Unicode replacement character
         end = ssb.length();
         ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_line_question), start, end, flag);
-        ssb.append(" をタップして正解すると");
+        ssb.append(" をタップして正解すると得点がもらえ、");
         ssb.append('\n');
 
         ssb.append(" ");
@@ -225,9 +225,8 @@ public class OnePointTutorialDialog {
         start = ssb.length();
         ssb.append('\uFFFC'); // Unicode replacement character
         end = ssb.length();
-        // TODO:地図のイメージに差し替えのこと!!
-        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.common_google_signin_btn_icon_light), start, end, flag);
-        ssb.append(" の大きさ、位置を合わせてね");
+        ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_map_icon), start, end, flag);
+        ssb.append(" の大きさ、位置を合わせると得点がもらえます");
 
         return ssb;
     }
@@ -242,7 +241,7 @@ public class OnePointTutorialDialog {
         ssb.append('\uFFFC'); // Unicode replacement character
         end = ssb.length();
         ssb.setSpan(new EmojiImageSpan(this.activity, R.drawable.emoji_out_of_sv_station), start, end, flag);
-        ssb.append(" の駅をタップして正しい駅名を選んでね");
+        ssb.append(" の駅をタップして正しい駅名を選ぶと得点がもらえます");
 
         return ssb;
     }

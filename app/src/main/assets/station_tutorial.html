@@ -20,22 +20,14 @@
 <div data-role="page" id="pcontents">
 
 	<!-- 本文 -->
-    <div>
+    <div data-role="content">
 
         <p><b>「駅並べ」</b><font size='2'>知ってて当然？</font></p>
         <p><font size='2'>〜アクティビティ起動後はこんな感じ〜</font></p>
         <font size="2">
-            <p>
-                ■■■■■■■■■<br>
-                ■　　　　　　　■<br>
-                ■　駅並べ　　　■<br>
-                ■　地図表示　　■<br>
-                ■　駅順リスト　■<br>
-                ■　　　　　　　■<br>
-                ■■■■■■■■■<br>
-            </p>
-            <p>路線を選んで、駅名を順番に応えるクイズです。<br>
-            <p>「路線シルエット」に正解するとプレイできる様になります</p>
+            <img border="0" src="images/station/station_screenshot.png" width="128" align="left">
+            最初の一駅をスタートに、その路線にある駅を選び、正しい順番に並べるクイズです。<br>
+            「路線シルエット」に正解するとプレイできる様になります<br>
         </font>
     </div>
 
@@ -48,8 +40,30 @@
                 <font size=2>
                     <p>ここでは以下の内容を説明する</p>
                     <ol>
-                        <li>画面の全体構成</li>
-                        <li>駅リスト、地図
+                        <li><b>得点と解答進捗</b><br>
+                            <br>
+                            <img border="0" src="images/station/station_score_and_prog.png" width="128"><br>
+                            <font size="1">画面の左上にその路線の「駅並べ」の得点と解答率（正解駅数／路線内の全駅数）が表示されます。「地図合わせ」に正解していると路線シルエットを青色で表示します。未正解だと表示されません。</font><br><br>
+                        </li>
+                        <li><b>線路と駅の位置</b><br>
+                            <br>
+                            <img border="0" src="images/station/station_map.png" width="128"><br>
+                            <font size="1">正解済みの線路と駅の位置を表す地図が表示されます。</font><br>
+                            <img border="0" src="images/station/mapsize_change_button.png" width="10" align="left"><font size="1"> をドラッグして上下にスクロールすると地図のサイズを変更できます。</font><br><br>
+                            <img border="0" src="images/station/station_map_size_changing.png" width="256"><br>
+                            <br>
+
+                        </li>
+                        <li><b>駅のリスト</b><br>
+                            <br>
+                            <img border="0" src="images/station/station_list.png" width="128"><br>
+                            <font size="1">路線内の駅を表すリストが表示されます。</font><br><br>
+                            <img border="0" src="images/station/station_list_item.png" width="256"><br>
+                            <font size="1">リストには駅アイコン（
+                                正解：<img border="0" src="images/station/station_answered_icon.png" height="16">
+                                ／未正解：<img border="0" src="images/station/station_noanswered_icon.png" height="16">
+                                ）、駅名、得点と地図上のマーカー表示トグルスイッチが表示されます。</font><br>
+                        </li>
                     </ol>
                 </font>
             </div>
@@ -61,39 +75,28 @@
                     <dl>
                         <dt><b>【駅の並べ方】</b></dt>
                         <dd>
-                            <p>
-                                最初は、起点となるターミナル駅だけ表示されています。<br>
-                                ■未回答■の駅をタップし、リストから駅名を選びます。
-                            </p>
-                            <p>
-                                  ■■■■■■■■■■　■■■■■■■■<br>
-                                  ■　　　　　　　　■　■　　　　　　■<br>
-                                  ■　駅順リスト　　■　■　駅リスト　■<br>
-                                  ■　とタップ位置　■　■　　　　　　■<br>
-                                  ■　　　　　　　　■　■　　　　　　■<br>
-                                  ■■■■■■■■■■　■■■■■■■■<br>
-                            </p>
-                            <p>
-                                  正解で■どや顔■が表示され、駅リストのアイコンが■回答済み■に変わり得点が得られます。<br>
-                                  間違えると■泣き顔■が表示されます。
-                            </p>
+                            <br>
+                            最初は、起点となるターミナル駅だけ表示されています。<br>
+                            未正解（<img border="0" src="images/station/station_noanswered_icon.png" height="16">）の駅をタップし、リストから正しい駅名を選びます。<br>
+                            <img border="0" src="images/station/station_select.png" width="192"><br>
+
+                            <ol>
+                                <li>正解で<br><br>
+                                    <img border="0" src="images/station/station_answer_correct.png" width="128"><br>
+                                    と表示され、リストのアイコンが <img border="0" src="images/station/station_answered_icon.png" height="16"> に変わり、得点が得られます。<br><br>
+                                </li>
+                                <li>間違えると<br><br>
+                                    <img border="0" src="images/station/station_answer_wrong.png" width="128"><br>
+                                    と表示され獲得できる点数が減ります。<br><br>
+                                </li>
+                            </ol>
                         </dd>
                         <dt><b>【地図上の位置表示】</b></dt>
                         <dd>
-                            <p>
-                              正解した駅をチェックすると、地図上に駅の位置がマーキングされ位置を確認できます。
-                            </p>
-                            <p>
-                              ■■■■■■■■■■　■■■■■■■■<br>
-                              ■　　　　　　　　■　■　　　　　　■<br>
-                              ■　駅順リストと　■　■　地図上の　■<br>
-                              ■　チェック位置　■　■　駅の位置　■<br>
-                              ■　　　　　　　　■　■　　　　　　■<br>
-                              ■■■■■■■■■■　■■■■■■■■<br>
-                            </p>
-                            <p>
-                              地図上のマーカーをタップすると、その駅をWebで検索できます。
-                            </p>
+                            <br>
+                            正解した駅をチェックすると、地図上に駅の位置がマーキングされ位置を確認できます。<br>
+                            地図上のマーカーをタップすると、その駅をWebで検索できます。<br>
+                            <img border="0" src="images/station/station_map_marker.png" width="192"><br>
                         </dd>
                     </dl>
                 </font>

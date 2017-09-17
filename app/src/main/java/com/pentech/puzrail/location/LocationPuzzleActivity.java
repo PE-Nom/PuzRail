@@ -148,9 +148,9 @@ public class LocationPuzzleActivity extends AppCompatActivity implements
             mFab.hide();
         }
 
-//        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
-//        nendAdView.setListener(this);
-//        nendAdView.loadAd();
+        NendAdView nendAdView = (NendAdView) findViewById(R.id.nend);
+        nendAdView.setListener(this);
+        nendAdView.loadAd();
 
     }
 
