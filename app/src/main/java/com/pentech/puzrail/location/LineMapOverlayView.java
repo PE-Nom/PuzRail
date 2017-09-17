@@ -36,6 +36,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.content.Context.CONTEXT_IGNORE_SECURITY;
 import static android.content.Context.VIBRATOR_SERVICE;
 import static com.pentech.puzrail.database.SettingParameter.DIFFICULTY_AMATEUR;
 
@@ -546,7 +547,18 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         // calculate the zooming scale from the distance between touched positions
 //        final float scale = detector.getScaleFactor();
         // calculate the applied zooming scale
-        final float tmpScale = scale * currentScale*1.1f;
+        Log.d(TAG,String.format("currentScale = %f, maxScale = %f, minScale = %f",currentScale,mMaxScale,mMinScale));
+        final float tmpScale;
+/*
+        tmpScale = scale * currentScale*2.0f;
+*/
+        if(scale>1.0f){
+            tmpScale = scale * ((mMaxScale-currentScale)/currentScale*0.2f+currentScale);
+        }
+        else{
+            tmpScale = scale * (currentScale-(currentScale-mMinScale)/currentScale*0.2f);
+        }
+
         if (tmpScale < mMinScale) {
             // skip if the applied scale is smaller than minimum scale
             return false;
@@ -554,7 +566,6 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
             // skip if the applied scale is bigger than maximum scale
             return false;
         }
-
         // change scale with scale value and pivot point
         if (mImageMatrix.postScale(scale, scale, pivotX, pivotY)){
             // when Matrix is changed
