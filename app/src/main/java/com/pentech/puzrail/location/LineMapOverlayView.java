@@ -547,17 +547,20 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         // calculate the zooming scale from the distance between touched positions
 //        final float scale = detector.getScaleFactor();
         // calculate the applied zooming scale
-        Log.d(TAG,String.format("currentScale = %f, maxScale = %f, minScale = %f",currentScale,mMaxScale,mMinScale));
+//        Log.d(TAG,String.format("currentScale = %f, maxScale = %f, minScale = %f",currentScale,mMaxScale,mMinScale));
         final float tmpScale;
 /*
         tmpScale = scale * currentScale*2.0f;
 */
         if(scale>1.0f){
-            tmpScale = scale * ((mMaxScale-currentScale)/currentScale*0.2f+currentScale);
+//            tmpScale = scale * ((mMaxScale-currentScale)/currentScale*0.2f+currentScale);
+            scale += (mMaxScale-currentScale)/currentScale*0.05f;
         }
         else{
-            tmpScale = scale * (currentScale-(currentScale-mMinScale)/currentScale*0.2f);
+//            tmpScale = scale * (currentScale-(currentScale-mMinScale)/currentScale*0.2f);
+            scale -= (currentScale-mMinScale)/currentScale*0.05f;
         }
+        tmpScale = scale*currentScale;
 
         if (tmpScale < mMinScale) {
             // skip if the applied scale is smaller than minimum scale

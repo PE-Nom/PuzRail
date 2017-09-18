@@ -7,8 +7,8 @@ android {
         applicationId "com.pentech.puzrail"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 15
-        versionName "2.01"
+        versionCode 16
+        versionName "2.02"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
