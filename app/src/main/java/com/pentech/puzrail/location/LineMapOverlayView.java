@@ -332,7 +332,7 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         mMaxScale = Math.min(
                 Math.abs((getRight()-getLeft()))/Math.abs((mImageRect.right-mImageRect.left)),
                 Math.abs((getBottom()-getTop()))/Math.abs((mImageRect.bottom-mImageRect.top)));
-        mMinScale = 1.0f;
+        mMinScale = 1.1f;
 
         // set limit rectangle that the image can move
         final Rect tmp = new Rect();
@@ -347,6 +347,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         super.setScaleType(ScaleType.MATRIX);
         // apply matrix"
         super.setImageMatrix(mImageMatrix);
+
+        // 初期表示のスケール変更
+        processZoom(1.25f);
 
         // debug
         float[] values = new float[9];
@@ -521,23 +524,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
 
         // スケーリングの中心座標を求める。
         // 最初に現在の表示領域の矩形頂点座標を求める
-        float[] points = new float[9];
-        // calculate the corner coordinates of image applied matrix
-        // [(left,top),(right,top),(right,bottom),(left.bottom)]
-        points[0] = points[6] = mImageRect.left;
-        points[1] = points[3] = mImageRect.top;
-        points[5] = points[7] = mImageRect.bottom;
-        points[2] = points[4] = mImageRect.right;
-        mImageMatrix.mapPoints(points);
-
-        float left = points[0];
-        float top = points[1];
-        float right = points[2];
-        float bottom = points[5];
-
-        //次にX,Yの中心を求め、スケーリングの中心座標とする。
-        float pivotX = (left+right)/2.0f;
-        float pivotY = (top+bottom)/2.0f;
+        RectF railwayImageRect = getCurrentImageRect();
+        float pivotX = (railwayImageRect.left+railwayImageRect.right)/2.0f;
+        float pivotY = (railwayImageRect.top+railwayImageRect.bottom)/2.0f;
 
         // restore the Matrix
         float[] values = new float[9];
@@ -545,23 +534,9 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         // get current zooming scale
         final float currentScale = Math.min(values[Matrix.MSCALE_X],values[Matrix.MSCALE_Y]);
         // calculate the zooming scale from the distance between touched positions
-//        final float scale = detector.getScaleFactor();
         // calculate the applied zooming scale
-//        Log.d(TAG,String.format("currentScale = %f, maxScale = %f, minScale = %f",currentScale,mMaxScale,mMinScale));
-        final float tmpScale;
-/*
-        tmpScale = scale * currentScale*2.0f;
-*/
-        if(scale>1.0f){
-//            tmpScale = scale * ((mMaxScale-currentScale)/currentScale*0.2f+currentScale);
-            scale += (mMaxScale-currentScale)/currentScale*0.05f;
-        }
-        else{
-//            tmpScale = scale * (currentScale-(currentScale-mMinScale)/currentScale*0.2f);
-            scale -= (currentScale-mMinScale)/currentScale*0.05f;
-        }
-        tmpScale = scale*currentScale;
-
+        final float tmpScale = scale * currentScale*1.1f;
+        Log.d(TAG,String.format("scale = %f, currentScale = %f, tmpScale = %f, mMinScale = %f, mMaxScale = %f",scale,currentScale,tmpScale,mMinScale,mMaxScale));
         if (tmpScale < mMinScale) {
             // skip if the applied scale is smaller than minimum scale
             return false;
@@ -571,8 +546,6 @@ public class LineMapOverlayView extends android.support.v7.widget.AppCompatImage
         }
         // change scale with scale value and pivot point
         if (mImageMatrix.postScale(scale, scale, pivotX, pivotY)){
-            // when Matrix is changed
-//            mImageMatrixChanged = true;
             // apply to super class
             super.setImageMatrix(mImageMatrix);
         }
