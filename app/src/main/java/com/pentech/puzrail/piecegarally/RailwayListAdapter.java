@@ -30,13 +30,11 @@ public class RailwayListAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
     private ArrayList<Line> lines;
-    private DBAdapter dbAdapter;
 
-    public RailwayListAdapter(Context context, ArrayList<Line> lines, DBAdapter dbAdapter){
+    public RailwayListAdapter(Context context, ArrayList<Line> lines){
         this.context = context;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.lines = lines;
-        this.dbAdapter = dbAdapter;
     }
 
     @Override
@@ -114,73 +112,68 @@ public class RailwayListAdapter extends BaseAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
 
-            // 路線名のテキスト表示
-            Log.d(TAG,String.format("linename = %s, linekana = %s",line.getRawName(),line.getRawKana()));
-            holder.railwayLineName.setText(line.getRawName()+" ");
-            holder.railwaylineKana.setText("("+line.getRawKana()+")");
-            holder.railwayLineName.setTextColor(Color.parseColor("#142d81"));
-            holder.railwaylineKana.setTextColor(Color.parseColor("#142d81"));
+        // 路線名のテキスト表示
+        Log.d(TAG,String.format("linename = %s, linekana = %s",line.getRawName(),line.getRawKana()));
+        holder.railwayLineName.setText(line.getRawName()+" ");
+        holder.railwaylineKana.setText("("+line.getRawKana()+")");
+        holder.railwayLineName.setTextColor(Color.parseColor("#142d81"));
+        holder.railwaylineKana.setTextColor(Color.parseColor("#142d81"));
 
-            // 路線シルエットのイメージ表示
-            Drawable drawable;
-            if(line.isSilhouetteCompleted()){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
-            }
-            else{
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_line_question,null);
-            }
-            holder.railwayLineImage.setImageDrawable(drawable);
+        // 路線シルエットのイメージ表示
+        Drawable drawable;
+        if(line.isSilhouetteCompleted()){
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),line.getDrawableResourceId(),null);
+        }
+        else{
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_line_question,null);
+        }
+        holder.railwayLineImage.setImageDrawable(drawable);
 
-            // 「地図合わせ」のImageButtonの表示Image切り替え
-            if(line.isLocationCompleted()){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_completed_button,null);
-            }
-            else if(line.isSilhouetteCompleted()){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_button,null);
-            }
-            else{
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_inhibit,null);
-            }
-            holder.mapImageBtn.setImageDrawable(drawable);
-            holder.mapImageBtn.setTag(position);
+        // 「地図合わせ」のImageButtonの表示Image切り替え
+        if(line.isLocationCompleted()){
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_completed_button,null);
+        }
+        else if(line.isSilhouetteCompleted()){
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.tracklaying_button,null);
+        }
+        else{
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_tracklaying_inhibit,null);
+        }
+        holder.mapImageBtn.setImageDrawable(drawable);
+        holder.mapImageBtn.setTag(position);
 
-            // 「駅並べ」のImageButtonの表示Image切り替え
-            int totalStationsInLine = dbAdapter.countTotalStationsInLine(companyId,lineId);
-            int answeredStationsInLine = dbAdapter.countAnsweredStationsInLine(companyId,lineId);
-            if(totalStationsInLine==answeredStationsInLine)
-            {
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_completed_button,null);
-            }
-            else if(line.isSilhouetteCompleted()){
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_button,null);
-            }
-            else{
-                drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_inhibit,null);
-            }
-            holder.staImageBtn.setImageDrawable(drawable);
-            holder.staImageBtn.setTag(position);
+        // 「駅並べ」のImageButtonの表示Image切り替え
+        int totalStationsInLine = line.getTotalStationsInLine();
+        int answeredStationsInLine = line.getAnsweredStationsInLine();
+        if(totalStationsInLine==answeredStationsInLine)
+        {
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_completed_button,null);
+        }
+        else if(line.isSilhouetteCompleted()){
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.station_open_button,null);
+        }
+        else{
+            drawable = ResourcesCompat.getDrawable(this.context.getResources(),R.drawable.ic_station_open_inhibit,null);
+        }
+        holder.staImageBtn.setImageDrawable(drawable);
+        holder.staImageBtn.setTag(position);
 
-            // silhouetteScoreの表示
-            holder.silhouetteScoreAndUnit.setText(String.format("%d pt.",line.getSilhouetteScore()));
-            // locationScoreの表示
-            holder.locationScoreAndUnit.setText(String.format("%d pt.",line.getLocationScore()));
-            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-            long elapseTime = line.getLocationTime() * 1000;
-            String dispTime = sdf.format(elapseTime);
-        Log.d(TAG,String.format("dispTime = %s",dispTime));
-            holder.locationTime.setText(dispTime);
+        // silhouetteScoreの表示
+        holder.silhouetteScoreAndUnit.setText(String.format("%d pt.",line.getSilhouetteScore()));
+        // locationScoreの表示
+        holder.locationScoreAndUnit.setText(String.format("%d pt.",line.getLocationScore()));
+        SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+        long elapseTime = line.getLocationTime() * 1000;
+        String dispTime = sdf.format(elapseTime);
+        holder.locationTime.setText(dispTime);
 
-            // stationsScoreの表示
-            int stationsTotalScore = this.dbAdapter.sumStationsScoreInLine(companyId,lineId);
-            holder.stationsScoreAndUnit.setText(String.format("%d pt.",stationsTotalScore));
-            // 「駅並べ」の進捗表示
-            holder.stationsProgress.setText(String.format("%d/%d",
-                    this.dbAdapter.countAnsweredStationsInLine(companyId,lineId),
-                    this.dbAdapter.countTotalStationsInLine(companyId,lineId)));
-
-            // 路線合計得点の表示
-            int lineTotalScore = line.getSilhouetteScore() + line.getLocationScore() + stationsTotalScore;
-            holder.lineTotalScoreAndUnit.setText(String.format("%d pt.",lineTotalScore));
+        // stationsScoreの表示
+        holder.stationsScoreAndUnit.setText(String.format("%d pt.",line.getStationsTotalScore()));
+        // 「駅並べ」の進捗表示
+        holder.stationsProgress.setText(String.format("%d/%d",answeredStationsInLine,totalStationsInLine));
+        // 路線合計得点の表示
+        int lineTotalScore = line.getSilhouetteScore() + line.getLocationScore() + line.getStationsTotalScore();
+        holder.lineTotalScoreAndUnit.setText(String.format("%d pt.",lineTotalScore));
 
         return convertView;
     }

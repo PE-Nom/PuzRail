@@ -42,6 +42,10 @@ public class Line {
     private int silhouetteScore;
     private int locationScore;
 
+    private int totalStationsInLine = 0;
+    private int answeredStationsInLine = 0;
+    private int stationsTotalScore = 0;
+
     private int silhouetteMissingCount = 0;
     private int silhouetteShowAnswerCount = 0;
     private int locationShowAnswerCount =0;
@@ -203,4 +207,26 @@ public class Line {
 
     public void setLocationTime(long time) { this.locationTime = time; }
     public long getLocationTime() { return this.locationTime; }
+
+    // 路線の駅情報アクセッサ
+    public int getTotalStationsInLine() {
+        return totalStationsInLine;
+    }
+    public void setTotalStationsInLine(int totalStationsInLine) {
+        this.totalStationsInLine = totalStationsInLine;
+    }
+
+    public int getAnsweredStationsInLine() {
+        return answeredStationsInLine;
+    }
+    public void setAnsweredStationsInLine(int answeredStationsInLine) {
+        this.answeredStationsInLine = answeredStationsInLine;
+    }
+
+    public int getStationsTotalScore() {
+        return stationsTotalScore;
+    }
+    public void setStationsTotalScore(int stationsTotalScore) {
+        this.stationsTotalScore = stationsTotalScore;
+    }
 }

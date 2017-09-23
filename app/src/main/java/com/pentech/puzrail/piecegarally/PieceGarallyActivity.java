@@ -127,7 +127,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
 
         // GridViewのインスタンスを生成
         this.listView = (MultiButtonListView) findViewById(R.id.railway_list_view);
-        this.lineListAdapter = new RailwayListAdapter(this.getApplicationContext(), this.lines, db);;
+        this.lineListAdapter = new RailwayListAdapter(this.getApplicationContext(), this.lines);
         this.listView.setAdapter(this.lineListAdapter);
         this.listView.setOnItemClickListener(this);
         this.listView.setOnItemLongClickListener(this);
@@ -261,132 +261,147 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     }
 
     private AlertDialog mDialog;
+    private void cancelSelectLineSilhouette(){
+        mDialog.dismiss();
+        mDialog = null;
+        selectedLineIndex = -1;
+    }
     private void selectLineSilhouette(int position){
-        // アイコンタップでTextViewにその名前を表示する
-        Log.d(TAG, String.format("onItemLongClick position = %d", position));
-        Line line = this.lines.get(position);
-        if(!line.isSilhouetteCompleted()){
-            this.selectedLineIndex = position;
-            ArrayList<Line> selectOptionLines = new ArrayList<Line>();
-            final ArrayList<Line> randomizedOptionLines = new ArrayList<Line>();
-/*
-            //路線名　未正解の路線を抽出（lines→sortedRemainLines)
-            Iterator<Line> lineIte = this.lines.iterator();
-            while(lineIte.hasNext()){
-                Line ln = lineIte.next();
-                if(!ln.isSilhouetteCompleted()){
-                    selectOptionLines.add(ln);
-                }
-            }
+        Log.d(TAG, String.format("onItemLongClick selectedLineIndex = %d,position = %d", selectedLineIndex,position));
+        if(this.selectedLineIndex == -1){
 
-            Random rnd = new Random();
-            while(randomizedOptionLines.size()<selectOptionLines.size()){
-                // 0～未正解件数までの整数をランダムに生成
-                int idx = rnd.nextInt(selectOptionLines.size());
-                Line fromLine = selectOptionLines.get(idx);
-                Iterator<Line> li = randomizedOptionLines.iterator();
-                boolean already = false;
-                while(li.hasNext()){
-                    Line toLine = li.next();
-                    if(toLine.getLineId() == fromLine.getLineId()){
-                        already = true;
-                        break;
+            Line line = this.lines.get(position);
+            if(!line.isSilhouetteCompleted()){
+                this.selectedLineIndex = position;
+                ArrayList<Line> selectOptionLines = new ArrayList<Line>();
+                final ArrayList<Line> randomizedOptionLines = new ArrayList<Line>();
+    /*
+                //路線名　未正解の路線を抽出（lines→sortedRemainLines)
+                Iterator<Line> lineIte = this.lines.iterator();
+                while(lineIte.hasNext()){
+                    Line ln = lineIte.next();
+                    if(!ln.isSilhouetteCompleted()){
+                        selectOptionLines.add(ln);
                     }
                 }
-                if(!already){
-                    randomizedOptionLines.add(fromLine);
-                }
-            }
-*/
 
-            int optionItemNum = 0;
-            int level = this.settingParameter.getDifficultyMode();
-            switch(level){
-                case SettingParameter.DIFFICULTY_BEGINNER:
-                    optionItemNum = 8;
-                    break;
-                case SettingParameter.DIFFICULTY_AMATEUR:
-                    optionItemNum = 12;
-                    break;
-                case SettingParameter.DIFFICULTY_PROFESSIONAL:
-                    optionItemNum = 16;
-                    break;
-            }
-            selectOptionLines = this.db.getLineList(-1,false);
-            Random rnd = new Random();
-            while(randomizedOptionLines.size()<optionItemNum){
-                // 0～未正解件数までの整数をランダムに生成
-                int idx = rnd.nextInt(selectOptionLines.size());
-                Line fromLine = selectOptionLines.get(idx);
-                Iterator<Line> li = randomizedOptionLines.iterator();
-                boolean already = false;
-                while(li.hasNext()){
-                    Line toLine = li.next();
-                    if(toLine.getLineId() == fromLine.getLineId()){
-                        already = true;
-                        break;
-                    }
-                }
-                if(!already){
-                    randomizedOptionLines.add(fromLine);
-                }
-            }
-            int correctListPosition = rnd.nextInt(optionItemNum);
-            randomizedOptionLines.set(correctListPosition,(Line)this.lineListAdapter.getItem(this.selectedLineIndex));
-
-            // 未正解路線のシルエットのグリッドビュー生成
-            GridView remainLinesGridView = new GridView(this);
-            remainLinesGridView.setNumColumns(4);
-            remainLinesGridView.setVerticalSpacing(4);
-            remainLinesGridView.setGravity(Gravity.CENTER);
-            remainLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
-
-            RailwayGridAdapter remainLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), randomizedOptionLines );
-            remainLinesGridView.setAdapter(remainLinesAdapter);
-            remainLinesGridView.setOnItemClickListener(
-                    // ダイアログ上の未正解アイテムがクリックされたら答え合わせする
-                    new AdapterView.OnItemClickListener(){
-                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                            mDialog.dismiss();
-
-                            int correctAnswerIdx = PieceGarallyActivity.this.selectedLineIndex;
-                            Line correctLine = (Line)(PieceGarallyActivity.this.lineListAdapter.getItem(correctAnswerIdx));
-                            String correctLineName = correctLine.getRawName()+"("+correctLine.getRawKana()+")";
-
-                            Line selectedLine = randomizedOptionLines.get(position);
-                            String selectedLineName = selectedLine.getRawName()+"("+selectedLine.getRawKana()+")";
-
-                            Log.d(TAG,String.format("correct %s, selected %s",correctLineName,selectedLineName));
-                            //正解判定
-                            if(correctLine.getLineId() == selectedLine.getLineId()){
-//                                Toast.makeText(PieceGarallyActivity.this,"正解!!! v(￣Д￣)v ", Toast.LENGTH_SHORT).show();
-                                Toast.makeText(PieceGarallyActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
-                                correctLine.setSilhouetteAnswerStatus();
-                                correctLine.setSilhouetteScore(PieceGarallyActivity.this.computeScore(randomizedOptionLines.size(),
-                                                                correctLine.getSilhouetteMissingCount(),
-                                                                correctLine.getLocationShowAnswerCount()));
-                                PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(correctLine);
-                                PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
-                                PieceGarallyActivity.this.updateSilhouetteProgress();
-                                PieceGarallyActivity.this.updateCompanyScore();
-                            }
-                            else{
-                                correctLine.incrementSilhouetteMissingCount();
-//                                Toast.makeText(PieceGarallyActivity.this,"残念･･･ Σ(￣ロ￣lll)", Toast.LENGTH_SHORT).show();
-                                Toast.makeText(PieceGarallyActivity.this,"残念･･･    \uD83D\uDE23",Toast.LENGTH_SHORT).show();
-                            }
+                Random rnd = new Random();
+                while(randomizedOptionLines.size()<selectOptionLines.size()){
+                    // 0～未正解件数までの整数をランダムに生成
+                    int idx = rnd.nextInt(selectOptionLines.size());
+                    Line fromLine = selectOptionLines.get(idx);
+                    Iterator<Line> li = randomizedOptionLines.iterator();
+                    boolean already = false;
+                    while(li.hasNext()){
+                        Line toLine = li.next();
+                        if(toLine.getLineId() == fromLine.getLineId()){
+                            already = true;
+                            break;
                         }
                     }
-            );
+                    if(!already){
+                        randomizedOptionLines.add(fromLine);
+                    }
+                }
+    */
 
-            // ダイアログ表示
-            mDialog = new AlertDialog.Builder(this)
-                    .setTitle(String.format("｢%s｣は？",line.getRawName()))
-                    .setPositiveButton("Cancel",null)
-                    .setView(remainLinesGridView)
-                    .create();
-            mDialog.show();
+                int optionItemNum = 0;
+                int level = this.settingParameter.getDifficultyMode();
+                switch(level){
+                    case SettingParameter.DIFFICULTY_BEGINNER:
+                        optionItemNum = 8;
+                        break;
+                    case SettingParameter.DIFFICULTY_AMATEUR:
+                        optionItemNum = 12;
+                        break;
+                    case SettingParameter.DIFFICULTY_PROFESSIONAL:
+                        optionItemNum = 16;
+                        break;
+                }
+                selectOptionLines = this.db.getLineList(-1,false);
+                Random rnd = new Random();
+                while(randomizedOptionLines.size()<optionItemNum){
+                    // 0～未正解件数までの整数をランダムに生成
+                    int idx = rnd.nextInt(selectOptionLines.size());
+                    Line fromLine = selectOptionLines.get(idx);
+                    Iterator<Line> li = randomizedOptionLines.iterator();
+                    boolean already = false;
+                    while(li.hasNext()){
+                        Line toLine = li.next();
+                        if(toLine.getLineId() == fromLine.getLineId()){
+                            already = true;
+                            break;
+                        }
+                    }
+                    if(!already){
+                        randomizedOptionLines.add(fromLine);
+                    }
+                }
+                int correctListPosition = rnd.nextInt(optionItemNum);
+                randomizedOptionLines.set(correctListPosition,(Line)this.lineListAdapter.getItem(this.selectedLineIndex));
 
+                // 未正解路線のシルエットのグリッドビュー生成
+                GridView remainLinesGridView = new GridView(this);
+                remainLinesGridView.setNumColumns(4);
+                remainLinesGridView.setVerticalSpacing(4);
+                remainLinesGridView.setGravity(Gravity.CENTER);
+                remainLinesGridView.setBackground(ResourcesCompat.getDrawable(this.getResources(), R.drawable.backgound_bg, null));
+
+                RailwayGridAdapter remainLinesAdapter = new RailwayGridAdapter(this.getApplicationContext(), randomizedOptionLines );
+                remainLinesGridView.setAdapter(remainLinesAdapter);
+                remainLinesGridView.setOnItemClickListener(
+                        // ダイアログ上の未正解アイテムがクリックされたら答え合わせする
+                        new AdapterView.OnItemClickListener(){
+                            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                                int correctAnswerIdx = PieceGarallyActivity.this.selectedLineIndex;
+                                cancelSelectLineSilhouette();
+
+                                Line correctLine = (Line)(PieceGarallyActivity.this.lineListAdapter.getItem(correctAnswerIdx));
+                                String correctLineName = correctLine.getRawName()+"("+correctLine.getRawKana()+")";
+
+                                Line selectedLine = randomizedOptionLines.get(position);
+                                String selectedLineName = selectedLine.getRawName()+"("+selectedLine.getRawKana()+")";
+
+                                Log.d(TAG,String.format("correct %s, selected %s",correctLineName,selectedLineName));
+                                //正解判定
+                                if(correctLine.getLineId() == selectedLine.getLineId()){
+                                    Toast.makeText(PieceGarallyActivity.this,"正解!!!    \uD83D\uDE0A",Toast.LENGTH_SHORT).show();
+                                    correctLine.setSilhouetteAnswerStatus();
+                                    correctLine.setSilhouetteScore(PieceGarallyActivity.this.computeScore(randomizedOptionLines.size(),
+                                                                    correctLine.getSilhouetteMissingCount(),
+                                                                    correctLine.getLocationShowAnswerCount()));
+                                    PieceGarallyActivity.this.db.updateLineSilhouetteAnswerStatus(correctLine);
+                                    PieceGarallyActivity.this.lineListAdapter.notifyDataSetChanged();
+                                    PieceGarallyActivity.this.updateSilhouetteProgress();
+                                    PieceGarallyActivity.this.updateCompanyScore();
+                                }
+                                else{
+                                    correctLine.incrementSilhouetteMissingCount();
+                                    Toast.makeText(PieceGarallyActivity.this,"残念･･･    \uD83D\uDE23",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                );
+
+                // ダイアログ表示
+                mDialog = new AlertDialog.Builder(this)
+                        .setTitle(String.format("｢%s｣は？",line.getRawName()))
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                cancelSelectLineSilhouette();
+                            }
+                        })
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                cancelSelectLineSilhouette();
+                            }
+                        })
+                        .setView(remainLinesGridView)
+                        .create();
+                mDialog.show();
+            }
         }
     }
     @Override
@@ -624,6 +639,7 @@ public class PieceGarallyActivity extends AppCompatActivity implements
     // --------------------
     @Override
     public void onBackPressed() {
+        Log.d(TAG,"onBackPressed");
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivityForResult(intent, RESULTCODE);
         // アニメーションの設定

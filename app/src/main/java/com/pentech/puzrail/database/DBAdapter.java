@@ -314,6 +314,20 @@ public class DBAdapter {
         }
         returnLines = lines;
 
+        Iterator<Line> ite = lines.iterator();
+        while(ite.hasNext()){
+            Line li = ite.next();
+            int cmpId = li.getCompanyId();
+            int lineId = li.getLineId();
+            int totalStationsInLine = countTotalStationsInLine(cmpId,lineId);
+            int answeredStationsInLine = countAnsweredStationsInLine(cmpId,lineId);
+            int stationsTotalScore = sumStationsScoreInLine(cmpId,lineId);
+
+            li.setTotalStationsInLine(totalStationsInLine);
+            li.setAnsweredStationsInLine(answeredStationsInLine);
+            li.setStationsTotalScore(stationsTotalScore);
+        }
+
         if(isRandomize){
             Random rnd = new Random();
             while(randomizedLines.size() < lines.size()){
@@ -403,18 +417,22 @@ public class DBAdapter {
      * 総路線数の取得
      */
     public int countTotalLines(int companyId){
+        int cnt;
         Cursor cur = db.rawQuery("SELECT * from lines WHERE companyId=?",
                 new String[]{String.valueOf(companyId)});
-        return cur.getCount();
+        cnt = cur.getCount();
+        cur.close();
+        return cnt;
     }
 
     // シルエット
     /* 事業者ごと完了数 */
     public int countSilhouetteAnsweredLines(int companyId){
         int cnt;
-        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and silhouetteAnswerStatus = 1",
+        Cursor cur = db.rawQuery("SELECT * from lines WHERE companyId=? and silhouetteAnswerStatus = 1",
                 new String[]{String.valueOf(companyId)});
-        cnt = cursor.getCount();
+        cnt = cur.getCount();
+        cur.close();
         return cnt;
     }
     /* 事業者ごとスコア合計値 */
@@ -425,6 +443,7 @@ public class DBAdapter {
         if(cur.moveToNext()){
             score = cur.getInt(0);
         }
+        cur.close();
         return score;
     }
 
@@ -432,9 +451,10 @@ public class DBAdapter {
     /* 事業者ごと完了数 */
     public int countLocationAnsweredLines(int companyId){
         int cnt;
-        Cursor cursor = db.rawQuery("SELECT * from lines WHERE companyId=? and locationAnswerStatus = 1",
+        Cursor cur = db.rawQuery("SELECT * from lines WHERE companyId=? and locationAnswerStatus = 1",
                 new String[]{String.valueOf(companyId)});
-        cnt = cursor.getCount();
+        cnt = cur.getCount();
+        cur.close();
         return cnt;
     }
 
@@ -446,6 +466,7 @@ public class DBAdapter {
         if(cur.moveToNext()){
             score = cur.getInt(0);
         }
+        cur.close();
         return score;
     }
 
@@ -569,28 +590,38 @@ public class DBAdapter {
     //　駅数
     /* 総駅数 */
     public int countTotalStations(){
+        int cnt;
         Cursor cur = db.rawQuery("SELECT * from stations",null);
-        return cur.getCount();
+        cnt = cur.getCount();
+        cur.close();
+        return cnt;
     }
     /* 事業者ごと */
     public int countTotalStationsInCompany(int companyId){
+        int cnt;
         Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=?", new String[]{String.valueOf(companyId)});
-        return cur.getCount();
+        cnt = cur.getCount();
+        cur.close();
+        return cnt;
     }
     /* 路線ごと */
     public int countTotalStationsInLine(int companyId,int lineId){
+        int cnt;
         Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and lineId=?",
                 new String[]{String.valueOf(companyId), String.valueOf(lineId)});
-        return cur.getCount();
+        cnt = cur.getCount();
+        cur.close();
+        return cnt;
     }
 
     // 駅並べ完了数
     /* 事業者ごと */
     public int countAnsweredStationsInCompany(int companyId){
         int cnt;
-        Cursor cursor = db.rawQuery("SELECT * from stations WHERE companyId=? and answerStatus = 1",
+        Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and answerStatus = 1",
                 new String[]{String.valueOf(companyId)});
-        cnt = cursor.getCount();
+        cnt = cur.getCount();
+        cur.close();
         return cnt;
     }
     /* 路線ごと */
@@ -599,6 +630,7 @@ public class DBAdapter {
         Cursor cur = db.rawQuery("SELECT * from stations WHERE companyId=? and lineId=? and answerStatus = 1",
                 new String[]{String.valueOf(companyId),String.valueOf(lineId)});
         cnt =cur.getCount();
+        cur.close();
         return cnt;
     }
 
@@ -611,6 +643,7 @@ public class DBAdapter {
         if(cur.moveToNext()){
             score = cur.getInt(0);
         }
+        cur.close();
         return score;
     }
 
@@ -622,6 +655,7 @@ public class DBAdapter {
         if(cur.moveToNext()){
             score = cur.getInt(0);
         }
+        cur.close();
         return score;
     }
 }
